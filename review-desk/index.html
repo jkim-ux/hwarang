@@ -1,0 +1,905 @@
+<title>숙제 리뷰 데스크</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --ground: #f2f4f6;
+    --surface: #ffffff;
+    --surface-2: #e9edf1;
+    --line: #d6dce3;
+    --line-strong: #b9c2cc;
+    --ink: #17212e;
+    --ink-2: #4b5665;
+    --ink-3: #7b8695;
+    --accent: #2b4c9b;
+    --accent-ink: #ffffff;
+    --accent-soft: #e4eaf7;
+    --good: #2e7d4f;
+    --good-soft: #e1f1e7;
+    --warn: #a86a12;
+    --warn-soft: #f8ecd6;
+    --crit: #b3372b;
+    --crit-soft: #f8e1de;
+    --new: #2b4c9b;
+    --shadow: 0 1px 2px rgba(23, 33, 46, 0.06), 0 6px 20px rgba(23, 33, 46, 0.06);
+    --radius: 10px;
+    --font: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #11161d;
+      --surface: #182029;
+      --surface-2: #202a35;
+      --line: #2b3643;
+      --line-strong: #3d4a59;
+      --ink: #e6eaef;
+      --ink-2: #aeb7c2;
+      --ink-3: #7f8a97;
+      --accent: #8fb0f2;
+      --accent-ink: #0f1a33;
+      --accent-soft: #223252;
+      --good: #6fcf97;
+      --good-soft: #1d3527;
+      --warn: #e4b45f;
+      --warn-soft: #3b2e14;
+      --crit: #f08a7e;
+      --crit-soft: #452220;
+      --new: #8fb0f2;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #11161d;
+    --surface: #182029;
+    --surface-2: #202a35;
+    --line: #2b3643;
+    --line-strong: #3d4a59;
+    --ink: #e6eaef;
+    --ink-2: #aeb7c2;
+    --ink-3: #7f8a97;
+    --accent: #8fb0f2;
+    --accent-ink: #0f1a33;
+    --accent-soft: #223252;
+    --good: #6fcf97;
+    --good-soft: #1d3527;
+    --warn: #e4b45f;
+    --warn-soft: #3b2e14;
+    --crit: #f08a7e;
+    --crit-soft: #452220;
+    --new: #8fb0f2;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); }
+  button { font: inherit; color: inherit; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; padding-block: 0 56px; }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  /* ---------- top bar ---------- */
+  .top {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+    padding-block: 22px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; flex-direction: column; gap: 2px; min-width: 200px; }
+  .brand h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+  .brand .sub { color: var(--ink-3); font-size: 12.5px; }
+  .brand .sub b { color: var(--ink-2); font-weight: 500; }
+  .top .spacer { flex: 1; }
+  .stamp { display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; color: var(--ink-3); text-align: right; }
+  .stamp .num { color: var(--ink-2); }
+  .actions { display: flex; align-items: center; gap: 8px; }
+
+  .btn {
+    border: 1px solid var(--line-strong); background: var(--surface); border-radius: 8px;
+    padding: 8px 14px; cursor: pointer; font-weight: 500; font-size: 13.5px;
+    display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--ink-3); }
+  .btn:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+  .btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.ghost { border-color: transparent; background: transparent; color: var(--ink-2); }
+  .btn.ghost:hover { background: var(--surface-2); }
+  .btn.small { padding: 5px 10px; font-size: 12.5px; border-radius: 6px; }
+  .btn .spin { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .btn .spin { animation-duration: 2s; } }
+
+  /* ---------- progress ---------- */
+  .progress {
+    margin-top: 14px; padding: 10px 14px; border-radius: 8px;
+    background: var(--accent-soft); color: var(--ink); font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .progress .bar { flex: 1; height: 4px; background: var(--surface); border-radius: 2px; overflow: hidden; }
+  .progress .bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.3s; }
+  .notice {
+    margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-size: 13px;
+    background: var(--warn-soft); color: var(--ink); border: 1px solid transparent;
+  }
+  .notice.crit { background: var(--crit-soft); }
+
+  /* ---------- summary strip ---------- */
+  .strip {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px;
+    background: var(--line); border: 1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden; margin-top: 18px;
+  }
+  .strip .cell { background: var(--surface); padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; }
+  .strip .cell .lbl { font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-3); }
+  .strip .cell .val { font-size: 22px; font-weight: 600; line-height: 1.2; }
+  .strip .cell .val small { font-size: 12px; font-weight: 400; color: var(--ink-3); margin-left: 4px; }
+  .strip .cell.hot .val { color: var(--new); }
+  @media (max-width: 640px) { .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  /* ---------- toolbar ---------- */
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 22px; }
+  .seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 8px; overflow: hidden; }
+  .seg button { border: 0; background: var(--surface); padding: 6px 12px; cursor: pointer; font-size: 13px; color: var(--ink-2); }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--ground); }
+  .toolbar label { font-size: 12.5px; color: var(--ink-3); display: inline-flex; align-items: center; gap: 6px; }
+  .toolbar select, .toolbar input[type="search"] {
+    font: inherit; font-size: 13px; padding: 6px 10px; border: 1px solid var(--line-strong);
+    border-radius: 8px; background: var(--surface); color: var(--ink); min-width: 0;
+  }
+  .toolbar input[type="search"] { width: 180px; }
+
+  /* ---------- review list ---------- */
+  .group { margin-top: 22px; }
+  .group h2 {
+    margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--ink-2);
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .group h2 .cnt { font-weight: 400; color: var(--ink-3); }
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .card.new { border-left: 3px solid var(--new); }
+  .card .head {
+    display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 12px 14px; align-items: center;
+    padding: 12px 14px; cursor: pointer; width: 100%; border: 0; background: transparent; text-align: left;
+  }
+  .card .head:hover { background: var(--surface-2); }
+  .score {
+    width: 56px; height: 44px; border-radius: 8px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; line-height: 1; gap: 3px;
+    font-family: var(--mono); font-weight: 500;
+  }
+  .score b { font-size: 18px; }
+  .score small { font-size: 10px; opacity: 0.8; }
+  .score.good { background: var(--good-soft); color: var(--good); }
+  .score.warn { background: var(--warn-soft); color: var(--warn); }
+  .score.crit { background: var(--crit-soft); color: var(--crit); }
+  .score.none { background: var(--surface-2); color: var(--ink-3); }
+  .who { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .who .t { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  .who .t .student { font-weight: 600; font-size: 14.5px; }
+  .who .t .doc { color: var(--ink-2); }
+  .who .t .folder { color: var(--ink-3); font-size: 12px; }
+  .who .summary { color: var(--ink-2); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .card[open] .who .summary { white-space: normal; }
+  .meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+  .chips { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+  .chip {
+    display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 999px;
+    font-size: 11px; font-weight: 500; background: var(--surface-2); color: var(--ink-2);
+  }
+  .chip.new { background: var(--accent-soft); color: var(--accent); }
+  .chip.flag { background: var(--crit-soft); color: var(--crit); }
+  .chip.auto { background: var(--surface-2); }
+  .chip.partial { background: var(--warn-soft); color: var(--warn); }
+
+  .body { border-top: 1px solid var(--line); padding: 14px 16px 16px; display: none; }
+  .card[open] .body { display: block; }
+  .body .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 720px) { .body .cols { grid-template-columns: 1fr; } }
+  .body h3 { margin: 0 0 6px; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-3); }
+  .body h3.good { color: var(--good); }
+  .body h3.warn { color: var(--warn); }
+  .body ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; max-width: 60ch; }
+  .body li { font-size: 13.5px; }
+  .body .foot { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 12.5px; color: var(--ink-3); }
+  .body .foot .grow { flex: 1; }
+  .body .comment { margin-top: 12px; padding: 10px 12px; background: var(--surface-2); border-radius: 8px; font-size: 13.5px; max-width: 72ch; white-space: pre-wrap; }
+  .empty {
+    padding: 36px 20px; text-align: center; color: var(--ink-3); border: 1px dashed var(--line-strong);
+    border-radius: var(--radius); margin-top: 22px; font-size: 13.5px;
+  }
+  .empty b { color: var(--ink-2); font-weight: 500; }
+
+  /* ---------- runs ---------- */
+  .runs { margin-top: 32px; }
+  .runs h2 { font-size: 13px; font-weight: 600; color: var(--ink-2); margin: 0 0 8px; }
+  .runs .tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; vertical-align: top; }
+  th { color: var(--ink-3); font-weight: 500; font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; }
+  tr:last-child td { border-bottom: 0; }
+  td.err { color: var(--crit); white-space: normal; max-width: 40ch; }
+
+  /* ---------- settings drawer ---------- */
+  .drawer {
+    position: fixed; inset: 0; background: rgba(10, 14, 20, 0.45); display: none; z-index: 20;
+  }
+  .drawer[open] { display: block; }
+  .panel {
+    position: absolute; top: 0; right: 0; bottom: 0; width: min(520px, 100%);
+    background: var(--surface); box-shadow: var(--shadow); overflow-y: auto;
+    padding: 22px 24px 32px; display: flex; flex-direction: column; gap: 18px;
+  }
+  .panel h2 { margin: 0; font-size: 16px; }
+  .panel .row { display: flex; flex-direction: column; gap: 6px; }
+  .panel label { font-size: 12.5px; font-weight: 500; color: var(--ink-2); }
+  .panel .hint { font-size: 12px; color: var(--ink-3); }
+  .panel input[type="text"], .panel input[type="number"], .panel textarea {
+    font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid var(--line-strong);
+    border-radius: 8px; background: var(--ground); color: var(--ink); width: 100%;
+  }
+  .panel textarea { min-height: 150px; resize: vertical; line-height: 1.5; }
+  .folders { display: flex; flex-direction: column; gap: 6px; }
+  .folder-item {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+    border: 1px solid var(--line); border-radius: 8px; font-size: 13px;
+  }
+  .folder-item .n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .folder-item .id { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .addrow { display: flex; gap: 8px; }
+  .addrow input { flex: 1; }
+  .panel .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .panel .foot { display: flex; gap: 8px; justify-content: flex-end; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--line); }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+    background: var(--ink); color: var(--ground); padding: 10px 16px; border-radius: 8px;
+    font-size: 13px; box-shadow: var(--shadow); z-index: 30; max-width: calc(100% - 32px);
+  }
+  .toast[hidden] { display: none; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>숙제 리뷰 데스크</h1>
+      <div class="sub" id="folderLine">감시 폴더가 아직 없습니다</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="stamp">
+      <span>마지막 확인 <span class="num" id="lastRun">—</span></span>
+      <span>자동 확인 <span class="num" id="schedule">매일 08:00 · 17:00 (KST)</span></span>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="settingsBtn" type="button">설정</button>
+      <button class="btn primary" id="runBtn" type="button"><span id="runLabel">지금 확인하기</span></button>
+    </div>
+  </header>
+
+  <div class="progress" id="progress" hidden>
+    <span class="spin" style="width:14px;height:14px;border:2px solid var(--accent);border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite;display:inline-block"></span>
+    <span id="progressText">준비 중…</span>
+    <div class="bar"><i id="progressBar"></i></div>
+  </div>
+  <div class="notice" id="notice" hidden></div>
+
+  <section class="strip" aria-label="요약">
+    <div class="cell hot"><span class="lbl">확인 안 한 리뷰</span><span class="val num" id="sUnseen">0</span></div>
+    <div class="cell"><span class="lbl">오늘 제출</span><span class="val num" id="sToday">0</span></div>
+    <div class="cell"><span class="lbl">학생</span><span class="val num" id="sStudents">0</span></div>
+    <div class="cell"><span class="lbl">주의 필요</span><span class="val num" id="sFlags">0</span></div>
+  </section>
+
+  <div class="toolbar">
+    <div class="seg" role="group" aria-label="보기">
+      <button type="button" data-filter="unseen" aria-pressed="true">확인 안 함</button>
+      <button type="button" data-filter="all" aria-pressed="false">전체</button>
+      <button type="button" data-filter="flag" aria-pressed="false">주의</button>
+    </div>
+    <label>묶기
+      <select id="groupSel">
+        <option value="date">제출일</option>
+        <option value="student">학생</option>
+        <option value="folder">폴더</option>
+      </select>
+    </label>
+    <label>정렬
+      <select id="sortSel">
+        <option value="recent">최근 제출순</option>
+        <option value="score-asc">점수 낮은순</option>
+        <option value="score-desc">점수 높은순</option>
+        <option value="student">이름순</option>
+      </select>
+    </label>
+    <input type="search" id="q" placeholder="학생·문서 검색" aria-label="검색">
+    <span class="spacer" style="flex:1"></span>
+    <button class="btn small ghost" id="markAllBtn" type="button">보이는 항목 모두 확인함</button>
+  </div>
+
+  <div id="groups"></div>
+
+  <section class="runs">
+    <h2>실행 기록</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>시각 (KST)</th><th>출처</th><th>검사</th><th>리뷰</th><th>건너뜀</th><th>소요</th><th>오류</th></tr></thead>
+        <tbody id="runsBody"><tr><td colspan="7" style="color:var(--ink-3)">아직 실행 기록이 없습니다.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div class="drawer" id="drawer">
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+    <h2 id="panelTitle">설정</h2>
+
+    <div class="row">
+      <label>감시 폴더</label>
+      <div class="hint">폴더 안의 구글 문서와, 한 단계 아래 하위 폴더(학생 폴더)의 문서를 확인합니다. 하위 폴더 이름에서 수업 이름을 뺀 부분을 학생 이름으로 씁니다.</div>
+      <div class="folders" id="folderList"></div>
+      <div class="addrow">
+        <input type="text" id="folderInput" placeholder="드라이브 폴더 링크 또는 폴더 ID 붙여넣기" aria-label="폴더 링크">
+        <button class="btn" id="folderAdd" type="button">추가</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <label for="excludeInput">건너뛸 하위 폴더 (쉼표로 구분)</label>
+      <input type="text" id="excludeInput" placeholder="자료실, 비공개">
+    </div>
+
+    <div class="two">
+      <div class="row">
+        <label for="sinceInput">최근 며칠 안에 수정된 문서만</label>
+        <input type="number" id="sinceInput" min="1" max="120" step="1">
+      </div>
+      <div class="row">
+        <label for="minCharsInput">이 글자 수 미만이면 "내용 없음"</label>
+        <input type="number" id="minCharsInput" min="0" max="2000" step="10">
+      </div>
+    </div>
+
+    <div class="row">
+      <label for="rubricInput">리뷰 기준 (Claude에게 주는 지시)</label>
+      <div class="hint">수업·과제 성격에 맞게 자유롭게 고치세요. 자동 확인과 수동 확인 모두 이 기준을 씁니다.</div>
+      <textarea id="rubricInput"></textarea>
+    </div>
+
+    <div class="foot">
+      <button class="btn ghost" id="panelClose" type="button">닫기</button>
+      <button class="btn primary" id="panelSave" type="button">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var FOLDER = 'application/vnd.google-apps.folder';
+  var GDOC = 'application/vnd.google-apps.document';
+  var DRIVE = 'Google Drive';
+  var DEFAULT_RUBRIC = [
+    '당신은 IB 디플로마 과정을 가르치는 교사의 조교입니다. 학생이 구글 문서로 제출한 숙제를 읽고 교사가 빠르게 파악할 수 있는 리뷰를 작성하세요.',
+    '',
+    '평가 관점:',
+    '1. 과제 요구를 충족했는가 (완성도, 분량, 질문에 실제로 답했는가)',
+    '2. 내용의 정확성 — 교과 개념·용어(경제학, 심리학 등)를 바르게 사용했는가, 사실 오류나 오개념이 있는가',
+    '3. 논리와 구조 — 주장, 근거, 설명(예: 정의 → 설명 → 예시/도표 → 평가)이 이어지는가',
+    '4. 표현 — 학술적 영어 문장, 용어의 정확성 (문법은 의미를 해치는 경우만 지적)',
+    '',
+    '규칙:',
+    '- 리뷰는 한국어로 쓰되, 학생 글을 인용할 때는 원문(영어)을 그대로 짧게 인용합니다.',
+    '- 좋은 점보다 고칠 점을 구체적으로: 무엇이 왜 부족한지, 어떻게 고치면 되는지.',
+    '- 점수는 0~10 정수. 8 이상은 거의 수정 없이 통과, 5~7은 보완 필요, 4 이하는 다시 써야 하는 수준.',
+    '- 미완성·빈 문서·과제와 무관한 내용·AI가 그대로 쓴 듯한 글은 flags에 표시하세요.'
+  ].join('\n');
+
+  var state = {
+    db: null, mcp: null, sample: null,
+    config: null, reviews: {}, runs: [],
+    filter: 'unseen', group: 'date', sort: 'recent', q: '',
+    running: false, capsReady: false
+  };
+  var draftFolders = [];
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmtKST(iso, opts) {
+    if (!iso) return '—';
+    var d = new Date(iso); if (isNaN(d)) return '—';
+    var o = opts || { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
+    o.timeZone = 'Asia/Seoul';
+    return d.toLocaleString('ko-KR', o).replace(/\.\s*$/, '');
+  }
+  function dayKST(iso) { return fmtKST(iso, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }); }
+  function todayKST() { return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }); }
+  function dateKeyKST(iso) { return new Date(iso).toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }); }
+  var toastTimer = null;
+  function toast(msg, ms) {
+    var t = $('toast'); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.hidden = true; }, ms || 3200);
+  }
+  function notice(msg, crit) {
+    var n = $('notice'); if (!msg) { n.hidden = true; return; }
+    n.textContent = msg; n.className = 'notice' + (crit ? ' crit' : ''); n.hidden = false;
+  }
+  function use(name) {
+    try {
+      if (window.claude && typeof window.claude.use === 'function') return window.claude.use(name);
+    } catch (e) { /* no runtime */ }
+    return Promise.resolve(null);
+  }
+
+  /* ---------------- boot ---------------- */
+  render();
+  bindUI();
+  Promise.all([use('db'), use('mcp'), use('sample')]).then(function (caps) {
+    state.db = caps[0]; state.mcp = caps[1]; state.sample = caps[2];
+    state.capsReady = true;
+    if (!state.db) {
+      notice('이 페이지는 claude.ai 안에서 열어야 리뷰 데이터를 불러올 수 있습니다.', true);
+      render();
+      return;
+    }
+    subscribe();
+    if (!state.mcp || !state.sample) {
+      notice('드라이브 연결 또는 Claude 리뷰 기능을 이 화면에서 쓸 수 없습니다. 자동 확인 결과는 계속 보이지만 "지금 확인하기"는 동작하지 않습니다.');
+    }
+    render();
+  });
+
+  function subscribe() {
+    var db = state.db;
+    db.doc('config/main').onSnapshot(function (snap) {
+      state.config = snap.exists ? snap.data() : null;
+      render();
+    }, function (e) { toast('설정을 읽지 못했습니다: ' + e.message); });
+    db.collection('reviews').onSnapshot(function (snap) {
+      var map = {};
+      snap.docs.forEach(function (d) { map[d.id] = d.data(); });
+      state.reviews = map;
+      render();
+    }, function (e) { toast('리뷰를 읽지 못했습니다: ' + e.message); });
+    db.collection('runs').orderBy('startedAt', 'desc').limit(30).onSnapshot(function (snap) {
+      state.runs = snap.docs.map(function (d) { return d.data(); });
+      render();
+    }, function (e) { /* runs are optional */ });
+  }
+
+  /* ---------------- rendering ---------------- */
+  function cfg() {
+    var c = state.config || {};
+    return {
+      folders: Array.isArray(c.folders) ? c.folders : [],
+      exclude: Array.isArray(c.exclude) ? c.exclude : ['자료실', '비공개'],
+      sinceDays: Number(c.sinceDays) > 0 ? Number(c.sinceDays) : 14,
+      minChars: Number(c.minChars) >= 0 ? Number(c.minChars) : 40,
+      rubric: typeof c.rubric === 'string' && c.rubric.trim() ? c.rubric : DEFAULT_RUBRIC
+    };
+  }
+  function scoreClass(r) {
+    if (r.status === 'empty' || typeof r.score !== 'number') return 'none';
+    return r.score >= 8 ? 'good' : r.score >= 5 ? 'warn' : 'crit';
+  }
+  function visibleReviews() {
+    var list = Object.keys(state.reviews).map(function (k) { return state.reviews[k]; });
+    var q = state.q.trim().toLowerCase();
+    list = list.filter(function (r) {
+      if (state.filter === 'unseen' && r.seen) return false;
+      if (state.filter === 'flag' && !((r.flags && r.flags.length) || (typeof r.score === 'number' && r.score < 5))) return false;
+      if (q && !((r.student || '') + ' ' + (r.title || '') + ' ' + (r.folderName || '')).toLowerCase().includes(q)) return false;
+      return true;
+    });
+    list.sort(function (a, b) {
+      if (state.sort === 'score-asc') return (a.score == null ? 99 : a.score) - (b.score == null ? 99 : b.score) || cmpRecent(a, b);
+      if (state.sort === 'score-desc') return (b.score == null ? -1 : b.score) - (a.score == null ? -1 : a.score) || cmpRecent(a, b);
+      if (state.sort === 'student') return String(a.student || '').localeCompare(String(b.student || ''), 'ko') || cmpRecent(a, b);
+      return cmpRecent(a, b);
+    });
+    return list;
+  }
+  function cmpRecent(a, b) { return String(b.modifiedTime || '').localeCompare(String(a.modifiedTime || '')); }
+
+  function render() {
+    var c = cfg();
+    var all = Object.keys(state.reviews).map(function (k) { return state.reviews[k]; });
+
+    // header
+    $('folderLine').innerHTML = c.folders.length
+      ? '감시 중 · ' + c.folders.map(function (f) { return '<b>' + esc(f.name || f.id) + '</b>'; }).join(', ')
+      : '감시 폴더가 아직 없습니다 — <b>설정</b>에서 추가하세요';
+    var last = state.runs[0];
+    $('lastRun').textContent = last ? fmtKST(last.finishedAt || last.startedAt) + (last.source === 'scheduled' ? ' 자동' : ' 수동') : '아직 없음';
+
+    // strip
+    var today = todayKST();
+    var unseen = all.filter(function (r) { return !r.seen; }).length;
+    var todayN = all.filter(function (r) { return r.modifiedTime && dateKeyKST(r.modifiedTime) === today; }).length;
+    var students = {}; all.forEach(function (r) { if (r.student) students[r.student] = 1; });
+    var flags = all.filter(function (r) { return (r.flags && r.flags.length) || (typeof r.score === 'number' && r.score < 5); }).length;
+    $('sUnseen').textContent = unseen; $('sToday').textContent = todayN;
+    $('sStudents').textContent = Object.keys(students).length; $('sFlags').textContent = flags;
+
+    // run button
+    var canRun = state.capsReady && state.db && state.mcp && state.sample && !state.running;
+    $('runBtn').disabled = !canRun;
+    $('runBtn').innerHTML = state.running ? '<span class="spin"></span><span>확인 중…</span>' : '<span>지금 확인하기</span>';
+
+    // list
+    var list = visibleReviews();
+    var host = $('groups');
+    if (!list.length) {
+      var msg = all.length
+        ? (state.filter === 'unseen' ? '확인하지 않은 리뷰가 없습니다. <b>전체</b>에서 지난 리뷰를 볼 수 있습니다.' : '조건에 맞는 리뷰가 없습니다.')
+        : (c.folders.length ? '아직 리뷰가 없습니다. <b>지금 확인하기</b>를 누르거나 다음 자동 확인(08:00 · 17:00)을 기다리세요.' : '먼저 <b>설정</b>에서 학생들이 숙제를 올리는 드라이브 폴더를 추가하세요.');
+      host.innerHTML = '<div class="empty">' + msg + '</div>';
+    } else {
+      var groups = {}; var order = [];
+      list.forEach(function (r) {
+        var key, label;
+        if (state.group === 'student') { key = r.student || '(이름 없음)'; label = key; }
+        else if (state.group === 'folder') { key = r.folderName || '(폴더 없음)'; label = key; }
+        else { key = r.modifiedTime ? dateKeyKST(r.modifiedTime) : '0000'; label = r.modifiedTime ? dayKST(r.modifiedTime) + (key === today ? ' · 오늘' : '') : '날짜 없음'; }
+        if (!groups[key]) { groups[key] = { label: label, items: [] }; order.push(key); }
+        groups[key].items.push(r);
+      });
+      if (state.group === 'date') order.sort().reverse();
+      host.innerHTML = order.map(function (k) {
+        var g = groups[k];
+        return '<section class="group"><h2>' + esc(g.label) + ' <span class="cnt num">' + g.items.length + '</span></h2><div class="list">' +
+          g.items.map(cardHTML).join('') + '</div></section>';
+      }).join('');
+    }
+
+    // runs
+    var rb = $('runsBody');
+    if (!state.runs.length) rb.innerHTML = '<tr><td colspan="7" style="color:var(--ink-3)">아직 실행 기록이 없습니다.</td></tr>';
+    else rb.innerHTML = state.runs.map(function (r) {
+      var dur = r.finishedAt && r.startedAt ? Math.round((new Date(r.finishedAt) - new Date(r.startedAt)) / 1000) + '초' : (r.status === 'running' ? '진행 중' : '—');
+      var errs = (r.errors || []).map(function (e) { return esc(typeof e === 'string' ? e : (e.title ? e.title + ': ' : '') + (e.message || '')); }).join('<br>');
+      return '<tr><td class="num">' + fmtKST(r.startedAt) + '</td><td>' + (r.source === 'scheduled' ? '자동' : '수동') + '</td>' +
+        '<td class="num">' + (r.checked == null ? '—' : r.checked) + '</td><td class="num">' + (r.reviewed == null ? '—' : r.reviewed) + '</td>' +
+        '<td class="num">' + (r.skipped == null ? '—' : r.skipped) + '</td><td class="num">' + dur + '</td><td class="err">' + (errs || '') + '</td></tr>';
+    }).join('');
+  }
+
+  function cardHTML(r) {
+    var sc = scoreClass(r);
+    var scoreBox = sc === 'none'
+      ? '<div class="score none"><b>–</b><small>' + (r.status === 'empty' ? '빈 문서' : '점수 없음') + '</small></div>'
+      : '<div class="score ' + sc + '"><b>' + r.score + '</b><small>/ 10</small></div>';
+    var chips = [];
+    if (!r.seen) chips.push('<span class="chip new">새 리뷰</span>');
+    if (r.completeness === 'partial') chips.push('<span class="chip partial">미완성</span>');
+    (r.flags || []).forEach(function (f) { chips.push('<span class="chip flag">' + esc(f) + '</span>'); });
+    if (r.revision > 1) chips.push('<span class="chip">' + r.revision + '차 수정</span>');
+    chips.push('<span class="chip auto">' + (r.source === 'scheduled' ? '자동' : '수동') + '</span>');
+    var lists = function (title, cls, arr) {
+      if (!arr || !arr.length) return '';
+      return '<div><h3 class="' + cls + '">' + title + '</h3><ul>' + arr.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
+    };
+    return '<article class="card' + (r.seen ? '' : ' new') + '" data-id="' + esc(r.fileId) + '">' +
+      '<button class="head" type="button" aria-expanded="false">' + scoreBox +
+      '<div class="who"><div class="t"><span class="student">' + esc(r.student || '(이름 없음)') + '</span><span class="doc">' + esc(r.title) + '</span><span class="folder">' + esc(r.folderName || '') + '</span></div>' +
+      '<div class="summary">' + esc(r.summary || '') + '</div></div>' +
+      '<div class="meta"><span class="num">제출 ' + fmtKST(r.modifiedTime) + '</span><div class="chips">' + chips.join('') + '</div></div></button>' +
+      '<div class="body"><div class="cols">' +
+      lists('잘한 점', 'good', r.strengths) + lists('고칠 점', 'warn', r.improvements) + lists('다음 단계', '', r.nextSteps) +
+      '</div>' + (r.comment ? '<div class="comment">' + esc(r.comment) + '</div>' : '') +
+      '<div class="foot"><span>리뷰 ' + fmtKST(r.reviewedAt) + '</span><span class="num">' + (r.wordCount || 0) + ' 단어</span><span class="grow"></span>' +
+      '<a class="btn small" href="' + esc(r.viewUrl || '#') + '" target="_blank" rel="noopener">문서 열기</a>' +
+      '<button class="btn small" type="button" data-act="rereview">다시 리뷰</button>' +
+      '<button class="btn small ' + (r.seen ? '' : 'primary') + '" type="button" data-act="seen">' + (r.seen ? '확인 취소' : '확인함') + '</button>' +
+      '</div></div></article>';
+  }
+
+  /* ---------------- UI events ---------------- */
+  function bindUI() {
+    document.querySelectorAll('.seg button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        state.filter = b.getAttribute('data-filter');
+        document.querySelectorAll('.seg button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+        render();
+      });
+    });
+    $('groupSel').addEventListener('change', function () { state.group = this.value; render(); });
+    $('sortSel').addEventListener('change', function () { state.sort = this.value; render(); });
+    $('q').addEventListener('input', function () { state.q = this.value; render(); });
+    $('groups').addEventListener('click', function (ev) {
+      var act = ev.target.closest('[data-act]');
+      var card = ev.target.closest('.card');
+      if (!card) return;
+      var id = card.getAttribute('data-id');
+      if (act) {
+        ev.stopPropagation();
+        if (act.getAttribute('data-act') === 'seen') toggleSeen(id);
+        if (act.getAttribute('data-act') === 'rereview') rereview(id);
+        return;
+      }
+      if (ev.target.closest('.head')) {
+        var open = card.hasAttribute('open');
+        if (open) card.removeAttribute('open'); else card.setAttribute('open', '');
+        card.querySelector('.head').setAttribute('aria-expanded', open ? 'false' : 'true');
+      }
+    });
+    $('markAllBtn').addEventListener('click', function () {
+      if (!state.db) return;
+      var list = visibleReviews().filter(function (r) { return !r.seen; });
+      if (!list.length) { toast('확인할 항목이 없습니다.'); return; }
+      var now = new Date().toISOString();
+      Promise.all(list.map(function (r) { return state.db.doc('reviews/' + r.fileId).update({ seen: true, seenAt: now }); }))
+        .then(function () { toast(list.length + '건을 확인함으로 표시했습니다.'); })
+        .catch(function (e) { toast('저장 실패: ' + e.message); });
+    });
+    $('runBtn').addEventListener('click', function () { runReview('manual'); });
+    $('settingsBtn').addEventListener('click', openSettings);
+    $('panelClose').addEventListener('click', closeSettings);
+    $('drawer').addEventListener('click', function (ev) { if (ev.target === $('drawer')) closeSettings(); });
+    document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && $('drawer').hasAttribute('open')) closeSettings(); });
+    $('folderAdd').addEventListener('click', addFolder);
+    $('folderInput').addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); addFolder(); } });
+    $('folderList').addEventListener('click', function (ev) {
+      var b = ev.target.closest('[data-remove]'); if (!b) return;
+      draftFolders = draftFolders.filter(function (f) { return f.id !== b.getAttribute('data-remove'); });
+      renderFolderList();
+    });
+    $('panelSave').addEventListener('click', saveSettings);
+  }
+
+  function toggleSeen(id) {
+    var r = state.reviews[id]; if (!r || !state.db) return;
+    state.db.doc('reviews/' + id).update({ seen: !r.seen, seenAt: new Date().toISOString() })
+      .catch(function (e) { toast('저장 실패: ' + e.message); });
+  }
+  function rereview(id) {
+    var r = state.reviews[id]; if (!r) return;
+    if (!(state.mcp && state.sample && state.db)) { toast('이 화면에서는 리뷰를 실행할 수 없습니다.'); return; }
+    runReview('manual', [id]);
+  }
+
+  /* ---------------- settings ---------------- */
+  function openSettings() {
+    var c = cfg();
+    draftFolders = c.folders.slice();
+    renderFolderList();
+    $('excludeInput').value = c.exclude.join(', ');
+    $('sinceInput').value = c.sinceDays;
+    $('minCharsInput').value = c.minChars;
+    $('rubricInput').value = c.rubric;
+    $('drawer').setAttribute('open', '');
+    setTimeout(function () { $('folderInput').focus(); }, 0);
+  }
+  function closeSettings() { $('drawer').removeAttribute('open'); }
+  function renderFolderList() {
+    var host = $('folderList');
+    if (!draftFolders.length) { host.innerHTML = '<div class="hint">아직 없음</div>'; return; }
+    host.innerHTML = draftFolders.map(function (f) {
+      return '<div class="folder-item"><span class="n">' + esc(f.name || '(이름 없음)') + ' <span class="id">' + esc(f.id) + '</span></span>' +
+        '<button class="btn small ghost" type="button" data-remove="' + esc(f.id) + '">제거</button></div>';
+    }).join('');
+  }
+  function parseFolderId(s) {
+    s = (s || '').trim();
+    var m = s.match(/\/folders\/([A-Za-z0-9_-]{10,})/) || s.match(/[?&]id=([A-Za-z0-9_-]{10,})/);
+    if (m) return m[1];
+    if (/^[A-Za-z0-9_-]{10,}$/.test(s)) return s;
+    return null;
+  }
+  function addFolder() {
+    var id = parseFolderId($('folderInput').value);
+    if (!id) { toast('폴더 링크나 ID 형식이 아닙니다.'); return; }
+    if (draftFolders.some(function (f) { return f.id === id; })) { toast('이미 추가된 폴더입니다.'); return; }
+    var btn = $('folderAdd'); btn.disabled = true; btn.textContent = '확인 중…';
+    var done = function (name) {
+      draftFolders.push({ id: id, name: name });
+      $('folderInput').value = '';
+      renderFolderList();
+      btn.disabled = false; btn.textContent = '추가';
+    };
+    if (!state.mcp) { done(''); return; }
+    state.mcp.server(DRIVE).then(function (drive) {
+      return drive.get_file_metadata({ fileId: id, excludeContentSnippets: true });
+    }).then(function (meta) {
+      if (meta && meta.mimeType && meta.mimeType !== FOLDER) { toast('폴더가 아니라 파일입니다: ' + (meta.title || id)); btn.disabled = false; btn.textContent = '추가'; return; }
+      done((meta && meta.title) || '');
+    }).catch(function (e) {
+      toast('폴더 정보를 가져오지 못했습니다 (' + (e && e.message ? e.message : e) + '). 이름 없이 추가합니다.');
+      done('');
+    });
+  }
+  function saveSettings() {
+    if (!state.db) { toast('저장할 수 없습니다 (데이터 연결 없음).'); return; }
+    var data = {
+      folders: draftFolders,
+      exclude: $('excludeInput').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean),
+      sinceDays: Math.max(1, parseInt($('sinceInput').value, 10) || 14),
+      minChars: Math.max(0, parseInt($('minCharsInput').value, 10) || 0),
+      rubric: $('rubricInput').value.trim() || DEFAULT_RUBRIC,
+      updatedAt: new Date().toISOString()
+    };
+    state.db.doc('config/main').set(data).then(function () { toast('설정을 저장했습니다.'); closeSettings(); })
+      .catch(function (e) { toast('저장 실패: ' + e.message); });
+  }
+
+  /* ---------------- review run ---------------- */
+  function setProgress(text, frac) {
+    var p = $('progress');
+    if (text == null) { p.hidden = true; return; }
+    p.hidden = false; $('progressText').textContent = text;
+    $('progressBar').style.width = Math.round(Math.max(0, Math.min(1, frac || 0)) * 100) + '%';
+  }
+
+  function listAll(drive, parentId) {
+    var out = [];
+    function page(token) {
+      var input = { query: "parentId = '" + parentId + "'", excludeContentSnippets: true, pageSize: 100 };
+      if (token) input.pageToken = token;
+      return drive.search_files(input).then(function (res) {
+        var files = (res && res.files) || [];
+        out = out.concat(files);
+        if (res && res.nextPageToken && files.length) return page(res.nextPageToken);
+        return out;
+      });
+    }
+    return page(null);
+  }
+
+  function studentFromFolder(sub, parentName) {
+    var s = sub;
+    if (parentName) s = s.split(parentName).join(' ');
+    s = s.replace(/[_\-–·|]+/g, ' ').replace(/\s+/g, ' ').trim();
+    return s || sub;
+  }
+
+  function buildPrompt(c, doc, text) {
+    return c.rubric + '\n\n' +
+      '--- 문서 정보 ---\n학생: ' + (doc.student || '(알 수 없음)') + '\n문서 제목: ' + doc.title + '\n폴더: ' + (doc.folderName || '') +
+      '\n제출(수정) 시각: ' + fmtKST(doc.modifiedTime) + ' KST\n\n--- 문서 내용 시작 ---\n' + text + '\n--- 문서 내용 끝 ---\n\n' +
+      '반드시 아래 형식의 JSON 객체 하나만 출력하세요. 다른 텍스트나 코드펜스는 넣지 마세요.\n' +
+      '{"score": 0에서 10 사이 정수, "completeness": "complete" | "partial" | "empty", "summary": "교사가 한눈에 볼 한 문장 (60자 이내)", ' +
+      '"strengths": ["구체적인 잘한 점", ...], "improvements": ["구체적인 고칠 점과 고치는 방법", ...], "nextSteps": ["학생에게 줄 다음 과제·행동 1~3개"], ' +
+      '"flags": ["미완성" | "과제와 무관" | "AI 작성 의심" | "표절 의심" 등 해당하는 것만, 없으면 빈 배열], "comment": "학생에게 그대로 전달해도 되는 3~5문장 코멘트 (한국어)"}';
+  }
+
+  function runReview(source, onlyIds) {
+    if (state.running) return;
+    if (!(state.db && state.mcp && state.sample)) { toast('이 화면에서는 리뷰를 실행할 수 없습니다.'); return; }
+    var c = cfg();
+    if (!c.folders.length) { openSettings(); toast('먼저 감시 폴더를 추가하세요.'); return; }
+    state.running = true; render();
+    var db = state.db;
+    var runId = 'run_' + new Date().toISOString().replace(/[:.]/g, '-');
+    var run = { id: runId, source: source, startedAt: new Date().toISOString(), status: 'running', checked: 0, reviewed: 0, skipped: 0, errors: [] };
+    var drive = null;
+    var candidates = [];
+
+    setProgress('폴더를 확인하는 중…', 0.02);
+    db.doc('runs/' + runId).set(run).catch(function () { /* non-fatal */ });
+
+    state.mcp.server(DRIVE).then(function (d) {
+      drive = d;
+      var since = Date.now() - c.sinceDays * 86400000;
+      var chain = Promise.resolve();
+      c.folders.forEach(function (folder) {
+        chain = chain.then(function () { return listAll(drive, folder.id); }).then(function (items) {
+          var subs = [];
+          items.forEach(function (it) {
+            if (it.mimeType === FOLDER) {
+              var skip = c.exclude.some(function (x) { return x && it.title && it.title.indexOf(x) >= 0; });
+              if (!skip) subs.push(it);
+            } else if (it.mimeType === GDOC) {
+              candidates.push({ id: it.id, title: it.title, modifiedTime: it.modifiedTime, viewUrl: it.viewUrl, student: it.owner ? String(it.owner).split('@')[0] : '', folderName: folder.name || '', subfolder: '' });
+            }
+          });
+          var sc = Promise.resolve();
+          subs.forEach(function (sub) {
+            sc = sc.then(function () { return listAll(drive, sub.id); }).then(function (docs) {
+              docs.forEach(function (d) {
+                if (d.mimeType !== GDOC) return;
+                candidates.push({ id: d.id, title: d.title, modifiedTime: d.modifiedTime, viewUrl: d.viewUrl, student: studentFromFolder(sub.title, folder.name), folderName: folder.name || '', subfolder: sub.title });
+              });
+            });
+          });
+          return sc;
+        });
+      });
+      return chain.then(function () {
+        if (onlyIds) return candidates.filter(function (d) { return onlyIds.indexOf(d.id) >= 0; });
+        return candidates.filter(function (d) { return d.modifiedTime && new Date(d.modifiedTime).getTime() >= since; });
+      });
+    }).then(function (recent) {
+      run.checked = recent.length;
+      var todo = onlyIds ? recent : recent.filter(function (d) {
+        var prev = state.reviews[d.id];
+        return !prev || !prev.modifiedTime || String(prev.modifiedTime) < String(d.modifiedTime);
+      });
+      run.skipped = recent.length - todo.length;
+      if (!todo.length) {
+        setProgress('새로 제출되거나 수정된 문서가 없습니다.', 1);
+        return;
+      }
+      var i = 0;
+      var chain = Promise.resolve();
+      todo.forEach(function (doc) {
+        chain = chain.then(function () {
+          i += 1;
+          setProgress('리뷰 중 ' + i + '/' + todo.length + ' · ' + (doc.student ? doc.student + ' · ' : '') + doc.title, (i - 0.5) / todo.length);
+          return reviewOne(drive, c, doc, source).then(function () { run.reviewed += 1; })
+            .catch(function (e) {
+              run.errors.push({ title: (doc.student ? doc.student + ' · ' : '') + doc.title, message: (e && e.message) || String(e) });
+            });
+        });
+      });
+      return chain.then(function () { setProgress('완료: ' + run.reviewed + '건 리뷰' + (run.errors.length ? ', 오류 ' + run.errors.length + '건' : ''), 1); });
+    }).catch(function (e) {
+      run.errors.push({ title: '실행', message: (e && e.message) || String(e) });
+      setProgress('실행 중 오류: ' + ((e && e.message) || e), 1);
+      if (e && e.code === 'needs_reauth') notice('구글 드라이브 연결을 다시 승인해야 합니다. claude.ai 설정 › 커넥터에서 Google Drive를 다시 연결하세요.', true);
+    }).then(function () {
+      run.finishedAt = new Date().toISOString(); run.status = 'done';
+      state.running = false;
+      setTimeout(function () { setProgress(null); }, 6000);
+      return db.doc('runs/' + runId).set(run).catch(function () { /* ignore */ });
+    }).then(function () {
+      render();
+      if (run.reviewed) toast(run.reviewed + '건 리뷰를 저장했습니다.');
+    });
+  }
+
+  function reviewOne(drive, c, doc, source) {
+    var prev = state.reviews[doc.id];
+    var base = {
+      fileId: doc.id, title: doc.title, student: doc.student || '', folderName: doc.folderName || '', subfolder: doc.subfolder || '',
+      viewUrl: doc.viewUrl || ('https://docs.google.com/document/d/' + doc.id + '/edit'),
+      modifiedTime: doc.modifiedTime, reviewedAt: new Date().toISOString(), source: source,
+      revision: prev ? (prev.revision || 1) + 1 : 1, seen: false
+    };
+    return drive.read_file_content({ fileId: doc.id }).then(function (res) {
+      var text = (res && typeof res.fileContent === 'string') ? res.fileContent.trim() : '';
+      var words = text ? text.split(/\s+/).length : 0;
+      base.wordCount = words;
+      if (text.length < c.minChars) {
+        return Object.assign(base, {
+          status: 'empty', score: null, completeness: 'empty', summary: '문서에 내용이 거의 없습니다 (' + text.length + '자).',
+          strengths: [], improvements: ['문서를 열어 과제를 작성해야 합니다.'], nextSteps: [], flags: ['미완성'], comment: ''
+        });
+      }
+      var MAX = 60000;
+      if (text.length > MAX) text = text.slice(0, MAX) + '\n[... 이후 내용은 길이 제한으로 생략됨 ...]';
+      return state.sample.json(buildPrompt(c, doc, text), { modelTier: 'default', cache: false }).then(function (j) {
+        j = j || {};
+        var sc = parseInt(j.score, 10);
+        return Object.assign(base, {
+          status: 'reviewed',
+          score: isNaN(sc) ? null : Math.max(0, Math.min(10, sc)),
+          completeness: ['complete', 'partial', 'empty'].indexOf(j.completeness) >= 0 ? j.completeness : 'complete',
+          summary: String(j.summary || '').slice(0, 200),
+          strengths: arr(j.strengths), improvements: arr(j.improvements), nextSteps: arr(j.nextSteps), flags: arr(j.flags),
+          comment: String(j.comment || '')
+        });
+      });
+    }).then(function (review) {
+      return state.db.doc('reviews/' + doc.id).set(review);
+    });
+  }
+  function arr(x) { return Array.isArray(x) ? x.map(function (s) { return String(s); }).filter(Boolean).slice(0, 12) : []; }
+})();
+</script>

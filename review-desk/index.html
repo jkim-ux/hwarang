@@ -120,6 +120,28 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   @media (prefers-reduced-motion: reduce) { .btn .spin { animation-duration: 2s; } }
 
+  /* ---------- subject tabs ---------- */
+  .tabs {
+    display: flex; gap: 2px; margin-top: 14px; border-bottom: 1px solid var(--line);
+    overflow-x: auto; scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+  }
+  .tabs button {
+    border: 0; background: transparent; padding: 10px 14px 9px; cursor: pointer; white-space: nowrap;
+    font-size: 13.5px; font-weight: 500; color: var(--ink-2); border-bottom: 2px solid transparent;
+    margin-bottom: -1px; display: inline-flex; align-items: center; gap: 7px;
+  }
+  .tabs button:hover { color: var(--ink); background: var(--surface-2); border-radius: 6px 6px 0 0; }
+  .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+  .tabs .badge {
+    min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; font-size: 11px; font-weight: 600;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--surface-2); color: var(--ink-3); font-family: var(--mono);
+  }
+  .tabs button[aria-selected="true"] .badge, .tabs .badge.hot { background: var(--accent-soft); color: var(--accent); }
+  .tabs .badge.zero { opacity: 0.6; }
+  .folder-item .lbl { width: 110px; flex: none; }
+  .folder-item .lbl input { font: inherit; font-size: 12.5px; padding: 4px 8px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--ground); color: var(--ink); width: 100%; }
+
   /* ---------- progress ---------- */
   .progress {
     margin-top: 14px; padding: 10px 14px; border-radius: 8px;
@@ -291,6 +313,8 @@
     </div>
   </header>
 
+  <nav class="tabs" id="tabs" role="tablist" aria-label="과목"></nav>
+
   <div class="progress" id="progress" hidden>
     <span class="spin" style="width:14px;height:14px;border:2px solid var(--accent);border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite;display:inline-block"></span>
     <span id="progressText">준비 중…</span>
@@ -350,7 +374,7 @@
 
     <div class="row">
       <label>감시 폴더</label>
-      <div class="hint">폴더 안의 구글 문서와, 한 단계 아래 하위 폴더(학생 폴더)의 문서를 확인합니다. 하위 폴더 이름에서 수업 이름을 뺀 부분을 학생 이름으로 씁니다.</div>
+      <div class="hint">폴더 하나가 과목 탭 하나가 됩니다. 폴더 안의 구글 문서와, 한 단계 아래 하위 폴더(학생 폴더)의 문서를 확인합니다. 하위 폴더 이름에서 수업 이름을 뺀 부분을 학생 이름으로 씁니다. 탭 이름은 짧게 바꿀 수 있습니다.</div>
       <div class="folders" id="folderList"></div>
       <div class="addrow">
         <input type="text" id="folderInput" placeholder="드라이브 폴더 링크 또는 폴더 ID 붙여넣기" aria-label="폴더 링크">
@@ -415,7 +439,7 @@
   var state = {
     db: null, mcp: null, sample: null,
     config: null, reviews: {}, runs: [],
-    filter: 'unseen', group: 'date', sort: 'recent', q: '',
+    filter: 'unseen', group: 'date', sort: 'recent', q: '', tab: 'all',
     running: false, capsReady: false
   };
   var draftFolders = [];
@@ -449,6 +473,7 @@
   }
 
   /* ---------------- boot ---------------- */
+  try { var savedTab = localStorage.getItem('reviewDesk.tab'); if (savedTab) state.tab = savedTab; } catch (e) { /* ignore */ }
   render();
   bindUI();
   Promise.all([use('db'), use('mcp'), use('sample')]).then(function (caps) {
@@ -488,7 +513,7 @@
   function cfg() {
     var c = state.config || {};
     return {
-      folders: Array.isArray(c.folders) ? c.folders : [],
+      folders: Array.isArray(c.folders) ? c.folders.filter(function (f) { return f && f.id; }).map(function (f) { return { id: f.id, name: f.name || '', label: f.label || '' }; }) : [],
       exclude: Array.isArray(c.exclude) ? c.exclude : ['자료실', '비공개'],
       sinceDays: Number(c.sinceDays) > 0 ? Number(c.sinceDays) : 14,
       minChars: Number(c.minChars) >= 0 ? Number(c.minChars) : 40,
@@ -499,8 +524,25 @@
     if (r.status === 'empty' || typeof r.score !== 'number') return 'none';
     return r.score >= 8 ? 'good' : r.score >= 5 ? 'warn' : 'crit';
   }
+  function tabLabel(f) { return f.label || f.name || f.id; }
+  function inFolder(r, f) {
+    if (!f) return true;
+    if (r.folderId) return r.folderId === f.id;
+    return !!f.name && r.folderName === f.name;
+  }
+  function currentFolder() {
+    if (state.tab === 'all') return null;
+    var fs = cfg().folders;
+    for (var i = 0; i < fs.length; i++) if (fs[i].id === state.tab) return fs[i];
+    return null;
+  }
+  function tabReviews() {
+    var f = currentFolder();
+    if (state.tab !== 'all' && !f) { state.tab = 'all'; }
+    return Object.keys(state.reviews).map(function (k) { return state.reviews[k]; }).filter(function (r) { return inFolder(r, f); });
+  }
   function visibleReviews() {
-    var list = Object.keys(state.reviews).map(function (k) { return state.reviews[k]; });
+    var list = tabReviews();
     var q = state.q.trim().toLowerCase();
     list = list.filter(function (r) {
       if (state.filter === 'unseen' && r.seen) return false;
@@ -520,7 +562,18 @@
 
   function render() {
     var c = cfg();
-    var all = Object.keys(state.reviews).map(function (k) { return state.reviews[k]; });
+    var everything = Object.keys(state.reviews).map(function (k) { return state.reviews[k]; });
+    var all = tabReviews();
+    var folder = currentFolder();
+
+    // tabs
+    var unseenAll = everything.filter(function (r) { return !r.seen; }).length;
+    var tabsHtml = '<button type="button" role="tab" data-tab="all" aria-selected="' + (state.tab === 'all') + '">전체<span class="badge' + (unseenAll ? ' hot' : ' zero') + '">' + unseenAll + '</span></button>';
+    c.folders.forEach(function (f) {
+      var n = everything.filter(function (r) { return !r.seen && inFolder(r, f); }).length;
+      tabsHtml += '<button type="button" role="tab" data-tab="' + esc(f.id) + '" aria-selected="' + (state.tab === f.id) + '" title="' + esc(f.name) + '">' + esc(tabLabel(f)) + '<span class="badge' + (n ? ' hot' : ' zero') + '">' + n + '</span></button>';
+    });
+    $('tabs').innerHTML = tabsHtml;
 
     // header
     $('folderLine').innerHTML = c.folders.length
@@ -541,15 +594,18 @@
     // run button
     var canRun = state.capsReady && state.db && state.mcp && state.sample && !state.running;
     $('runBtn').disabled = !canRun;
-    $('runBtn').innerHTML = state.running ? '<span class="spin"></span><span>확인 중…</span>' : '<span>지금 확인하기</span>';
+    $('runBtn').innerHTML = state.running ? '<span class="spin"></span><span>확인 중…</span>' : '<span>지금 확인하기' + (folder ? ' · ' + esc(tabLabel(folder)) : '') + '</span>';
+    $('runBtn').title = folder ? tabLabel(folder) + ' 폴더만 확인합니다' : '모든 과목 폴더를 확인합니다';
 
     // list
     var list = visibleReviews();
     var host = $('groups');
     if (!list.length) {
       var msg = all.length
-        ? (state.filter === 'unseen' ? '확인하지 않은 리뷰가 없습니다. <b>전체</b>에서 지난 리뷰를 볼 수 있습니다.' : '조건에 맞는 리뷰가 없습니다.')
-        : (c.folders.length ? '아직 리뷰가 없습니다. <b>지금 확인하기</b>를 누르거나 다음 자동 확인(08:00 · 17:00)을 기다리세요.' : '먼저 <b>설정</b>에서 학생들이 숙제를 올리는 드라이브 폴더를 추가하세요.');
+        ? (state.filter === 'unseen' ? '확인하지 않은 리뷰가 없습니다. <b>전체</b> 보기에서 지난 리뷰를 볼 수 있습니다.' : '조건에 맞는 리뷰가 없습니다.')
+        : (folder
+          ? '<b>' + esc(tabLabel(folder)) + '</b>에는 아직 리뷰가 없습니다. 최근 ' + c.sinceDays + '일 안에 제출된 문서가 없으면 정상입니다. 새 숙제가 올라오면 자동 확인(08:00 · 17:00) 때 리뷰됩니다.'
+          : (c.folders.length ? '아직 리뷰가 없습니다. <b>지금 확인하기</b>를 누르거나 다음 자동 확인(08:00 · 17:00)을 기다리세요.' : '먼저 <b>설정</b>에서 학생들이 숙제를 올리는 드라이브 폴더를 추가하세요.'));
       host.innerHTML = '<div class="empty">' + msg + '</div>';
     } else {
       var groups = {}; var order = [];
@@ -620,6 +676,12 @@
         render();
       });
     });
+    $('tabs').addEventListener('click', function (ev) {
+      var b = ev.target.closest('[data-tab]'); if (!b) return;
+      state.tab = b.getAttribute('data-tab');
+      try { localStorage.setItem('reviewDesk.tab', state.tab); } catch (e) { /* ignore */ }
+      render();
+    });
     $('groupSel').addEventListener('change', function () { state.group = this.value; render(); });
     $('sortSel').addEventListener('change', function () { state.sort = this.value; render(); });
     $('q').addEventListener('input', function () { state.q = this.value; render(); });
@@ -649,7 +711,7 @@
         .then(function () { toast(list.length + '건을 확인함으로 표시했습니다.'); })
         .catch(function (e) { toast('저장 실패: ' + e.message); });
     });
-    $('runBtn').addEventListener('click', function () { runReview('manual'); });
+    $('runBtn').addEventListener('click', function () { var f = currentFolder(); runReview('manual', null, f ? [f.id] : null); });
     $('settingsBtn').addEventListener('click', openSettings);
     $('panelClose').addEventListener('click', closeSettings);
     $('drawer').addEventListener('click', function (ev) { if (ev.target === $('drawer')) closeSettings(); });
@@ -660,6 +722,11 @@
       var b = ev.target.closest('[data-remove]'); if (!b) return;
       draftFolders = draftFolders.filter(function (f) { return f.id !== b.getAttribute('data-remove'); });
       renderFolderList();
+    });
+    $('folderList').addEventListener('input', function (ev) {
+      var i = ev.target.closest('[data-label]'); if (!i) return;
+      var id = i.getAttribute('data-label');
+      draftFolders.forEach(function (f) { if (f.id === id) f.label = i.value.trim(); });
     });
     $('panelSave').addEventListener('click', saveSettings);
   }
@@ -692,9 +759,15 @@
     var host = $('folderList');
     if (!draftFolders.length) { host.innerHTML = '<div class="hint">아직 없음</div>'; return; }
     host.innerHTML = draftFolders.map(function (f) {
-      return '<div class="folder-item"><span class="n">' + esc(f.name || '(이름 없음)') + ' <span class="id">' + esc(f.id) + '</span></span>' +
+      return '<div class="folder-item"><span class="lbl"><input type="text" value="' + esc(f.label || '') + '" placeholder="탭 이름" aria-label="탭 이름" data-label="' + esc(f.id) + '"></span>' +
+        '<span class="n">' + esc(f.name || '(이름 없음)') + ' <span class="id">' + esc(f.id) + '</span></span>' +
         '<button class="btn small ghost" type="button" data-remove="' + esc(f.id) + '">제거</button></div>';
     }).join('');
+  }
+  function shortLabel(name) {
+    if (!name) return '';
+    return name.replace(/\bEconomics\b/i, 'Econ').replace(/\bBusiness( Management)?\b/i, 'BM').replace(/\bPsychology\b/i, 'Psych')
+      .replace(/\bGlobal Politics\b/i, 'GloPo').replace(/\bSocial Science\b/i, 'SS').replace(/\bGrade\b/i, '').replace(/\bYR\s*/i, 'Y').replace(/\s+/g, ' ').trim();
   }
   function parseFolderId(s) {
     s = (s || '').trim();
@@ -709,7 +782,7 @@
     if (draftFolders.some(function (f) { return f.id === id; })) { toast('이미 추가된 폴더입니다.'); return; }
     var btn = $('folderAdd'); btn.disabled = true; btn.textContent = '확인 중…';
     var done = function (name) {
-      draftFolders.push({ id: id, name: name });
+      draftFolders.push({ id: id, name: name, label: shortLabel(name) });
       $('folderInput').value = '';
       renderFolderList();
       btn.disabled = false; btn.textContent = '추가';
@@ -779,7 +852,7 @@
       '"flags": ["미완성" | "과제와 무관" | "AI 작성 의심" | "표절 의심" 등 해당하는 것만, 없으면 빈 배열], "comment": "학생에게 그대로 전달해도 되는 3~5문장 코멘트 (한국어)"}';
   }
 
-  function runReview(source, onlyIds) {
+  function runReview(source, onlyIds, folderIds) {
     if (state.running) return;
     if (!(state.db && state.mcp && state.sample)) { toast('이 화면에서는 리뷰를 실행할 수 없습니다.'); return; }
     var c = cfg();
@@ -798,7 +871,8 @@
       drive = d;
       var since = Date.now() - c.sinceDays * 86400000;
       var chain = Promise.resolve();
-      c.folders.forEach(function (folder) {
+      var targets = folderIds ? c.folders.filter(function (f) { return folderIds.indexOf(f.id) >= 0; }) : c.folders;
+      targets.forEach(function (folder) {
         chain = chain.then(function () { return listAll(drive, folder.id); }).then(function (items) {
           var subs = [];
           items.forEach(function (it) {
@@ -806,7 +880,7 @@
               var skip = c.exclude.some(function (x) { return x && it.title && it.title.indexOf(x) >= 0; });
               if (!skip) subs.push(it);
             } else if (it.mimeType === GDOC) {
-              candidates.push({ id: it.id, title: it.title, modifiedTime: it.modifiedTime, viewUrl: it.viewUrl, student: it.owner ? String(it.owner).split('@')[0] : '', folderName: folder.name || '', subfolder: '' });
+              candidates.push({ id: it.id, title: it.title, modifiedTime: it.modifiedTime, viewUrl: it.viewUrl, student: it.owner ? String(it.owner).split('@')[0] : '', folderId: folder.id, folderName: folder.name || '', subfolder: '' });
             }
           });
           var sc = Promise.resolve();
@@ -814,7 +888,7 @@
             sc = sc.then(function () { return listAll(drive, sub.id); }).then(function (docs) {
               docs.forEach(function (d) {
                 if (d.mimeType !== GDOC) return;
-                candidates.push({ id: d.id, title: d.title, modifiedTime: d.modifiedTime, viewUrl: d.viewUrl, student: studentFromFolder(sub.title, folder.name), folderName: folder.name || '', subfolder: sub.title });
+                candidates.push({ id: d.id, title: d.title, modifiedTime: d.modifiedTime, viewUrl: d.viewUrl, student: studentFromFolder(sub.title, folder.name), folderId: folder.id, folderName: folder.name || '', subfolder: sub.title });
               });
             });
           });
@@ -867,7 +941,7 @@
   function reviewOne(drive, c, doc, source) {
     var prev = state.reviews[doc.id];
     var base = {
-      fileId: doc.id, title: doc.title, student: doc.student || '', folderName: doc.folderName || '', subfolder: doc.subfolder || '',
+      fileId: doc.id, title: doc.title, student: doc.student || '', folderId: doc.folderId || '', folderName: doc.folderName || '', subfolder: doc.subfolder || '',
       viewUrl: doc.viewUrl || ('https://docs.google.com/document/d/' + doc.id + '/edit'),
       modifiedTime: doc.modifiedTime, reviewedAt: new Date().toISOString(), source: source,
       revision: prev ? (prev.revision || 1) + 1 : 1, seen: false

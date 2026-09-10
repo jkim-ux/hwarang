@@ -22,7 +22,7 @@
 ## 절차
 
 1. `read_db` get, collection `config`, doc_id `main`.
-   필드: `folders[{id,name}]`, `exclude[]`(건너뛸 하위 폴더 이름 조각), `sinceDays`, `minChars`, `rubric`.
+   필드: `folders[{id,name,label}]` (과목 폴더 목록, 폴더 하나 = 과목 탭 하나), `exclude[]`(건너뛸 하위 폴더 이름 조각), `sinceDays`, `minChars`, `rubric`.
    문서가 없거나 `folders` 가 비어 있으면 아무것도 쓰지 말고 종료.
 2. `read_db` list, collection `reviews` (`query.limit` 1000, `next_cursor` 가 있으면 계속). `fileId → {modifiedTime, revision}` 맵을 만든다.
 3. 각 folder 에 대해 Google Drive `search_files` 를 `query: "parentId = '<folder.id>'"`, `excludeContentSnippets: true`, `pageSize: 100` 으로 호출하고 `nextPageToken` 이 있으면 `pageToken` 으로 이어서 호출한다.
@@ -33,7 +33,7 @@
    리뷰 대상 = `reviews` 에 없거나, 저장된 `modifiedTime` 이 문서의 `modifiedTime` 보다 이전인 것.
 5. 각 대상 문서에 대해 `read_file_content` 로 본문을 읽는다.
    - 본문(공백 제거 후) 길이가 `minChars` 미만이면 `status: "empty"` 리뷰를 만든다 (아래 스키마의 empty 예시).
-   - 아니면 `rubric` 의 지시에 따라 리뷰를 직접 작성한다. 본문이 60,000자를 넘으면 앞 60,000자만 읽는다.
+   - 아니면 `rubric` 의 지시에 따라 리뷰를 직접 작성한다. 과목은 `folder.name` 으로 판단한다 (Economics, Business, Psychology, Global Politics, Social Science 등). 본문이 60,000자를 넘으면 앞 60,000자만 읽는다.
 6. 리뷰를 `write_db` batch (최대 50개씩), op `set`, collection `reviews`, doc_id = 문서의 fileId 로 저장한다.
 7. 마지막에 실행 기록을 `write_db` set, collection `runs`, doc_id `run_<시작시각 ISO에서 : 과 . 을 - 로 바꾼 것>` 으로 저장한다.
 8. 사용자에게 보내는 메시지는 짧게 한 줄(리뷰 n건, 오류 n건)로 충분하다.
@@ -45,6 +45,7 @@
   "fileId": "<Drive file id>",
   "title": "<문서 제목>",
   "student": "<학생 이름>",
+  "folderId": "<config.folders[].id>",
   "folderName": "<config.folders[].name>",
   "subfolder": "<하위 폴더 제목 또는 빈 문자열>",
   "viewUrl": "<문서 viewUrl>",

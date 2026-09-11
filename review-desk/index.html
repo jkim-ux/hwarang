@@ -332,7 +332,7 @@
     '- 좋은 점보다 고칠 점을 구체적으로: 무엇이 왜 부족한지, 어떻게 고치면 되는지.',
     '- 점수는 0~10 정수. 8 이상은 거의 수정 없이 통과, 5~7은 보완 필요, 4 이하는 다시 써야 하는 수준.',
     '- 미완성·빈 문서·과제와 무관한 내용·AI가 그대로 쓴 듯한 글은 flags에 표시하세요.',
-    '- comment(학생에게 보낼 코멘트)는 교사 본인 말투로 씁니다: 반말, 짧고 직설적, 핵심만 2~4문장. 존댓말과 "~해 주세요"는 금지. 예: "정의는 맞는데 본론이 없잖아. Day 1 구조 그대로 가져와서 두 문단 써." / "shift랑 movement 구분한 건 좋아. 근데 Q2 라벨 두 군데 겹친다, 고쳐."'
+    '- comment(학생에게 보낼 코멘트)는 교사 본인 말투로 씁니다: 반말, 짧고 직설적, 핵심만 2~4문장. 존댓말과 ~해 주세요 금지. 교과 용어는 영어 그대로 씁니다 (graph, curve, demand, supply, producer, consumer, price, quantity, equilibrium, shortage, shift, movement, definition, example 등). 도표→graph, 곡선→curve, 수요→demand, 생산자→producer, 가격을 올리다→increase price, 새 균형→new equilibrium, 수량→quantity, 수량 라벨 오류→wrong label on Quantity. 따옴표는 쓰지 않고 용어를 그대로 씁니다. 예: shift랑 movement 구분한 건 좋아. 근데 wrong label on Quantity, Q2가 두 군데 겹친다. 고쳐. / definition은 맞는데 본론이 없잖아. Day 1 구조 그대로 가져와서 graph 두 개 그리고 두 문단 써.'
   ].join('\n');
   var ICON_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"></path></svg>';
   var ICON_DOC = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"></path><path d="M20 4l-9 9"></path><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"></path></svg>';
@@ -495,7 +495,7 @@
     var canRun = state.capsReady && state.db && state.mcp && state.sample && !state.running && c.folders.length;
     $('runBtn').disabled = !canRun;
     $('runBtn').innerHTML = state.running ? '<span class="spin"></span><span>확인 중…</span>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span>지금 확인하기' + (f ? ' · ' + esc(label(f)) : '') + '</span>';
-    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v7';
+    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v8';
 
     // list
     var titleMap = { unseen: '확인 안 함', missing: '미제출자', seen: '확인함' };
@@ -570,7 +570,7 @@
       var hist = (a ? '<button class="h" type="button"><div class="sq none">—</div><div class="n">' + esc(a.name) + '</div><div class="s crit">미제출</div><div class="w">마감 ' + (a.due ? a.due.slice(5).replace('-', '/') : '') + '</div></button>' : '') +
         m.history.map(function (r) { return '<button class="h" type="button" data-open="' + esc(r.fileId) + '"><div class="sq ' + scoreClass(r) + '">' + (scoreClass(r) === 'none' ? '빈' : r.score) + '</div><div class="n">' + esc(r.title) + '</div><div class="s">' + esc(r.summary || '') + '</div><div class="w">' + fmt(r.modifiedTime) + '</div></button>'; }).join('');
       var msg = m.student.name.replace(/^[가-힣]{1}/, '') || m.student.name;
-      var draft = m.student.name + ', ' + (a ? a.name + ' 과제' : '이번 과제') + ' 아직 폴더에 없다. ' + (m.last ? '지난 ' + m.last.title + ' 쓴 것처럼 ' : '') + '정의 → 도표 → 설명 순서로 써서 올려.';
+      var draft = m.student.name + ', ' + (a ? a.name + ' 과제' : '이번 과제') + ' 아직 폴더에 없다. ' + (m.last ? '지난 ' + m.last.title + ' 쓴 것처럼 ' : '') + 'definition → graph → 설명 순서로 써서 올려.';
       d.innerHTML = back +
         '<div class="d-head"><div class="left"><div class="d-crumb">' + esc(m.folder.name) + (m.student.folderName ? ' · ' + esc(m.student.folderName) : '') + '</div><div class="d-title">' + esc(m.student.name) + '</div>' +
         '<div class="d-meta">' + (m.last ? '마지막 제출 ' + fmt(m.last.modifiedTime) + ' · 최근 제출 ' + m.history.length + '건' : '최근 ' + cfg().sinceDays + '일 안에 제출 없음') + '</div>' +

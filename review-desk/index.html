@@ -209,36 +209,50 @@
   .d-empty { margin: auto; color: var(--ink-3); text-align: center; font-size: 14px; max-width: 32ch; line-height: 1.6; }
   .back { display: none; }
 
-  /* compare overlay */
+  /* compare overlay (Google Docs page view) */
   .cmp { position: fixed; inset: 0; background: var(--ground); z-index: 25; display: flex; flex-direction: column; }
   .cmp-top { display: flex; align-items: center; gap: 12px; padding: 10px 20px; background: var(--surface); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
   .cmp-top .t { font-size: 15px; font-weight: 800; }
   .cmp-top .t span { font-weight: 500; color: var(--ink-2); }
   .cmp-top .grow { flex-grow: 1; }
-  .cmp-body { display: flex; flex-grow: 1; min-height: 0; }
-  .cmp-doc { flex: 1 1 55%; min-width: 0; overflow-y: auto; padding: 32px 48px 80px; background: var(--surface); border-right: 1px solid var(--line); }
-  .cmp-doc .paper { max-width: 72ch; margin: 0 auto; font-family: "Noto Sans KR", Arial, sans-serif; font-size: 14.5px; line-height: 1.8; white-space: pre-wrap; word-break: break-word; color: var(--ink); }
-  .cmp-doc .paper h4 { margin: 0 0 18px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-3); }
-  mark.ann { background: var(--warn-soft); color: inherit; padding: 1px 0; border-bottom: 2px solid var(--gold); cursor: pointer; }
-  mark.ann.on { background: #f7d9dc; border-bottom-color: var(--crimson); }
+  .cmp-top .st { font-size: 12px; color: var(--ink-3); }
+  .cmp-scroll { flex-grow: 1; min-height: 0; overflow: auto; background: #e9ebee; display: flex; align-items: flex-start; gap: 28px; padding: 28px 28px 120px; }
+  .cmp-pages { flex: 0 0 auto; position: relative; display: flex; flex-direction: column; gap: 18px; }
+  .cmp-page { position: relative; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.06); overflow: hidden; }
+  .cmp-page canvas { display: block; }
+  .cmp-page .hl { position: absolute; inset: 0; pointer-events: none; }
+  .cmp-page .hl div { position: absolute; background: rgba(234,196,1,0.42); border-bottom: 2px solid var(--gold); }
+  .cmp-page .hl div.on { background: rgba(144,32,36,0.22); border-bottom-color: var(--crimson); }
+  .cmp-page .hl i { position: absolute; font: 700 10px/14px Arial, sans-serif; font-style: normal; color: #fff; background: var(--crimson); padding: 0 4px; border-radius: 2px; }
+  .cmp-page .tl { position: absolute; inset: 0; overflow: hidden; line-height: 1; cursor: text; }
+  .cmp-page .tl span { position: absolute; color: transparent; white-space: pre; transform-origin: 0 0; }
+  .cmp-page .tl ::selection { background: rgba(26,115,232,0.35); }
+  .cmp-paper { width: 816px; max-width: 100%; box-sizing: border-box; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.06); padding: 96px; font-family: Arial, "Noto Sans KR", sans-serif; font-size: 14.67px; line-height: 1.15; white-space: pre-wrap; word-break: break-word; color: #000; }
+  .cmp-paper h4 { margin: 0 0 18px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-3); font-family: inherit; }
+  mark.ann { background: rgba(234,196,1,0.42); color: inherit; padding: 1px 0; border-bottom: 2px solid var(--gold); cursor: pointer; }
+  mark.ann.on { background: rgba(144,32,36,0.22); border-bottom-color: var(--crimson); }
   mark.ann sup { font-size: 10px; font-weight: 800; color: var(--crimson); margin-left: 2px; }
-  .cmp-side { flex: 0 0 420px; overflow-y: auto; padding: 20px 20px 80px; display: flex; flex-direction: column; gap: 10px; }
-  .cmp-side h3 { margin: 0 0 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--ink-3); display: flex; align-items: baseline; gap: 8px; }
-  .ann-card { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--gold); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .cmp-margin { flex: 1 1 340px; min-width: 300px; max-width: 460px; position: relative; }
+  .cmp-margin .ann-card { position: absolute; left: 0; right: 0; transition: top 0.15s ease; }
+  .cmp-margin .cmp-lost { position: absolute; left: 0; right: 0; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-3); }
+  .cmp-margin .cmp-hint { position: absolute; left: 0; right: 0; }
+  .cmp-margin.static { max-width: none; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+  .cmp-margin.static .ann-card, .cmp-margin.static .cmp-lost, .cmp-margin.static .cmp-hint { position: static; }
+  .cmp-status { color: var(--ink-3); font-size: 13px; padding: 40px 20px; text-align: center; width: 816px; max-width: 100%; box-sizing: border-box; }
+  .ann-card { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--gold); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; }
   .ann-card.on { border-left-color: var(--crimson); box-shadow: 0 0 0 1px var(--crimson); }
   .ann-card.lost { border-left-color: var(--line-strong); }
   .ann-card .q { font-size: 12px; color: var(--ink-3); line-height: 1.4; cursor: pointer; }
   .ann-card .q b { color: var(--crimson); font-weight: 800; margin-right: 6px; }
   .ann-card .n { font-size: 13.5px; line-height: 1.55; white-space: pre-wrap; }
-  .ann-card textarea, .box textarea { font: inherit; font-size: 13.5px; line-height: 1.55; width: 100%; min-height: 72px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--ground); color: var(--ink); resize: vertical; }
+  .ann-card textarea, .box textarea { font: inherit; font-size: 13.5px; line-height: 1.55; width: 100%; min-height: 72px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--ground); color: var(--ink); resize: vertical; box-sizing: border-box; }
   .ann-card .btns, .box .btns { display: flex; gap: 6px; flex-wrap: wrap; }
   .ann-card .btns .grow { flex-grow: 1; }
   .btn.tiny { height: 26px; padding: 0 9px; font-size: 12px; }
   .btn.tiny.danger { color: var(--crit); }
-  .cmp-side .empty { padding: 20px; }
   .cmp-hint { font-size: 12px; color: var(--ink-3); line-height: 1.5; padding: 8px 12px; background: var(--surface-2); }
   .box .n { white-space: pre-wrap; }
-  @media (max-width: 900px) { .cmp-body { flex-direction: column; } .cmp-doc { flex: 1 1 50%; border-right: 0; border-bottom: 1px solid var(--line); padding: 20px 20px 40px; } .cmp-side { flex: 1 1 50%; } }
+  @media (max-width: 900px) { .cmp-scroll { flex-direction: column; gap: 16px; padding: 12px 12px 80px; } .cmp-margin { flex: 0 0 auto; width: 100%; } }
 
   /* drawer */
   .drawer { position: fixed; inset: 0; background: rgba(10, 8, 8, 0.45); z-index: 20; }
@@ -344,6 +358,7 @@
 <div class="cmp" id="cmp" hidden></div>
 <div class="toast" id="toast" hidden></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 (function () {
   'use strict';
@@ -527,7 +542,7 @@
     var canRun = state.capsReady && state.db && state.mcp && state.sample && !state.running && c.folders.length;
     $('runBtn').disabled = !canRun;
     $('runBtn').innerHTML = state.running ? '<span class="spin"></span><span>확인 중…</span>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span>지금 확인하기' + (f ? ' · ' + esc(label(f)) : '') + '</span>';
-    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v9';
+    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v10';
 
     // list
     var titleMap = { unseen: '확인 안 함', missing: '미제출자', seen: '확인함' };
@@ -929,10 +944,20 @@
     return x.map(function (a) { return a && typeof a === 'object' ? { quote: String(a.quote || '').replace(/\s+/g, ' ').trim().slice(0, 300), note: String(a.note || '').trim() } : null; })
       .filter(function (a) { return a && a.quote && a.note; }).slice(0, 10);
   }
-  /* ---------- compare view ---------- */
+  /* ---------- compare view: Google Docs page (PDF export) + margin comments ---------- */
+  var PDFJS_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+  function pdfLib() {
+    var L = window.pdfjsLib; if (!L || !L.getDocument) return null;
+    try { if (L.GlobalWorkerOptions && !L.GlobalWorkerOptions.workerSrc) L.GlobalWorkerOptions.workerSrc = PDFJS_BASE + 'pdf.worker.min.js'; } catch (e) { /* ignore */ }
+    return L;
+  }
+  function b64bytes(s) { var bin = atob(String(s).replace(/[^A-Za-z0-9+/=]/g, '')); var u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+  function mul(m1, m2) { return [m1[0] * m2[0] + m1[2] * m2[1], m1[1] * m2[0] + m1[3] * m2[1], m1[0] * m2[2] + m1[2] * m2[3], m1[1] * m2[2] + m1[3] * m2[3], m1[0] * m2[4] + m1[2] * m2[5] + m1[4], m1[1] * m2[4] + m1[3] * m2[5] + m1[5]]; }
+  function isNarrow() { return window.innerWidth <= 900; }
+  function pageWidth() { var sc = $('cmpScroll'); var avail = sc ? sc.clientWidth - 56 - (isNarrow() ? 0 : 328) : 816; return Math.max(320, Math.min(816, avail)); }
   function anchorAll(text, anns) {
-    var norm = String(text || ''); var out = []; var cursor = 0;
-    var collapsed = norm.replace(/\s+/g, ' '); var map = []; // collapsed index -> original index
+    var norm = String(text || ''); var out = [];
+    var collapsed = norm.replace(/\s+/g, ' '); var map = [];
     (function () { var j = 0; for (var i = 0; i < norm.length; i++) { var ch = norm[i]; if (/\s/.test(ch)) { if (j > 0 && collapsed[j - 1] === ' ') continue; map[j] = i; j++; } else { map[j] = i; j++; } } map[j] = norm.length; })();
     (anns || []).forEach(function (a, idx) {
       var q = String(a.quote || '').replace(/\s+/g, ' ').trim(); var start = -1;
@@ -946,7 +971,7 @@
     var parts = anchored.filter(function (x) { return x.start >= 0; }).sort(function (a, b) { return a.start - b.start; });
     var html = ''; var pos = 0;
     parts.forEach(function (x) {
-      if (x.start < pos) return; // overlapping: skip
+      if (x.start < pos) return;
       html += esc(text.slice(pos, x.start));
       html += '<mark class="ann' + (state.activeAnn === x.idx ? ' on' : '') + '" data-ann="' + x.idx + '">' + esc(text.slice(x.start, x.end)) + '<sup>' + (x.idx + 1) + '</sup></mark>';
       pos = x.end;
@@ -954,41 +979,205 @@
     html += esc(text.slice(pos));
     return html;
   }
+  function fetchPdf(r) {
+    state.pdfCache = state.pdfCache || {};
+    var key = r.fileId + '@' + (r.modifiedTime || '');
+    if (state.pdfCache[key]) return Promise.resolve(state.pdfCache[key]);
+    if (!state.mcp) return Promise.reject(new Error('드라이브 연결 없음'));
+    return state.mcp.server(DRIVE).then(function (d) { return d.download_file_content({ fileId: r.fileId, exportMimeType: 'application/pdf' }); }).then(function (res) {
+      var c = res && res.content; if (!c || typeof c !== 'string') throw new Error('PDF 내용이 비어 있음');
+      var bytes = b64bytes(c); if (bytes.length < 100) throw new Error('PDF 내용이 비어 있음');
+      var keys = Object.keys(state.pdfCache); if (keys.length > 8) delete state.pdfCache[keys[0]];
+      state.pdfCache[key] = bytes; return bytes;
+    });
+  }
   function openCompare(id) {
     var r = findReview(id); if (!r) return;
-    state.compareId = r.fileId; state.activeAnn = null; state.editAnn = null; state.cmpSel = '';
+    state.compareId = r.fileId; state.activeAnn = null; state.editAnn = null; state.cmpSel = ''; state.cmpAnchors = []; state.cmpMode = 'loading'; state.cmpShellFor = null;
     renderCompare(); $('cmp').hidden = false; document.body.style.overflow = 'hidden';
+    loadPages(r);
   }
-  function closeCompare() { $('cmp').hidden = true; state.compareId = null; state.editAnn = null; document.body.style.overflow = ''; }
+  function closeCompare() { $('cmp').hidden = true; state.compareId = null; state.editAnn = null; state.cmpShellFor = null; state.cmpToken = (state.cmpToken || 0) + 1; document.body.style.overflow = ''; $('cmp').innerHTML = ''; }
+  function buildShell(r) {
+    $('cmp').innerHTML =
+      '<div class="cmp-top"><div class="t">' + esc(r.student || '') + ' <span>' + esc(r.title) + '</span></div>' +
+      '<span class="st" id="cmpStatus"></span>' +
+      '<a class="btn quiet" href="' + esc(r.viewUrl || '#') + '" target="_blank" rel="noopener">' + ICON_DOC + '구글 문서 열기</a>' +
+      '<button class="btn quiet" type="button" id="cmpAddSel">선택한 문장에 코멘트</button>' +
+      '<span class="grow"></span>' +
+      '<button class="btn quiet" type="button" id="cmpCopyAll">코멘트 전체 복사</button>' +
+      '<button class="btn quiet" type="button" id="cmpClose">닫기</button></div>' +
+      '<div class="cmp-scroll" id="cmpScroll"><div class="cmp-pages" id="cmpPages"><div class="cmp-status">구글 문서를 페이지 그대로 불러오는 중…</div></div><div class="cmp-margin" id="cmpMargin"></div></div>';
+    state.cmpShellFor = r.fileId;
+  }
   function renderCompare() {
     var r = findReview(state.compareId); var host = $('cmp'); if (!r) { host.innerHTML = ''; return; }
-    var anns = Array.isArray(r.annotations) ? r.annotations : []; var text = r.docText || '';
-    var anchored = anchorAll(text, anns);
-    var cards = anchored.map(function (x) {
-      var a = x.ann; var i = x.idx; var editing = state.editAnn === i;
-      return '<div class="ann-card' + (state.activeAnn === i ? ' on' : '') + (x.start < 0 ? ' lost' : '') + '" data-card="' + i + '">' +
-        '<div class="q" data-focus="' + i + '"><b>' + (i + 1) + '</b>' + esc(a.quote.length > 90 ? a.quote.slice(0, 90) + '…' : a.quote) + (x.start < 0 ? ' <span style="color:var(--crit)">(본문에서 위치 못 찾음)</span>' : '') + '</div>' +
+    if (state.cmpShellFor !== r.fileId || !$('cmpMargin')) buildShell(r);
+    var anns = Array.isArray(r.annotations) ? r.annotations : [];
+    var st = $('cmpStatus'); if (st) st.textContent = state.cmpMode === 'pdf' ? '구글 문서 페이지 그대로' : (state.cmpMode === 'text' ? '텍스트만 (PDF 못 불러옴)' : '');
+    var cards = anns.map(function (a, i) {
+      var editing = state.editAnn === i; var lost = state.cmpMode !== 'loading' && !state.cmpAnchors[i];
+      return '<div class="ann-card' + (state.activeAnn === i ? ' on' : '') + (lost ? ' lost' : '') + '" data-card="' + i + '">' +
+        '<div class="q" data-focus="' + i + '"><b>' + (i + 1) + '</b>' + esc(a.quote.length > 90 ? a.quote.slice(0, 90) + '…' : a.quote) + (lost ? ' <span style="color:var(--crit)">(본문에서 위치 못 찾음)</span>' : '') + '</div>' +
         (editing ? '<textarea id="annEdit" data-i="' + i + '">' + esc(a.note) + '</textarea>' : '<div class="n">' + esc(a.note) + '</div>') +
         '<div class="btns">' + (editing
           ? '<button class="btn tiny primary" type="button" data-ann-save="' + i + '" style="height:26px">저장</button><button class="btn tiny" type="button" data-ann-cancel="' + i + '">취소</button>'
           : '<button class="btn tiny" type="button" data-ann-copy="' + i + '">복사</button><button class="btn tiny" type="button" data-ann-edit="' + i + '">수정</button>') +
         '<span class="grow"></span><button class="btn tiny danger" type="button" data-ann-del="' + i + '">삭제</button></div></div>';
     }).join('');
-    host.innerHTML =
-      '<div class="cmp-top"><div class="t">' + esc(r.student || '') + ' <span>' + esc(r.title) + '</span></div>' +
-      '<a class="btn quiet" href="' + esc(r.viewUrl || '#') + '" target="_blank" rel="noopener">' + ICON_DOC + '구글 문서 열기</a>' +
-      '<button class="btn quiet" type="button" id="cmpAddSel">선택한 문장에 코멘트</button>' +
-      '<span class="grow"></span>' +
-      '<button class="btn quiet" type="button" id="cmpCopyAll">코멘트 전체 복사</button>' +
-      '<button class="btn quiet" type="button" id="cmpClose">닫기</button></div>' +
-      '<div class="cmp-body"><div class="cmp-doc" id="cmpDoc"><div class="paper"><h4>학생 문서 원문 · 이미지와 서식은 빠짐</h4>' + (text ? docHtml(text, anchored) : '<span style="color:var(--ink-3)">이 리뷰에는 문서 원문이 저장돼 있지 않아. 다시 리뷰를 누르면 원문과 문장별 코멘트가 생겨.</span>') + '</div></div>' +
-      '<div class="cmp-side"><h3>문장별 코멘트 <span style="font-weight:500;letter-spacing:0">' + anns.length + '개</span></h3>' +
-      (cards || '<div class="cmp-hint">아직 문장별 코멘트가 없어. 왼쪽에서 문장을 드래그로 선택하고 위의 "선택한 문장에 코멘트"를 누르면 직접 추가할 수 있어. 또는 상세 화면에서 다시 리뷰.</div>') +
-      '<div class="cmp-hint">쓰는 법: 구글 문서에서 같은 문장을 선택하고 댓글 추가 → 여기서 복사한 코멘트를 붙여 넣기.</div></div></div>';
-    if (state.editAnn != null) { var ta = $('annEdit'); if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); } }
+    $('cmpMargin').innerHTML = cards + (cards ? '' : '<div class="cmp-hint" data-hint>아직 문장별 코멘트가 없어. 왼쪽 문서에서 문장을 드래그로 선택하고 위의 "선택한 문장에 코멘트"를 누르면 추가할 수 있어.</div>') +
+      '<div class="cmp-hint" data-hint>구글 문서에서 같은 문장을 선택하고 댓글 추가 → 여기서 복사한 코멘트를 붙여 넣기.</div>';
+    applyHighlightState(); layoutCards();
+    if (state.editAnn != null) { var ta = $('annEdit'); if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); ta.addEventListener('input', layoutCards); } }
+  }
+  function loadPages(r) {
+    var token = state.cmpToken = (state.cmpToken || 0) + 1;
+    var L = pdfLib();
+    var fail = function (why) { if (state.cmpToken !== token) return; state.cmpMode = 'text'; renderTextPages(r, why); };
+    if (!L) { fail('PDF 라이브러리를 불러오지 못함'); return; }
+    fetchPdf(r).then(function (bytes) {
+      if (state.cmpToken !== token) return;
+      return L.getDocument({ data: bytes.slice(0), isEvalSupported: false }).promise.then(function (doc) {
+        if (state.cmpToken !== token) return;
+        return renderPdfPages(doc, token);
+      }).then(function () { if (state.cmpToken !== token) return; state.cmpMode = 'pdf'; applyHighlights(); renderCompare(); });
+    }).catch(function (e) { fail((e && e.message) || String(e)); });
+  }
+  function renderTextPages(r, why) {
+    var pages = $('cmpPages'); if (!pages) return;
+    var text = r.docText || '';
+    pages.innerHTML = '<div class="cmp-paper" id="cmpPaper"><h4>텍스트만 표시 · ' + esc(why || '') + '</h4>' + (text ? docHtml(text, anchorAll(text, Array.isArray(r.annotations) ? r.annotations : [])) : '<span style="color:var(--ink-3)">이 리뷰에는 문서 원문이 저장돼 있지 않아. 다시 리뷰를 누르면 원문과 문장별 코멘트가 생겨.</span>') + '</div>';
+    applyHighlights(); renderCompare();
+  }
+  function renderPdfPages(doc, token) {
+    var pages = $('cmpPages'); if (!pages) return Promise.resolve();
+    pages.innerHTML = ''; state.cmpPageText = [];
+    var pw = pageWidth(); var chain = Promise.resolve();
+    for (var n = 1; n <= doc.numPages; n++) (function (n) {
+      chain = chain.then(function () { if (state.cmpToken !== token) return; return doc.getPage(n).then(function (page) { return drawPage(page, n, pw, pages); }); });
+    })(n);
+    return chain;
+  }
+  function drawPage(page, n, pw, host) {
+    var base = page.getViewport({ scale: 1 }); var scale = pw / base.width; var vp = page.getViewport({ scale: scale });
+    var dpr = Math.min(3, window.devicePixelRatio || 1);
+    var el = document.createElement('div'); el.className = 'cmp-page'; el.style.width = vp.width + 'px'; el.style.height = vp.height + 'px'; el.setAttribute('data-page', n);
+    var cv = document.createElement('canvas'); cv.width = Math.floor(vp.width * dpr); cv.height = Math.floor(vp.height * dpr); cv.style.width = vp.width + 'px'; cv.style.height = vp.height + 'px';
+    var hl = document.createElement('div'); hl.className = 'hl'; var tl = document.createElement('div'); tl.className = 'tl';
+    el.appendChild(cv); el.appendChild(hl); el.appendChild(tl); host.appendChild(el);
+    var rvp = page.getViewport({ scale: scale * dpr });
+    return page.render({ canvasContext: cv.getContext('2d'), viewport: rvp }).promise.then(function () { return page.getTextContent(); }).then(function (tc) { buildTextLayer(tc, vp, tl, el, n); });
+  }
+  function buildTextLayer(tc, vp, tl, el, n) {
+    var items = (tc && tc.items) || []; var styles = (tc && tc.styles) || {}; var spans = []; var text = '';
+    var frag = document.createDocumentFragment();
+    items.forEach(function (it) {
+      if (typeof it.str !== 'string') return;
+      if (it.str) {
+        var m = mul(vp.transform, it.transform); var fh = Math.hypot(m[2], m[3]) || 1; var angle = Math.atan2(m[1], m[0]);
+        var s = document.createElement('span'); s.textContent = it.str;
+        var fam = styles[it.fontName] && styles[it.fontName].fontFamily; s.style.fontFamily = fam || 'sans-serif';
+        s.style.left = m[4].toFixed(2) + 'px'; s.style.top = (m[5] - fh * 0.88).toFixed(2) + 'px'; s.style.fontSize = fh.toFixed(2) + 'px';
+        s.setAttribute('data-w', (it.width * vp.scale).toFixed(2)); s.setAttribute('data-a', angle.toFixed(4));
+        frag.appendChild(s); spans.push({ el: s, start: text.length, end: text.length + it.str.length }); text += it.str;
+      }
+      if (it.hasEOL) { frag.appendChild(document.createElement('br')); text += '\n'; }
+    });
+    tl.appendChild(frag);
+    spans.forEach(function (sp) {
+      var w = parseFloat(sp.el.getAttribute('data-w')); var a = parseFloat(sp.el.getAttribute('data-a')) || 0; var mw = sp.el.getBoundingClientRect().width;
+      var t = a ? 'rotate(' + a + 'rad)' : '';
+      if (w > 0 && mw > 0 && Math.abs(w - mw) / w > 0.005) t += ' scaleX(' + (w / mw).toFixed(4) + ')';
+      if (t) sp.el.style.transform = t.trim();
+    });
+    state.cmpPageText[n - 1] = { text: text, spans: spans, el: el, hl: el.querySelector('.hl') };
+  }
+  function findQuoteRects(quote) {
+    var pages = state.cmpPageText || []; if (!pages.length) return null;
+    var q = String(quote || '').replace(/\s+/g, ''); if (q.length < 2) return null;
+    if (!state.cmpNorm || state.cmpNorm.for !== pages) {
+      var g = ''; var gm = [];
+      pages.forEach(function (p, pi) { for (var i = 0; i < p.text.length; i++) { var ch = p.text[i]; if (/\s/.test(ch)) continue; g += ch; gm.push([pi, i]); } });
+      state.cmpNorm = { for: pages, g: g, gm: gm };
+    }
+    var g = state.cmpNorm.g; var gm = state.cmpNorm.gm; var s = g.indexOf(q); if (s < 0) return null;
+    var e = s + q.length - 1; var a = gm[s]; var b = gm[e];
+    var segs = a[0] === b[0] ? [[a[0], a[1], b[1] + 1]] : [[a[0], a[1], pages[a[0]].text.length], [b[0], 0, b[1] + 1]];
+    var rects = []; var first = null;
+    segs.forEach(function (sg) {
+      var p = pages[sg[0]]; var sA = null, sB = null;
+      p.spans.forEach(function (sp) { if (!sA && sg[1] >= sp.start && sg[1] < sp.end) sA = sp; if (sg[2] - 1 >= sp.start && sg[2] - 1 < sp.end) sB = sp; });
+      if (!sA || !sB) return;
+      var range = document.createRange();
+      try { range.setStart(sA.el.firstChild, sg[1] - sA.start); range.setEnd(sB.el.firstChild, sg[2] - sB.start); } catch (e) { return; }
+      var pr = p.el.getBoundingClientRect(); var rs = range.getClientRects();
+      for (var i = 0; i < rs.length; i++) { var rc = rs[i]; if (rc.width < 1) continue; var o = { page: sg[0], el: p.el, l: rc.left - pr.left, t: rc.top - pr.top, w: rc.width, h: rc.height }; rects.push(o); if (!first) first = o; }
+    });
+    if (!rects.length) return null;
+    return { rects: rects, y: first.el.offsetTop + first.t, page: first.page };
+  }
+  function applyHighlights() {
+    var r = findReview(state.compareId); if (!r) return;
+    var anns = Array.isArray(r.annotations) ? r.annotations : []; state.cmpAnchors = [];
+    if (state.cmpMode === 'pdf') {
+      (state.cmpPageText || []).forEach(function (p) { if (p.hl) p.hl.innerHTML = ''; });
+      anns.forEach(function (a, i) {
+        var f = findQuoteRects(a.quote); if (!f) { state.cmpAnchors[i] = null; return; }
+        f.rects.forEach(function (rc, k) {
+          var d = document.createElement('div'); d.setAttribute('data-ann', i); d.style.left = rc.l + 'px'; d.style.top = rc.t + 'px'; d.style.width = rc.w + 'px'; d.style.height = rc.h + 'px'; rc.el.querySelector('.hl').appendChild(d);
+          if (k === 0) { var b = document.createElement('i'); b.textContent = i + 1; b.style.left = Math.max(0, rc.l - 20) + 'px'; b.style.top = Math.max(0, rc.t + 1) + 'px'; rc.el.querySelector('.hl').appendChild(b); }
+        });
+        state.cmpAnchors[i] = f;
+      });
+    } else if (state.cmpMode === 'text') {
+      var paper = $('cmpPaper'); if (!paper) return;
+      var text = r.docText || ''; paper.querySelector('h4').insertAdjacentHTML('afterend', ''); 
+      var h4 = paper.querySelector('h4'); var head = h4 ? h4.outerHTML : '';
+      paper.innerHTML = head + (text ? docHtml(text, anchorAll(text, anns)) : '');
+      anns.forEach(function (a, i) { var mk = paper.querySelector('mark[data-ann="' + i + '"]'); state.cmpAnchors[i] = mk ? { y: paper.offsetTop + mk.offsetTop, mark: mk } : null; });
+    }
+  }
+  function applyHighlightState() {
+    var host = $('cmpPages'); if (!host) return;
+    [].forEach.call(host.querySelectorAll('[data-ann]'), function (d) { d.classList.toggle('on', parseInt(d.getAttribute('data-ann'), 10) === state.activeAnn); });
+  }
+  function layoutCards() {
+    var margin = $('cmpMargin'); if (!margin) return;
+    var narrow = isNarrow() || state.cmpMode === 'loading'; margin.classList.toggle('static', narrow);
+    var cards = [].slice.call(margin.querySelectorAll('.ann-card')); var hints = [].slice.call(margin.querySelectorAll('[data-hint]'));
+    var lostLabel = margin.querySelector('.cmp-lost'); if (lostLabel) lostLabel.remove();
+    if (narrow) { margin.style.height = ''; return; }
+    var gap = 10; var items = cards.map(function (c) { var i = parseInt(c.getAttribute('data-card'), 10); var a = state.cmpAnchors[i]; return { el: c, i: i, y: a ? a.y : null, h: c.offsetHeight }; });
+    var anchored = items.filter(function (x) { return x.y != null; }).sort(function (a, b) { return a.y - b.y; });
+    var lost = items.filter(function (x) { return x.y == null; });
+    var k = -1; anchored.forEach(function (x, j) { if (x.i === state.activeAnn) k = j; });
+    var tops = [];
+    var greedy = function () { var prev = -Infinity; anchored.forEach(function (x, j) { tops[j] = Math.max(x.y, prev); prev = tops[j] + x.h + gap; }); };
+    if (k >= 0) {
+      tops[k] = anchored[k].y; var prev = tops[k] + anchored[k].h + gap;
+      for (var j = k + 1; j < anchored.length; j++) { tops[j] = Math.max(anchored[j].y, prev); prev = tops[j] + anchored[j].h + gap; }
+      var next = tops[k];
+      for (var q = k - 1; q >= 0; q--) { tops[q] = Math.min(anchored[q].y, next - gap - anchored[q].h); next = tops[q]; }
+      if (anchored.length && tops[0] < 0) greedy();
+    } else greedy();
+    var bottom = 0; anchored.forEach(function (x, j) { x.el.style.top = tops[j] + 'px'; bottom = Math.max(bottom, tops[j] + x.h); });
+    var pagesEl = $('cmpPages'); var pagesH = pagesEl ? pagesEl.offsetHeight : 0;
+    var y = Math.max(bottom + 28, lost.length ? Math.min(pagesH, bottom + 28) : 0);
+    if (lost.length) { var lab = document.createElement('div'); lab.className = 'cmp-lost'; lab.textContent = '본문에서 위치 못 찾음'; margin.appendChild(lab); lab.style.top = y + 'px'; y += lab.offsetHeight + 6; lost.forEach(function (x) { x.el.style.top = y + 'px'; y += x.h + gap; }); bottom = y; }
+    var hy = Math.max(bottom + 16, 0); hints.forEach(function (h) { h.style.top = hy + 'px'; hy += h.offsetHeight + 8; });
+    margin.style.height = Math.max(hy, pagesH) + 'px';
+  }
+  function scrollToAnchor(i) {
+    var a = state.cmpAnchors[i]; var sc = $('cmpScroll'); if (!a || !sc) return;
+    var target = a.y - Math.max(80, sc.clientHeight * 0.3); sc.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+  }
+  function hitAnn(ev) {
+    var anchors = state.cmpAnchors || []; var best = null;
+    anchors.forEach(function (a, i) { if (!a || !a.rects) return; a.rects.forEach(function (rc) { var pr = rc.el.getBoundingClientRect(); var x = ev.clientX - pr.left, y = ev.clientY - pr.top; if (x >= rc.l && x <= rc.l + rc.w && y >= rc.t && y <= rc.t + rc.h) best = i; }); });
+    return best;
   }
   function saveAnnotations(r, anns) {
-    r.annotations = anns; state.reviews[r.fileId] = r; renderCompare();
+    r.annotations = anns; state.reviews[r.fileId] = r; applyHighlights(); renderCompare();
     if (state.db) Promise.resolve(state.db.doc('reviews/' + r.fileId).update({ annotations: anns })).catch(function (e) { toast('저장 실패: ' + ((e && e.message) || e)); });
   }
   function bindCompare() {
@@ -997,23 +1186,28 @@
       var anns = Array.isArray(r.annotations) ? r.annotations.slice() : [];
       var t = ev.target;
       if (t.closest('#cmpClose')) { closeCompare(); return; }
-      if (t.closest('#cmpCopyAll')) { copyText(anns.map(function (a, i) { return (i + 1) + '. ' + a.note + '\n   ("' + (a.quote.length > 80 ? a.quote.slice(0, 80) + '…' : a.quote) + '")'; }).join('\n\n')); return; }
+      if (t.closest('#cmpCopyAll')) { copyText(anns.map(function (a, i) { return (i + 1) + '. ' + a.note + '\n   (' + (a.quote.length > 80 ? a.quote.slice(0, 80) + '…' : a.quote) + ')'; }).join('\n\n')); return; }
       if (t.closest('#cmpAddSel')) {
         var sel = window.getSelection ? String(window.getSelection()).replace(/\s+/g, ' ').trim() : '';
         if (!sel || sel.length < 4) { toast('왼쪽 문서에서 문장을 먼저 드래그로 선택해.'); return; }
-        anns.push({ quote: sel.slice(0, 300), note: '' }); r.annotations = anns; state.reviews[r.fileId] = r; state.editAnn = anns.length - 1; state.activeAnn = state.editAnn; renderCompare(); return;
+        anns.push({ quote: sel.slice(0, 300), note: '' }); r.annotations = anns; state.reviews[r.fileId] = r; state.editAnn = anns.length - 1; state.activeAnn = state.editAnn; applyHighlights(); renderCompare(); return;
       }
-      var m = t.closest('mark[data-ann]'); if (m) { state.activeAnn = parseInt(m.getAttribute('data-ann'), 10); renderCompare(); var c = document.querySelector('[data-card="' + state.activeAnn + '"]'); if (c) c.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
-      var f = t.closest('[data-focus]'); if (f) { state.activeAnn = parseInt(f.getAttribute('data-focus'), 10); renderCompare(); var mk = document.querySelector('mark[data-ann="' + state.activeAnn + '"]'); if (mk) mk.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+      var m = t.closest('mark[data-ann]'); if (m) { state.activeAnn = parseInt(m.getAttribute('data-ann'), 10); renderCompare(); return; }
+      if (t.closest('.cmp-page')) { var sel2 = window.getSelection ? String(window.getSelection()).trim() : ''; if (sel2) return; var hi = hitAnn(ev); if (hi != null) { state.activeAnn = hi; renderCompare(); } return; }
+      var f = t.closest('[data-focus]'); if (f) { state.activeAnn = parseInt(f.getAttribute('data-focus'), 10); renderCompare(); scrollToAnchor(state.activeAnn); return; }
       var b;
       if ((b = t.closest('[data-ann-copy]'))) { copyText(anns[parseInt(b.getAttribute('data-ann-copy'), 10)].note); return; }
       if ((b = t.closest('[data-ann-edit]'))) { state.editAnn = parseInt(b.getAttribute('data-ann-edit'), 10); state.activeAnn = state.editAnn; renderCompare(); return; }
-      if ((b = t.closest('[data-ann-cancel]'))) { var ci = parseInt(b.getAttribute('data-ann-cancel'), 10); if (!anns[ci].note) { anns.splice(ci, 1); r.annotations = anns; state.reviews[r.fileId] = r; } state.editAnn = null; renderCompare(); return; }
+      if ((b = t.closest('[data-ann-cancel]'))) { var ci = parseInt(b.getAttribute('data-ann-cancel'), 10); if (!anns[ci].note) { anns.splice(ci, 1); r.annotations = anns; state.reviews[r.fileId] = r; applyHighlights(); } state.editAnn = null; renderCompare(); return; }
       if ((b = t.closest('[data-ann-save]'))) { var si = parseInt(b.getAttribute('data-ann-save'), 10); var ta = $('annEdit'); var v = ta ? ta.value.trim() : ''; if (!v) { toast('코멘트가 비어 있어.'); return; } anns[si] = Object.assign({}, anns[si], { note: v, edited: true }); state.editAnn = null; saveAnnotations(r, anns); toast('저장했어.'); return; }
       if ((b = t.closest('[data-ann-del]'))) { var di = parseInt(b.getAttribute('data-ann-del'), 10); anns.splice(di, 1); state.editAnn = null; state.activeAnn = null; saveAnnotations(r, anns); return; }
     });
     $('cmp').addEventListener('keydown', function (ev) { if ((ev.metaKey || ev.ctrlKey) && ev.key === 'Enter' && state.editAnn != null) { var b = document.querySelector('[data-ann-save]'); if (b) b.click(); } });
     document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !$('cmp').hidden && state.editAnn == null) closeCompare(); });
+    var rt; window.addEventListener('resize', function () {
+      if ($('cmp').hidden || !state.compareId) return; clearTimeout(rt);
+      rt = setTimeout(function () { var r = findReview(state.compareId); if (!r) return; if (state.cmpMode === 'pdf') { state.cmpMode = 'loading'; state.cmpNorm = null; loadPages(r); } else { applyHighlights(); renderCompare(); } }, 250);
+    });
   }
 })();
 </script>

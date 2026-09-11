@@ -209,6 +209,37 @@
   .d-empty { margin: auto; color: var(--ink-3); text-align: center; font-size: 14px; max-width: 32ch; line-height: 1.6; }
   .back { display: none; }
 
+  /* compare overlay */
+  .cmp { position: fixed; inset: 0; background: var(--ground); z-index: 25; display: flex; flex-direction: column; }
+  .cmp-top { display: flex; align-items: center; gap: 12px; padding: 10px 20px; background: var(--surface); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .cmp-top .t { font-size: 15px; font-weight: 800; }
+  .cmp-top .t span { font-weight: 500; color: var(--ink-2); }
+  .cmp-top .grow { flex-grow: 1; }
+  .cmp-body { display: flex; flex-grow: 1; min-height: 0; }
+  .cmp-doc { flex: 1 1 55%; min-width: 0; overflow-y: auto; padding: 32px 48px 80px; background: var(--surface); border-right: 1px solid var(--line); }
+  .cmp-doc .paper { max-width: 72ch; margin: 0 auto; font-family: "Noto Sans KR", Arial, sans-serif; font-size: 14.5px; line-height: 1.8; white-space: pre-wrap; word-break: break-word; color: var(--ink); }
+  .cmp-doc .paper h4 { margin: 0 0 18px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-3); }
+  mark.ann { background: var(--warn-soft); color: inherit; padding: 1px 0; border-bottom: 2px solid var(--gold); cursor: pointer; }
+  mark.ann.on { background: #f7d9dc; border-bottom-color: var(--crimson); }
+  mark.ann sup { font-size: 10px; font-weight: 800; color: var(--crimson); margin-left: 2px; }
+  .cmp-side { flex: 0 0 420px; overflow-y: auto; padding: 20px 20px 80px; display: flex; flex-direction: column; gap: 10px; }
+  .cmp-side h3 { margin: 0 0 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--ink-3); display: flex; align-items: baseline; gap: 8px; }
+  .ann-card { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--gold); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .ann-card.on { border-left-color: var(--crimson); box-shadow: 0 0 0 1px var(--crimson); }
+  .ann-card.lost { border-left-color: var(--line-strong); }
+  .ann-card .q { font-size: 12px; color: var(--ink-3); line-height: 1.4; cursor: pointer; }
+  .ann-card .q b { color: var(--crimson); font-weight: 800; margin-right: 6px; }
+  .ann-card .n { font-size: 13.5px; line-height: 1.55; white-space: pre-wrap; }
+  .ann-card textarea, .box textarea { font: inherit; font-size: 13.5px; line-height: 1.55; width: 100%; min-height: 72px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--ground); color: var(--ink); resize: vertical; }
+  .ann-card .btns, .box .btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ann-card .btns .grow { flex-grow: 1; }
+  .btn.tiny { height: 26px; padding: 0 9px; font-size: 12px; }
+  .btn.tiny.danger { color: var(--crit); }
+  .cmp-side .empty { padding: 20px; }
+  .cmp-hint { font-size: 12px; color: var(--ink-3); line-height: 1.5; padding: 8px 12px; background: var(--surface-2); }
+  .box .n { white-space: pre-wrap; }
+  @media (max-width: 900px) { .cmp-body { flex-direction: column; } .cmp-doc { flex: 1 1 50%; border-right: 0; border-bottom: 1px solid var(--line); padding: 20px 20px 40px; } .cmp-side { flex: 1 1 50%; } }
+
   /* drawer */
   .drawer { position: fixed; inset: 0; background: rgba(10, 8, 8, 0.45); z-index: 20; }
   .panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(520px, 100%); background: var(--surface); overflow-y: auto; padding: 22px 24px 32px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 0 40px rgba(0,0,0,0.25); }
@@ -310,6 +341,7 @@
     <div class="foot"><button class="btn" id="panelClose" type="button">닫기</button><button class="btn primary" id="panelSave" type="button" style="height:36px">저장</button></div>
   </div>
 </div>
+<div class="cmp" id="cmp" hidden></div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -412,7 +444,7 @@
 
   /* ---------- boot ---------- */
   try { var saved = JSON.parse(localStorage.getItem('reviewDesk.ui') || '{}'); if (saved.view) state.view = saved.view; if (saved.subject) state.subject = saved.subject; } catch (e) { /* ignore */ }
-  render(); bindUI();
+  render(); bindUI(); bindCompare();
   Promise.all([use('db'), use('mcp'), use('sample')]).then(function (caps) {
     state.db = caps[0]; state.mcp = caps[1]; state.sample = caps[2]; state.capsReady = true;
     if (!state.db) { notice('이 페이지는 claude.ai 안에서 열어야 리뷰 데이터를 불러올 수 있습니다.', true); render(); return; }
@@ -495,7 +527,7 @@
     var canRun = state.capsReady && state.db && state.mcp && state.sample && !state.running && c.folders.length;
     $('runBtn').disabled = !canRun;
     $('runBtn').innerHTML = state.running ? '<span class="spin"></span><span>확인 중…</span>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span>지금 확인하기' + (f ? ' · ' + esc(label(f)) : '') + '</span>';
-    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v8';
+    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v9';
 
     // list
     var titleMap = { unseen: '확인 안 함', missing: '미제출자', seen: '확인함' };
@@ -556,6 +588,7 @@
 
     // detail
     $('app').setAttribute('data-pane', state.pane);
+    if (state.compareId && !$('cmp').hidden && state.editAnn == null) { try { renderCompare(); } catch (e) { /* ignore */ } }
     try { renderDetail(); } catch (e) {
       $('detail').innerHTML = '<div class="d-empty" style="color:var(--crit)">상세 창을 그리는 중 오류가 났습니다.<br><span style="font-size:12px">' + esc((e && e.message) || e) + '</span></div>';
     }
@@ -591,7 +624,7 @@
       '<div class="d-head"><div class="left"><div class="d-crumb">' + esc(fo.name) + (r.subfolder ? ' · ' + esc(r.subfolder) : '') + (ra ? ' · 과제 ' + esc(ra.name) + (ra.guessed ? ' (추정)' : '') : '') + '</div>' +
       '<div class="d-title">' + esc(r.student || '(이름 없음)') + ' <span>' + esc(r.title) + '</span></div>' +
       '<div class="d-meta">제출 ' + fmt(r.modifiedTime) + ' · 리뷰 ' + fmt(r.reviewedAt) + (r.source === 'scheduled' ? ' 자동' : ' 수동') + ' · ' + (r.wordCount || 0) + ' 단어' + (r.revision > 1 ? ' · ' + r.revision + '차 수정' : '') + '</div>' +
-      '<div class="d-links"><a class="btn quiet" href="' + esc(r.viewUrl || '#') + '" target="_blank" rel="noopener">' + ICON_DOC + '구글 문서 열기</a>' + (studentFolderUrl ? '<a class="btn quiet" href="' + esc(studentFolderUrl) + '" target="_blank" rel="noopener">' + ICON_FOLDER + '학생 폴더 열기</a>' : '') + '</div></div>' +
+      '<div class="d-links"><button class="btn quiet primary" type="button" data-act="compare" style="height:32px">문서 보며 코멘트 달기' + (Array.isArray(r.annotations) && r.annotations.length ? ' · ' + r.annotations.length : '') + '</button><a class="btn quiet" href="' + esc(r.viewUrl || '#') + '" target="_blank" rel="noopener">' + ICON_DOC + '구글 문서 열기</a>' + (studentFolderUrl ? '<a class="btn quiet" href="' + esc(studentFolderUrl) + '" target="_blank" rel="noopener">' + ICON_FOLDER + '학생 폴더 열기</a>' : '') + '</div></div>' +
       '<div class="right"><div class="bigsq ' + sc + '">' + (sc === 'none' ? '빈<br>문서' : '<b>' + r.score + '</b><small>/ 10</small>') + '</div>' +
       '<div class="d-actions">' + (r.seen ? '<div class="seen-note">' + ICON_CHECK + '<span>확인함</span></div>' : '') +
       '<div class="btns">' + (r.seen ? '<button class="btn quiet" type="button" data-act="unseen">확인 안 함으로 되돌리기</button>' : '<button class="btn quiet" type="button" data-act="seen">확인함</button>') + '<button class="btn quiet" type="button" data-act="rereview"' + (state.mcp && state.sample ? '' : ' disabled') + '>다시 리뷰</button></div></div></div></div>' +
@@ -599,7 +632,10 @@
       ((r.flags && r.flags.length) ? '<div>' + r.flags.map(function (x) { return '<span class="tag flag" style="margin-left:0;margin-right:6px;font-size:12px;padding:2px 8px">' + esc(x) + '</span>'; }).join('') + '</div>' : '') +
       '<div class="cols">' + lists('잘한 점', 'good', r.strengths) + lists('고칠 점', 'crit', r.improvements) + '</div>' +
       lists('다음 단계', '', r.nextSteps) +
-      (r.comment ? '<div class="sec"><h3>학생에게 보낼 코멘트</h3><div class="box"><div id="commentText">' + esc(r.comment) + '</div><div class="btns"><button class="btn quiet" type="button" data-copy="commentText">복사</button></div></div></div>' : '');
+      '<div class="sec"><h3>학생에게 보낼 코멘트</h3><div class="box">' +
+        (state.editComment ? '<textarea id="commentEdit">' + esc(r.comment || '') + '</textarea><div class="btns"><button class="btn quiet primary" type="button" data-act="saveComment" style="height:32px">저장</button><button class="btn quiet" type="button" data-act="cancelComment">취소</button></div>'
+          : '<div class="n" id="commentText">' + esc(r.comment || '(코멘트 없음)') + '</div><div class="btns"><button class="btn quiet" type="button" data-copy="commentText">복사</button><button class="btn quiet" type="button" data-act="editComment">수정</button></div>') +
+      '</div></div>';
   }
   function studentFolderFromRoster(r) {
     var ro = state.roster[r.folderId]; if (!ro || !Array.isArray(ro.students)) return '';
@@ -620,7 +656,14 @@
     });
     $('detail').addEventListener('click', function (ev) {
       var act = ev.target.closest('[data-act]');
-      if (act) { var a = act.getAttribute('data-act'); if (a === 'seen') setSeen(state.selected, true); if (a === 'unseen') setSeen(state.selected, false); if (a === 'rereview') runReview('manual', [state.selected]); return; }
+      if (act) {
+        var a = act.getAttribute('data-act');
+        if (a === 'seen') setSeen(state.selected, true); if (a === 'unseen') setSeen(state.selected, false); if (a === 'rereview') runReview('manual', [state.selected]);
+        if (a === 'compare') openCompare(state.selected);
+        if (a === 'editComment') { state.editComment = true; render(); var ta = $('commentEdit'); if (ta) ta.focus(); }
+        if (a === 'cancelComment') { state.editComment = false; render(); }
+        if (a === 'saveComment') { var r0 = findReview(state.selected); var ta0 = $('commentEdit'); if (r0 && ta0) { var v0 = ta0.value.trim(); state.reviews[r0.fileId] = Object.assign({}, r0, { comment: v0, commentEdited: true }); state.editComment = false; render(); if (state.db) Promise.resolve(state.db.doc('reviews/' + r0.fileId).update({ comment: v0, commentEdited: true })).catch(function (e) { toast('저장 실패: ' + ((e && e.message) || e)); }); toast('저장했어.'); } }
+        return; }
       var cp = ev.target.closest('[data-copy]'); if (cp) { copyText($(cp.getAttribute('data-copy')).textContent); return; }
       var op = ev.target.closest('[data-open]'); if (op) { state.view = 'seen'; state.keep = {}; openReview(op.getAttribute('data-open')); return; }
       if (ev.target.closest('#backBtn')) { state.pane = 'list'; render(); }
@@ -645,7 +688,7 @@
   }
   function openReview(id) {
     var r = findReview(id); if (!r) { toast('리뷰를 찾지 못했습니다: ' + id); return; }
-    id = r.fileId || id;
+    id = r.fileId || id; state.editComment = false;
     state.selected = id; state.pane = 'detail';
     if (!r.seen && state.view === 'unseen') { state.keep[id] = true; setSeen(id, true); }
     render();
@@ -787,7 +830,9 @@
       '반드시 아래 형식의 JSON 객체 하나만 출력하세요. 다른 텍스트나 코드펜스는 넣지 마세요.\n' +
       '{"assignmentId": "위 목록의 id 또는 null", "score": 0에서 10 사이 정수, "completeness": "complete" | "partial" | "empty", "summary": "교사가 한눈에 볼 한 문장 (60자 이내)", ' +
       '"strengths": ["구체적인 잘한 점", ...], "improvements": ["구체적인 고칠 점과 고치는 방법", ...], "nextSteps": ["학생에게 줄 다음 과제·행동 1~3개"], ' +
-      '"flags": ["미완성" | "과제와 무관" | "AI 작성 의심" | "표절 의심" 등 해당하는 것만, 없으면 빈 배열], "comment": "학생에게 그대로 전달해도 되는 3~5문장 코멘트 (한국어)"}';
+      '"flags": ["미완성" | "과제와 무관" | "AI 작성 의심" | "표절 의심" 등 해당하는 것만, 없으면 빈 배열], "comment": "학생에게 그대로 전달해도 되는 3~5문장 코멘트 (한국어)", ' +
+      '"annotations": [{"quote": "문서 본문에서 그대로 복사한 구절 (10~200자, 한 글자도 바꾸지 말고 줄바꿈 없이)", "note": "그 부분에 달 코멘트 (comment와 같은 말투, 1~2문장)"}, ...]}\n' +
+      'annotations는 고칠 부분 위주로 최대 8개. quote는 반드시 본문에 있는 문자열 그대로여야 하고, 없는 문장을 만들지 마세요.';
   }
   function runReview(source, onlyIds, folderIds) {
     if (state.running) return;
@@ -872,11 +917,103 @@
         return setAssignment(Object.assign(base, {
           status: 'reviewed', score: isNaN(sc) ? null : Math.max(0, Math.min(10, sc)),
           completeness: ['complete', 'partial', 'empty'].indexOf(j.completeness) >= 0 ? j.completeness : 'complete',
-          summary: String(j.summary || '').slice(0, 200), strengths: arr(j.strengths), improvements: arr(j.improvements), nextSteps: arr(j.nextSteps), flags: arr(j.flags), comment: String(j.comment || '')
+          summary: String(j.summary || '').slice(0, 200), strengths: arr(j.strengths), improvements: arr(j.improvements), nextSteps: arr(j.nextSteps), flags: arr(j.flags), comment: String(j.comment || ''),
+          docText: text.slice(0, 30000), annotations: annList(j.annotations, text)
         }), typeof j.assignmentId === 'string' ? j.assignmentId : null);
       });
     }).then(function (review) { return state.db.doc('reviews/' + doc.id).set(review); });
   }
   function arr(x) { return Array.isArray(x) ? x.map(function (s) { return String(s); }).filter(Boolean).slice(0, 12) : []; }
+  function annList(x, text) {
+    if (!Array.isArray(x)) return [];
+    return x.map(function (a) { return a && typeof a === 'object' ? { quote: String(a.quote || '').replace(/\s+/g, ' ').trim().slice(0, 300), note: String(a.note || '').trim() } : null; })
+      .filter(function (a) { return a && a.quote && a.note; }).slice(0, 10);
+  }
+  /* ---------- compare view ---------- */
+  function anchorAll(text, anns) {
+    var norm = String(text || ''); var out = []; var cursor = 0;
+    var collapsed = norm.replace(/\s+/g, ' '); var map = []; // collapsed index -> original index
+    (function () { var j = 0; for (var i = 0; i < norm.length; i++) { var ch = norm[i]; if (/\s/.test(ch)) { if (j > 0 && collapsed[j - 1] === ' ') continue; map[j] = i; j++; } else { map[j] = i; j++; } } map[j] = norm.length; })();
+    (anns || []).forEach(function (a, idx) {
+      var q = String(a.quote || '').replace(/\s+/g, ' ').trim(); var start = -1;
+      if (q) { start = collapsed.indexOf(q, 0); }
+      if (start >= 0) { var s0 = map[start]; var e0 = map[start + q.length] != null ? map[start + q.length] : norm.length; out.push({ idx: idx, start: s0, end: e0, ann: a }); }
+      else out.push({ idx: idx, start: -1, end: -1, ann: a });
+    });
+    return out;
+  }
+  function docHtml(text, anchored) {
+    var parts = anchored.filter(function (x) { return x.start >= 0; }).sort(function (a, b) { return a.start - b.start; });
+    var html = ''; var pos = 0;
+    parts.forEach(function (x) {
+      if (x.start < pos) return; // overlapping: skip
+      html += esc(text.slice(pos, x.start));
+      html += '<mark class="ann' + (state.activeAnn === x.idx ? ' on' : '') + '" data-ann="' + x.idx + '">' + esc(text.slice(x.start, x.end)) + '<sup>' + (x.idx + 1) + '</sup></mark>';
+      pos = x.end;
+    });
+    html += esc(text.slice(pos));
+    return html;
+  }
+  function openCompare(id) {
+    var r = findReview(id); if (!r) return;
+    state.compareId = r.fileId; state.activeAnn = null; state.editAnn = null; state.cmpSel = '';
+    renderCompare(); $('cmp').hidden = false; document.body.style.overflow = 'hidden';
+  }
+  function closeCompare() { $('cmp').hidden = true; state.compareId = null; state.editAnn = null; document.body.style.overflow = ''; }
+  function renderCompare() {
+    var r = findReview(state.compareId); var host = $('cmp'); if (!r) { host.innerHTML = ''; return; }
+    var anns = Array.isArray(r.annotations) ? r.annotations : []; var text = r.docText || '';
+    var anchored = anchorAll(text, anns);
+    var cards = anchored.map(function (x) {
+      var a = x.ann; var i = x.idx; var editing = state.editAnn === i;
+      return '<div class="ann-card' + (state.activeAnn === i ? ' on' : '') + (x.start < 0 ? ' lost' : '') + '" data-card="' + i + '">' +
+        '<div class="q" data-focus="' + i + '"><b>' + (i + 1) + '</b>' + esc(a.quote.length > 90 ? a.quote.slice(0, 90) + '…' : a.quote) + (x.start < 0 ? ' <span style="color:var(--crit)">(본문에서 위치 못 찾음)</span>' : '') + '</div>' +
+        (editing ? '<textarea id="annEdit" data-i="' + i + '">' + esc(a.note) + '</textarea>' : '<div class="n">' + esc(a.note) + '</div>') +
+        '<div class="btns">' + (editing
+          ? '<button class="btn tiny primary" type="button" data-ann-save="' + i + '" style="height:26px">저장</button><button class="btn tiny" type="button" data-ann-cancel="' + i + '">취소</button>'
+          : '<button class="btn tiny" type="button" data-ann-copy="' + i + '">복사</button><button class="btn tiny" type="button" data-ann-edit="' + i + '">수정</button>') +
+        '<span class="grow"></span><button class="btn tiny danger" type="button" data-ann-del="' + i + '">삭제</button></div></div>';
+    }).join('');
+    host.innerHTML =
+      '<div class="cmp-top"><div class="t">' + esc(r.student || '') + ' <span>' + esc(r.title) + '</span></div>' +
+      '<a class="btn quiet" href="' + esc(r.viewUrl || '#') + '" target="_blank" rel="noopener">' + ICON_DOC + '구글 문서 열기</a>' +
+      '<button class="btn quiet" type="button" id="cmpAddSel">선택한 문장에 코멘트</button>' +
+      '<span class="grow"></span>' +
+      '<button class="btn quiet" type="button" id="cmpCopyAll">코멘트 전체 복사</button>' +
+      '<button class="btn quiet" type="button" id="cmpClose">닫기</button></div>' +
+      '<div class="cmp-body"><div class="cmp-doc" id="cmpDoc"><div class="paper"><h4>학생 문서 원문 · 이미지와 서식은 빠짐</h4>' + (text ? docHtml(text, anchored) : '<span style="color:var(--ink-3)">이 리뷰에는 문서 원문이 저장돼 있지 않아. 다시 리뷰를 누르면 원문과 문장별 코멘트가 생겨.</span>') + '</div></div>' +
+      '<div class="cmp-side"><h3>문장별 코멘트 <span style="font-weight:500;letter-spacing:0">' + anns.length + '개</span></h3>' +
+      (cards || '<div class="cmp-hint">아직 문장별 코멘트가 없어. 왼쪽에서 문장을 드래그로 선택하고 위의 "선택한 문장에 코멘트"를 누르면 직접 추가할 수 있어. 또는 상세 화면에서 다시 리뷰.</div>') +
+      '<div class="cmp-hint">쓰는 법: 구글 문서에서 같은 문장을 선택하고 댓글 추가 → 여기서 복사한 코멘트를 붙여 넣기.</div></div></div>';
+    if (state.editAnn != null) { var ta = $('annEdit'); if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); } }
+  }
+  function saveAnnotations(r, anns) {
+    r.annotations = anns; state.reviews[r.fileId] = r; renderCompare();
+    if (state.db) Promise.resolve(state.db.doc('reviews/' + r.fileId).update({ annotations: anns })).catch(function (e) { toast('저장 실패: ' + ((e && e.message) || e)); });
+  }
+  function bindCompare() {
+    $('cmp').addEventListener('click', function (ev) {
+      var r = findReview(state.compareId); if (!r) return;
+      var anns = Array.isArray(r.annotations) ? r.annotations.slice() : [];
+      var t = ev.target;
+      if (t.closest('#cmpClose')) { closeCompare(); return; }
+      if (t.closest('#cmpCopyAll')) { copyText(anns.map(function (a, i) { return (i + 1) + '. ' + a.note + '\n   ("' + (a.quote.length > 80 ? a.quote.slice(0, 80) + '…' : a.quote) + '")'; }).join('\n\n')); return; }
+      if (t.closest('#cmpAddSel')) {
+        var sel = window.getSelection ? String(window.getSelection()).replace(/\s+/g, ' ').trim() : '';
+        if (!sel || sel.length < 4) { toast('왼쪽 문서에서 문장을 먼저 드래그로 선택해.'); return; }
+        anns.push({ quote: sel.slice(0, 300), note: '' }); r.annotations = anns; state.reviews[r.fileId] = r; state.editAnn = anns.length - 1; state.activeAnn = state.editAnn; renderCompare(); return;
+      }
+      var m = t.closest('mark[data-ann]'); if (m) { state.activeAnn = parseInt(m.getAttribute('data-ann'), 10); renderCompare(); var c = document.querySelector('[data-card="' + state.activeAnn + '"]'); if (c) c.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+      var f = t.closest('[data-focus]'); if (f) { state.activeAnn = parseInt(f.getAttribute('data-focus'), 10); renderCompare(); var mk = document.querySelector('mark[data-ann="' + state.activeAnn + '"]'); if (mk) mk.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+      var b;
+      if ((b = t.closest('[data-ann-copy]'))) { copyText(anns[parseInt(b.getAttribute('data-ann-copy'), 10)].note); return; }
+      if ((b = t.closest('[data-ann-edit]'))) { state.editAnn = parseInt(b.getAttribute('data-ann-edit'), 10); state.activeAnn = state.editAnn; renderCompare(); return; }
+      if ((b = t.closest('[data-ann-cancel]'))) { var ci = parseInt(b.getAttribute('data-ann-cancel'), 10); if (!anns[ci].note) { anns.splice(ci, 1); r.annotations = anns; state.reviews[r.fileId] = r; } state.editAnn = null; renderCompare(); return; }
+      if ((b = t.closest('[data-ann-save]'))) { var si = parseInt(b.getAttribute('data-ann-save'), 10); var ta = $('annEdit'); var v = ta ? ta.value.trim() : ''; if (!v) { toast('코멘트가 비어 있어.'); return; } anns[si] = Object.assign({}, anns[si], { note: v, edited: true }); state.editAnn = null; saveAnnotations(r, anns); toast('저장했어.'); return; }
+      if ((b = t.closest('[data-ann-del]'))) { var di = parseInt(b.getAttribute('data-ann-del'), 10); anns.splice(di, 1); state.editAnn = null; state.activeAnn = null; saveAnnotations(r, anns); return; }
+    });
+    $('cmp').addEventListener('keydown', function (ev) { if ((ev.metaKey || ev.ctrlKey) && ev.key === 'Enter' && state.editAnn != null) { var b = document.querySelector('[data-ann-save]'); if (b) b.click(); } });
+    document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !$('cmp').hidden && state.editAnn == null) closeCompare(); });
+  }
 })();
 </script>

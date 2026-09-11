@@ -493,7 +493,7 @@
     var canRun = state.capsReady && state.db && state.mcp && state.sample && !state.running && c.folders.length;
     $('runBtn').disabled = !canRun;
     $('runBtn').innerHTML = state.running ? '<span class="spin"></span><span>확인 중…</span>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span>지금 확인하기' + (f ? ' · ' + esc(label(f)) : '') + '</span>';
-    $('bandSub').textContent = c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall';
+    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v6';
 
     // list
     var titleMap = { unseen: '확인 안 함', missing: '미제출자', seen: '확인함' };
@@ -553,8 +553,10 @@
     $('rows').innerHTML = rowsHtml;
 
     // detail
-    renderDetail();
     $('app').setAttribute('data-pane', state.pane);
+    try { renderDetail(); } catch (e) {
+      $('detail').innerHTML = '<div class="d-empty" style="color:var(--crit)">상세 창을 그리는 중 오류가 났습니다.<br><span style="font-size:12px">' + esc((e && e.message) || e) + '</span></div>';
+    }
   }
 
   function renderDetail() {
@@ -577,7 +579,7 @@
         '<div class="sec"><h3>학생에게 보낼 메시지</h3><div class="box"><div id="draftText">' + esc(draft) + '</div><div class="btns"><button class="btn quiet" type="button" data-copy="draftText">복사</button></div></div></div>';
       return;
     }
-    var r = state.reviews[state.selected];
+    var r = findReview(state.selected);
     if (!r) { d.innerHTML = back + '<div class="d-empty">왼쪽 목록에서 항목을 누르면 리뷰가 여기에 열리고, 그 순간 확인함으로 옮겨집니다.</div>'; return; }
     var sc = scoreClass(r); var fo = folderById(r.folderId) || { name: r.folderName || '' };
     var ra = reviewAssignment(r);
@@ -632,14 +634,22 @@
     $('folderList').addEventListener('input', function (ev) { var i = ev.target.closest('[data-label]'); if (!i) return; var id = i.getAttribute('data-label'); draftFolders.forEach(function (f) { if (f.id === id) f.label = i.value.trim(); }); });
     $('panelSave').addEventListener('click', saveSettings);
   }
+  function findReview(id) {
+    if (!id) return null;
+    if (state.reviews[id]) return state.reviews[id];
+    var keys = Object.keys(state.reviews);
+    for (var i = 0; i < keys.length; i++) { var r = state.reviews[keys[i]]; if (r && (r.fileId === id || keys[i].split('/').pop() === id)) return r; }
+    return null;
+  }
   function openReview(id) {
-    var r = state.reviews[id]; if (!r) return;
+    var r = findReview(id); if (!r) { toast('리뷰를 찾지 못했습니다: ' + id); return; }
+    id = r.fileId || id;
     state.selected = id; state.pane = 'detail';
     if (!r.seen && state.view === 'unseen') { state.keep[id] = true; setSeen(id, true); }
     render();
   }
   function setSeen(id, seen) {
-    var r = state.reviews[id]; if (!r || !state.db) return;
+    var r = findReview(id); if (!r || !state.db) return; id = r.fileId || id;
     if (!seen) delete state.keep[id];
     r.seen = seen; r.seenAt = new Date().toISOString(); render();
     state.db.doc('reviews/' + id).update({ seen: seen, seenAt: r.seenAt }).catch(function (e) { toast('저장 실패: ' + e.message); });

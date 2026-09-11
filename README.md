@@ -13,6 +13,8 @@
 | `review-desk/index.html` | 페이지 소스. Artifact 로 게시하며 `db`, `sample`, `mcp`(Google Drive: search_files, read_file_content, get_file_metadata, download_file_content) 런타임 기능과 cdnjs 의 pdf.js 3.11.174 를 씀 |
 | `review-desk/routine-prompt.md` | 자동 실행 루틴에 들어가는 프롬프트 (새 세션이 매번 이 지시로 실행) |
 
+채점 범위: IB 과목(Econ Y1·Y2, BM Y1·Y2, Psych Y1, GloPo Y1)의 숙제만. 9th·10th Grade Social Science 는 과목 목록에서 뺐고, IA·Task 3 문서는 제목 패턴으로 건너뛴다.
+
 ## 화면 구조 (받은편지함형)
 
 - 왼쪽 서랍: **모아보기** (확인 안 함 / 미제출자 / 확인함) + **과목** 필터. 아래에 마지막 확인 시각과 "지금 확인하기".
@@ -28,7 +30,7 @@
    **과제 목록**: 과목 폴더 안의 「자료실 › Homework › Due M.DD」 폴더가 과제. 마감일은 폴더 이름에서, 과제 내용은 안의 문서에서 읽어 `assignments/<folderId>` 에 저장.
    **과제 매칭**: 리뷰할 때 Claude가 문서 제목·내용·제출 시각을 과제 목록과 비교해 어느 과제의 답인지 정함 (결석으로 한 주 늦게 내도 내용 기준으로 매칭).
    **미제출자**: 과목의 학생 명단 중 선택한 과제(기본: 마감이 지난 가장 최근 과제)에 매칭된 제출물이 없는 학생.
-4. **리뷰 대상**: 최근 N일 안에 수정됐고, 리뷰가 없거나 리뷰 이후 다시 수정된 문서만.
+4. **리뷰 대상**: 최근 N일 안에 수정됐고, 리뷰가 없거나 리뷰 이후 다시 수정된 문서만. 제목이 설정의 "채점하지 않을 문서 제목" 정규식(기본: IA, Task 3, Internal Assessment, Supporting Document)에 걸리는 문서는 자동·수동 모두 건너뛴다.
 5. **리뷰 저장** (`reviews/<fileId>`): 점수(0~10), 한 줄 요약, 잘한 점 / 고칠 점 / 다음 단계, 주의 표시, 학생에게 전달할 코멘트.
 6. **실행 기록** (`runs/<id>`): 시각, 출처(자동/수동), 검사·리뷰·건너뜀 건수, 오류.
 

@@ -19,7 +19,7 @@
 - Google Drive 도구(mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content)는 ToolSearch 로 "select:" 하여 불러온다. 없으면 runs 에 errors [{"title":"실행","message":"Google Drive 커넥터 없음"}] 로 기록하고 종료.
 
 ## 절차
-1. `read_db` get, collection `config`, doc_id `main`. 필드: `folders[{id,name,label}]` (과목 폴더 목록), `exclude[]` (학생 폴더로 보지 않을 하위 폴더 이름 조각), `materialsPattern` (자료실 폴더 이름 조각, 기본 "자료실"), `homeworkPattern` (숙제 폴더 이름 조각, 기본 "Homework"), `sinceDays`, `minChars`, `rubric`. 문서가 없거나 `folders` 가 비어 있으면 아무것도 쓰지 말고 종료.
+1. `read_db` get, collection `config`, doc_id `main`. 필드: `folders[{id,name,label}]` (과목 폴더 목록), `exclude[]` (학생 폴더로 보지 않을 하위 폴더 이름 조각), `skipTitles` (채점하지 않을 문서 제목 정규식, 대소문자 무시. 기본 `\bIA\b|task\s*3|internal assessment|supporting document`. IA 와 Task 3 는 교사가 채점하지 않기로 했으므로 이 패턴에 걸리는 문서는 후보에서 빼고 리뷰를 만들지 않는다), `materialsPattern` (자료실 폴더 이름 조각, 기본 "자료실"), `homeworkPattern` (숙제 폴더 이름 조각, 기본 "Homework"), `sinceDays`, `minChars`, `rubric`. 문서가 없거나 `folders` 가 비어 있으면 아무것도 쓰지 말고 종료.
 2. `read_db` list, collection `reviews` (`query.limit` 1000, `next_cursor` 가 있으면 계속). `fileId → {modifiedTime, revision, assignmentId}` 맵을 만든다.
 3. 각 folder 에 대해 Google Drive `search_files` 를 `query: "parentId = '<folder.id>'"`, `excludeContentSnippets: true`, `pageSize: 100` 으로 호출하고 `nextPageToken` 이 있으면 `pageToken` 으로 이어서 호출한다. 항목을 셋으로 나눈다:
    - **자료실**: 제목에 `materialsPattern` 이 포함된 폴더 (첫 번째 것). 그 안에서 제목에 `homeworkPattern` 이 포함된 폴더를 찾고, 그 하위 폴더 각각이 **과제** 다. 과제 = `{id: 폴더 id, name: 폴더 제목, due: 제목의 "M.DD" 를 YYYY-MM-DD 로 (올해 기준), url: 폴더 viewUrl, docs: [{id,title}] (안의 구글 문서), prompt: 마감이 최근 60일 이내인 과제는 첫 문서 본문 앞 2000자, 아니면 빈 문자열}`.
@@ -27,7 +27,7 @@
    - **폴더 바로 아래 문서**: 학생 이름 = `owner` 이메일의 `@` 앞부분 (없으면 빈 문자열).
    - 두 단계보다 깊이 들어가지 않는다.
    - 과목마다 `write_db` set: collection `roster`, doc_id = folder.id, data `{folderId, folderName, students: [{name, folderId, folderName: 폴더 제목, url}], updatedAt}` 과 collection `assignments`, doc_id = folder.id, data `{folderId, folderName, items: [과제...], updatedAt}`.
-4. 후보 = `modifiedTime` 이 지금부터 `sinceDays` 일 이내인 문서. 리뷰 대상 = `reviews` 에 없거나, 저장된 `modifiedTime` 이 문서의 `modifiedTime` 보다 이전인 것.
+4. 후보 = `modifiedTime` 이 지금부터 `sinceDays` 일 이내이고 제목이 `skipTitles` 에 걸리지 않는 문서. 리뷰 대상 = `reviews` 에 없거나, 저장된 `modifiedTime` 이 문서의 `modifiedTime` 보다 이전인 것.
 5. 각 대상 문서에 대해 `read_file_content` 로 본문을 읽는다.
    - 본문(앞뒤 공백 제거 후) 길이가 `minChars` 미만이면 `status: "empty"` 리뷰를 만든다.
    - 아니면 `rubric` 의 지시에 따라 리뷰를 직접 작성한다. 과목은 `folder.name` 으로 판단한다. 본문이 60,000자를 넘으면 앞 60,000자만 읽는다.

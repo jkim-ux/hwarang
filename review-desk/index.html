@@ -122,6 +122,11 @@
   .btn.primary:hover { background: var(--crimson-deep); border-color: var(--crimson-deep); }
   .btn.quiet { border-color: var(--line); color: var(--ink-2); font-weight: 600; height: 32px; font-size: 12.5px; padding: 0 12px; }
   .btn.quiet:hover { border-color: var(--line-strong); color: var(--ink); }
+  .btn.quiet.primary, .btn.quiet.primary:hover { background: var(--crimson); border-color: var(--crimson); color: #ffffff; }
+  .crit { border: 1px solid var(--line); padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .crit input { font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--ground); color: var(--ink); }
+  .crit textarea { font: inherit; font-size: 12.5px; line-height: 1.5; min-height: 150px; padding: 8px; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--ground); color: var(--ink); resize: vertical; }
+  .crit .btns { display: flex; justify-content: flex-end; }
   .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
   .spin { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -354,6 +359,12 @@
       <label for="rubricInput">리뷰 기준 (Claude에게 주는 지시)</label>
       <textarea id="rubricInput"></textarea>
     </div>
+    <div class="row-f">
+      <label>과목별 채점 기준</label>
+      <div class="hint">폴더 이름에 "적용 과목" 글자가 들어간 과목에 붙는다 (예: Economics → IB Economics YR 1, YR 2 둘 다). 리뷰 기준과 함께 Claude에게 전달된다.</div>
+      <div id="critList"></div>
+      <button class="btn" id="critAdd" type="button">기준 추가</button>
+    </div>
     <div class="foot"><button class="btn" id="panelClose" type="button">닫기</button><button class="btn primary" id="panelSave" type="button" style="height:36px">저장</button></div>
   </div>
 </div>
@@ -368,6 +379,7 @@
   var GDOC = 'application/vnd.google-apps.document';
   var DRIVE = 'Google Drive';
   var DEFAULT_SKIP = '\\bIA\\b|task\\s*3|internal assessment|supporting document';
+  var DEFAULT_CRITERIA = [{"match": "Economics", "text": "IB Economics 채점 기준 (Paper 1 스타일)\n\n[10 marks, part (a) Explain 유형]\n- real-life example (RLE, RWE) 필요 없음. 없다고 감점하거나 넣으라고 하지 마라. 이론적 예시(가상의 두 재화, 가상의 정책 상황)는 있어도 되고 없어도 된다.\n- 필수: (1) 문제의 핵심 용어 definition 2개 안팎, (2) 정확히 label 된 graph 와 그 graph 를 글로 설명(무엇이 어디로 왜 움직이는지), (3) 이론으로 왜 그런지 설명하는 논리 전개(원인 → 과정 → 결과), (4) 문제에 실제로 답하는 결론 한두 문장.\n- 9~10: definition 정확, graph 정확·완전, 설명이 논리적이고 빠진 단계 없음. 7~8: 대체로 맞지만 label 누락이나 설명 한 단계 비약. 4~6: definition 이나 graph 중 하나가 빠지거나 오개념. 1~3: 관련 있는 문장 몇 개뿐.\n- 분량 약 300~450 단어. 서론(definition) → 본론 문단(graph 설명) → 결론.\n\n[15 marks, part (b) Discuss / Evaluate / To what extent 유형]\n- real-life example 필수. 국가·정책·시기·수치가 특정된 사례여야 하고 이론과 연결해서 써야 한다. 없으면 만점의 60% 이상 주지 않는다.\n- 필수: definition, 이론 설명 + graph, RLE, evaluation(장단점, short run vs long run, stakeholder 별 영향, 가정과 한계, 상황 의존성), 근거 있는 judgement 로 결론.\n- 13~15: RLE 를 효과적으로 쓰고 균형 잡힌 evaluation 과 판단. 10~12: RLE 있으나 evaluation 이 나열 수준. 7~9: RLE 없거나 이론만. 4~6: 부분적. 1~3: 최소.\n\n[2~4 marks 단답 Define / Explain / Outline]\n- 2 marks: definition + 짧은 부연. 4 marks: definition + 설명(또는 graph) + 문제 상황 적용.\n\n[graph 체크리스트]\n- 축 label (Price / Quantity, Price level / Real GDP, 두 재화 이름), curve label (D1 D2, S, AD1 AD2, SRAS, LRAS, PPC1 PPC2), shift 방향 화살표, 원래 equilibrium 과 new equilibrium 점, P1 P2 Q1 Q2 label, figure 번호.\n- 자주 나오는 오류: shift 와 movement 혼동, demand 와 quantity demanded 혼동, wrong label on Quantity, 같은 label 두 번, PPC 에서 actual growth (curve 위로 이동) 와 potential growth (curve 자체 shift) 혼동."}, {"match": "Business", "text": "IB Business Management 채점 기준 (Paper 1·2 스타일)\n\n- 2 marks Define / State / Outline: 정확한 definition + 사례 맥락 한 줄.\n- 4 marks Explain / Describe / Distinguish: 요구된 요소 2개(예: advantage 1 + disadvantage 1)를 각각 (a) 이론 설명 (b) 사례 회사에 적용 으로 2점씩. 적용이 없으면 요소당 1점.\n- 6 marks Analyse / Explain(긴 답): 이론 정확 + 사례 적용 + 원인·결과 연결.\n- 10 marks Evaluate / Discuss / Recommend / To what extent: knowledge, application, analysis, evaluation 네 축. stimulus 의 정보를 적극 인용해야 하고, 장단점 균형 → 근거 있는 judgement 나 recommendation. 도구(SWOT, Ansoff, ratio, decision tree 등)를 쓰라고 했으면 정확히 적용. 이론만 있고 사례 적용이 없으면 만점의 절반 이하.\n- 자주 나오는 오류: 사례 회사 이름만 언급하고 실제 적용 없음, 용어 부정확(shareholders 와 stakeholders, revenue 와 profit), advantage 나 disadvantage 를 문장으로 명시하지 않음."}, {"match": "Psychology", "text": "IB Psychology 채점 기준\n\n- 수업용 4 marks 문항: 질문이 요구한 요소를 나눠서 1점씩. 예: operationalization 문항 = construct 설명(1) + 관찰 가능한 행동으로 정의(1) + 연구에서 실제 측정 방법(1) + quantitative research 에서 왜 필요한지(1). researcher bias 문항 = definition(1) + credibility 를 낮추는 기제(1) + 수업에서 다룬 연구 참조(1) + 그 연구에서 bias 가 어떻게 작용하거나 통제됐는지(1). 배경 설명이나 일화만 있으면 점수 없음.\n- SAQ 9 marks (Paper 1 Section A): 문제의 concept 을 정확히 설명, 관련 연구 하나를 aim·procedure·results 로 서술, 연구를 질문에 명시적으로 연결. 7~9: 개념 정확하고 연구가 질문에 분명히 연결됨. 4~6: 연구는 있으나 연결 약함 또는 개념 설명 부족. 1~3: 관련성만 있음.\n- ERQ 22 marks (Paper 1 Section B, Paper 2): A 문제 초점(2), B knowledge and understanding(6), C use of research(6), D critical thinking(6: 방법론 평가, 대안 설명, 문화·성별·윤리 고려), E clarity and organisation(2). 연구 2개 이상, 평가가 서술이 아니라 질문에 연결돼야 함.\n- 자주 나오는 오류: 연구 설명만 하고 질문에 안 붙임, reliability 와 credibility/validity 혼동, 수업에서 안 다룬 연구 인용."}, {"match": "Global Politics", "text": "IB Global Politics 채점 기준\n\n- 짧은 문항(2~4 marks): 개념 definition + 실제 사례 한 줄로 적용.\n- Paper 2 에세이(25 marks): A 문제 초점과 claim / counterclaim 구조, B 핵심 개념·이론(power, sovereignty, legitimacy 등)의 정확한 사용, C 구체적 사례·증거(국가·사건·행위자·시기 특정), D 분석·평가와 근거 있는 결론. 사례 없이 이론만이면 만점의 절반 이하."}];
   var DEFAULT_RUBRIC = [
     '당신은 IB 디플로마 과정을 가르치는 교사의 조교입니다. 학생이 구글 문서로 제출한 숙제를 읽고 교사가 빠르게 파악할 수 있는 리뷰를 작성하세요.',
     '',
@@ -397,7 +409,7 @@
     view: 'unseen', subject: 'all', q: '', selected: null, selectedStudent: null,
     keep: {}, assignSel: {}, running: false, pane: 'list'
   };
-  var draftFolders = [];
+  var draftFolders = []; var draftCriteria = [];
 
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -428,9 +440,11 @@
       rubric: typeof c.rubric === 'string' && c.rubric.trim() ? c.rubric : DEFAULT_RUBRIC,
       materialsPattern: (c.materialsPattern || '자료실').trim(),
       homeworkPattern: (c.homeworkPattern || 'Homework').trim(),
-      skipTitles: typeof c.skipTitles === 'string' ? c.skipTitles : DEFAULT_SKIP
+      skipTitles: typeof c.skipTitles === 'string' ? c.skipTitles : DEFAULT_SKIP,
+      criteria: Array.isArray(c.criteria) ? c.criteria.filter(function (x) { return x && typeof x.text === 'string'; }).map(function (x) { return { match: String(x.match || '').trim(), text: String(x.text) }; }) : DEFAULT_CRITERIA
     };
   }
+  function criteriaFor(c, folderName) { var n = String(folderName || '').toLowerCase(); return c.criteria.filter(function (x) { return x.match && n.indexOf(x.match.toLowerCase()) >= 0 && x.text.trim(); }); }
   function skipRe() { var p = cfg().skipTitles.trim(); if (!p) return null; try { return new RegExp(p, 'i'); } catch (e) { return null; } }
   function isSkipped(title) { var re = skipRe(); return !!(re && re.test(String(title || ''))); }
   function folderById(id) { var fs = cfg().folders; for (var i = 0; i < fs.length; i++) if (fs[i].id === id) return fs[i]; return null; }
@@ -551,7 +565,7 @@
     var canRun = state.capsReady && state.db && state.mcp && state.sample && !state.running && c.folders.length;
     $('runBtn').disabled = !canRun;
     $('runBtn').innerHTML = state.running ? '<span class="spin"></span><span>확인 중…</span>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span>지금 확인하기' + (f ? ' · ' + esc(label(f)) : '') + '</span>';
-    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v12';
+    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v13';
 
     // list
     var titleMap = { unseen: '확인 안 함', missing: '미제출자', seen: '확인함' };
@@ -699,6 +713,9 @@
     document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !$('drawer').hidden) closeSettings(); });
     $('folderAdd').addEventListener('click', addFolder);
     $('folderInput').addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); addFolder(); } });
+    $('critAdd').addEventListener('click', function () { draftCriteria.push({ match: '', text: '' }); renderCritList(); var last = document.querySelector('[data-crit-match="' + (draftCriteria.length - 1) + '"]'); if (last) last.focus(); });
+    $('critList').addEventListener('click', function (ev) { var b = ev.target.closest('[data-crit-remove]'); if (!b) return; draftCriteria.splice(parseInt(b.getAttribute('data-crit-remove'), 10), 1); renderCritList(); });
+    $('critList').addEventListener('input', function (ev) { var m = ev.target.closest('[data-crit-match]'); var t = ev.target.closest('[data-crit-text]'); if (m) draftCriteria[parseInt(m.getAttribute('data-crit-match'), 10)].match = m.value; if (t) draftCriteria[parseInt(t.getAttribute('data-crit-text'), 10)].text = t.value; });
     $('folderList').addEventListener('click', function (ev) { var b = ev.target.closest('[data-remove]'); if (!b) return; draftFolders = draftFolders.filter(function (f) { return f.id !== b.getAttribute('data-remove'); }); renderFolderList(); });
     $('folderList').addEventListener('input', function (ev) { var i = ev.target.closest('[data-label]'); if (!i) return; var id = i.getAttribute('data-label'); draftFolders.forEach(function (f) { if (f.id === id) f.label = i.value.trim(); }); });
     $('panelSave').addEventListener('click', saveSettings);
@@ -735,12 +752,16 @@
 
   /* ---------- settings ---------- */
   function openSettings() {
-    var c = cfg(); draftFolders = c.folders.slice(); renderFolderList();
+    var c = cfg(); draftFolders = c.folders.slice(); renderFolderList(); draftCriteria = c.criteria.map(function (x) { return { match: x.match, text: x.text }; }); renderCritList();
     $('materialsInput').value = c.materialsPattern; $('homeworkInput').value = c.homeworkPattern;
     $('excludeInput').value = c.exclude.join(', '); $('skipInput').value = c.skipTitles; $('sinceInput').value = c.sinceDays; $('minCharsInput').value = c.minChars; $('rubricInput').value = c.rubric;
     $('drawer').hidden = false; setTimeout(function () { $('folderInput').focus(); }, 0);
   }
   function closeSettings() { $('drawer').hidden = true; }
+  function renderCritList() {
+    var host = $('critList'); if (!host) return;
+    host.innerHTML = draftCriteria.map(function (x, i) { return '<div class="crit"><input type="text" data-crit-match="' + i + '" value="' + esc(x.match) + '" placeholder="적용 과목 (폴더 이름에 포함된 말, 예: Economics)"><textarea data-crit-text="' + i + '">' + esc(x.text) + '</textarea><div class="btns"><button class="btn tiny danger" type="button" data-crit-remove="' + i + '">삭제</button></div></div>'; }).join('') || '<div class="hint">아직 없음</div>';
+  }
   function renderFolderList() {
     var host = $('folderList');
     if (!draftFolders.length) { host.innerHTML = '<div class="hint">아직 없음</div>'; return; }
@@ -770,7 +791,7 @@
     var data = {
       folders: draftFolders, exclude: $('excludeInput').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean),
       sinceDays: Math.max(1, parseInt($('sinceInput').value, 10) || 14), minChars: Math.max(0, parseInt($('minCharsInput').value, 10) || 0),
-      skipTitles: $('skipInput').value.trim(), rubric: $('rubricInput').value.trim() || DEFAULT_RUBRIC, materialsPattern: $('materialsInput').value.trim() || '자료실', homeworkPattern: $('homeworkInput').value.trim() || 'Homework',
+      criteria: draftCriteria.map(function (x) { return { match: String(x.match || '').trim(), text: String(x.text || '').trim() }; }).filter(function (x) { return x.match && x.text; }), skipTitles: $('skipInput').value.trim(), rubric: $('rubricInput').value.trim() || DEFAULT_RUBRIC, materialsPattern: $('materialsInput').value.trim() || '자료실', homeworkPattern: $('homeworkInput').value.trim() || 'Homework',
       updatedAt: new Date().toISOString()
     };
     state.db.doc('config/main').set(data).then(function () { toast('설정을 저장했습니다.'); closeSettings(); }).catch(function (e) { toast('저장 실패: ' + e.message); });
@@ -848,7 +869,8 @@
   /* ---------- review run ---------- */
   function buildPrompt(c, doc, text, assignments) {
     var alist = assignments.length ? assignments.map(function (a) { return '- id: ' + a.id + ' | 이름: ' + a.name + (a.due ? ' | 마감: ' + a.due : '') + (a.docs.length ? ' | 과제 문서: ' + a.docs.map(function (d) { return d.title; }).join(', ') : '') + (a.prompt ? ' | 과제 내용: ' + a.prompt.replace(/\s+/g, ' ').slice(0, 400) : ''); }).join('\n') : '(등록된 과제 없음)';
-    return c.rubric + '\n\n--- 이 과목의 과제 목록 (교사가 만든 Due 폴더) ---\n' + alist + '\n\n' +
+    var crit = criteriaFor(c, doc.folderName); var ctext = crit.length ? '\n\n--- 이 과목의 채점 기준 (교사가 정한 것. 위 리뷰 기준보다 우선) ---\n' + crit.map(function (x) { return x.text; }).join('\n\n') : '';
+    return c.rubric + ctext + '\n\n--- 이 과목의 과제 목록 (교사가 만든 Due 폴더) ---\n' + alist + '\n\n' +
       '--- 문서 정보 ---\n학생: ' + (doc.student || '(알 수 없음)') + '\n문서 제목: ' + doc.title + '\n과목: ' + (doc.folderName || '') + '\n제출(수정) 시각: ' + fmt(doc.modifiedTime) + ' KST\n\n--- 문서 내용 시작 ---\n' + text + '\n--- 문서 내용 끝 ---\n\n' +
       '먼저 이 문서가 위 과제 목록 중 어느 과제의 답인지 판단하세요 (문서 제목, 내용, 제출 시각과 마감일을 비교. 학생이 결석 등으로 늦게 낼 수 있으니 날짜보다 내용을 우선). 확신이 없으면 null.\n' +
       '반드시 아래 형식의 JSON 객체 하나만 출력하세요. 다른 텍스트나 코드펜스는 넣지 마세요.\n' +

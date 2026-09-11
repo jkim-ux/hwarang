@@ -331,7 +331,8 @@
     '- 리뷰는 한국어로 쓰되, 학생 글을 인용할 때는 원문(영어)을 그대로 짧게 인용합니다.',
     '- 좋은 점보다 고칠 점을 구체적으로: 무엇이 왜 부족한지, 어떻게 고치면 되는지.',
     '- 점수는 0~10 정수. 8 이상은 거의 수정 없이 통과, 5~7은 보완 필요, 4 이하는 다시 써야 하는 수준.',
-    '- 미완성·빈 문서·과제와 무관한 내용·AI가 그대로 쓴 듯한 글은 flags에 표시하세요.'
+    '- 미완성·빈 문서·과제와 무관한 내용·AI가 그대로 쓴 듯한 글은 flags에 표시하세요.',
+    '- comment(학생에게 보낼 코멘트)는 교사 본인 말투로 씁니다: 반말, 짧고 직설적, 핵심만 2~4문장. 존댓말과 "~해 주세요"는 금지. 예: "정의는 맞는데 본론이 없잖아. Day 1 구조 그대로 가져와서 두 문단 써." / "shift랑 movement 구분한 건 좋아. 근데 Q2 라벨 두 군데 겹친다, 고쳐."'
   ].join('\n');
   var ICON_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"></path></svg>';
   var ICON_DOC = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"></path><path d="M20 4l-9 9"></path><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"></path></svg>';
@@ -421,12 +422,13 @@
   });
   function subscribe() {
     var db = state.db;
-    db.doc('config/main').onSnapshot(function (s) { state.config = s.exists ? s.data() : null; render(); }, function (e) { toast('설정을 읽지 못했습니다: ' + e.message); });
-    db.collection('reviews').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { var x = d.data() || {}; var k = x.fileId || String(d.id).split('/').pop(); if (!x.fileId) x.fileId = k; m[k] = x; }); state.reviews = m; render(); }, function (e) { toast('리뷰를 읽지 못했습니다: ' + e.message); });
-    db.collection('runs').orderBy('startedAt', 'desc').limit(10).onSnapshot(function (s) { state.runs = s.docs.map(function (d) { return d.data(); }); render(); }, function () {});
-    db.collection('roster').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { var x = d.data() || {}; m[x.folderId || String(d.id).split('/').pop()] = x; }); state.roster = m; render(); }, function () {});
-    db.collection('assignments').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { var x = d.data() || {}; m[x.folderId || String(d.id).split('/').pop()] = x; }); state.assignments = m; render(); }, function () {});
+    db.doc('config/main').onSnapshot(function (s) { state.config = s.exists ? clone(s.data()) : null; render(); }, function (e) { toast('설정을 읽지 못했습니다: ' + e.message); });
+    db.collection('reviews').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { var x = clone(d.data()); var k = x.fileId || String(d.id).split('/').pop(); if (!x.fileId) x.fileId = k; m[k] = x; }); state.reviews = m; render(); }, function (e) { toast('리뷰를 읽지 못했습니다: ' + e.message); });
+    db.collection('runs').orderBy('startedAt', 'desc').limit(10).onSnapshot(function (s) { state.runs = s.docs.map(function (d) { return clone(d.data()); }); render(); }, function () {});
+    db.collection('roster').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { var x = clone(d.data()); m[x.folderId || String(d.id).split('/').pop()] = x; }); state.roster = m; render(); }, function () {});
+    db.collection('assignments').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { var x = clone(d.data()); m[x.folderId || String(d.id).split('/').pop()] = x; }); state.assignments = m; render(); }, function () {});
   }
+  function clone(x) { try { return x == null ? {} : JSON.parse(JSON.stringify(x)); } catch (e) { return Object.assign({}, x || {}); } }
   function persistUI() { try { localStorage.setItem('reviewDesk.ui', JSON.stringify({ view: state.view, subject: state.subject })); } catch (e) { /* ignore */ } }
 
   /* ---------- derived lists ---------- */
@@ -493,7 +495,7 @@
     var canRun = state.capsReady && state.db && state.mcp && state.sample && !state.running && c.folders.length;
     $('runBtn').disabled = !canRun;
     $('runBtn').innerHTML = state.running ? '<span class="spin"></span><span>확인 중…</span>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span>지금 확인하기' + (f ? ' · ' + esc(label(f)) : '') + '</span>';
-    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v6';
+    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v7';
 
     // list
     var titleMap = { unseen: '확인 안 함', missing: '미제출자', seen: '확인함' };
@@ -568,7 +570,7 @@
       var hist = (a ? '<button class="h" type="button"><div class="sq none">—</div><div class="n">' + esc(a.name) + '</div><div class="s crit">미제출</div><div class="w">마감 ' + (a.due ? a.due.slice(5).replace('-', '/') : '') + '</div></button>' : '') +
         m.history.map(function (r) { return '<button class="h" type="button" data-open="' + esc(r.fileId) + '"><div class="sq ' + scoreClass(r) + '">' + (scoreClass(r) === 'none' ? '빈' : r.score) + '</div><div class="n">' + esc(r.title) + '</div><div class="s">' + esc(r.summary || '') + '</div><div class="w">' + fmt(r.modifiedTime) + '</div></button>'; }).join('');
       var msg = m.student.name.replace(/^[가-힣]{1}/, '') || m.student.name;
-      var draft = m.student.name + ' 학생, ' + (a ? a.name + ' 과제' : '이번 과제') + '가 아직 폴더에 없어요. ' + (m.last ? '지난 ' + m.last.title + '처럼 ' : '') + '정의 → 도표 → 설명 순서로 써서 올려 주세요.';
+      var draft = m.student.name + ', ' + (a ? a.name + ' 과제' : '이번 과제') + ' 아직 폴더에 없다. ' + (m.last ? '지난 ' + m.last.title + ' 쓴 것처럼 ' : '') + '정의 → 도표 → 설명 순서로 써서 올려.';
       d.innerHTML = back +
         '<div class="d-head"><div class="left"><div class="d-crumb">' + esc(m.folder.name) + (m.student.folderName ? ' · ' + esc(m.student.folderName) : '') + '</div><div class="d-title">' + esc(m.student.name) + '</div>' +
         '<div class="d-meta">' + (m.last ? '마지막 제출 ' + fmt(m.last.modifiedTime) + ' · 최근 제출 ' + m.history.length + '건' : '최근 ' + cfg().sinceDays + '일 안에 제출 없음') + '</div>' +
@@ -613,7 +615,7 @@
     $('listTools').addEventListener('change', function (ev) { if (ev.target.id === 'assignSel') { var f = subjectFolder(); if (f) { state.assignSel[f.id] = ev.target.value; state.selectedStudent = null; render(); } } });
     $('listTools').addEventListener('click', function (ev) { if (ev.target.id === 'flagOnly') { state.flagOnly = !state.flagOnly; render(); } });
     $('rows').addEventListener('click', function (ev) {
-      var b = ev.target.closest('[data-id]'); if (b) { openReview(b.getAttribute('data-id')); return; }
+      var b = ev.target.closest('[data-id]'); if (b) { try { openReview(b.getAttribute('data-id')); } catch (e) { toast('열기 실패: ' + ((e && e.message) || e), 8000); } return; }
       var m = ev.target.closest('[data-missing]'); if (m) { state.selectedStudent = m.getAttribute('data-missing'); state.pane = 'detail'; render(); }
     });
     $('detail').addEventListener('click', function (ev) {
@@ -651,8 +653,11 @@
   function setSeen(id, seen) {
     var r = findReview(id); if (!r || !state.db) return; id = r.fileId || id;
     if (!seen) delete state.keep[id];
-    r.seen = seen; r.seenAt = new Date().toISOString(); render();
-    state.db.doc('reviews/' + id).update({ seen: seen, seenAt: r.seenAt }).catch(function (e) { toast('저장 실패: ' + e.message); });
+    var seenAt = new Date().toISOString();
+    state.reviews[id] = Object.assign({}, r, { seen: seen, seenAt: seenAt }); render();
+    try {
+      Promise.resolve(state.db.doc('reviews/' + id).update({ seen: seen, seenAt: seenAt })).catch(function (e) { toast('저장 실패: ' + ((e && e.message) || e)); });
+    } catch (e) { toast('저장 실패: ' + ((e && e.message) || e)); }
   }
   function copyText(t) {
     var done = function () { toast('복사했습니다.'); };

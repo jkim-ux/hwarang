@@ -1,36 +1,30 @@
 <title>숙제 리뷰 데스크</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <style>
   :root {
-    --ground: #f7f6f4;
+    --ground: #f6f5f2;
     --surface: #ffffff;
     --surface-2: #efedea;
-    --line: #dcd9d4;
+    --line: #e4e1dc;
     --line-strong: #bdb8b0;
-    --ink: #111111;
-    --ink-2: #444444;
-    --ink-3: #888888;
+    --ink: #141414;
+    --ink-2: #4a4745;
+    --ink-3: #8a8683;
+    --ink-4: #b5b1ac;
     --crimson: #902024;
     --crimson-deep: #6f1519;
+    --crimson-soft: #faf0f0;
     --gold: #eac401;
-    --gold-ink: #8a6d00;
-    --accent: #902024;
-    --accent-ink: #ffffff;
-    --accent-soft: #f7e6e7;
     --good: #2f6b3a;
     --good-soft: #e4f0e5;
     --warn: #8a6d00;
     --warn-soft: #faf0c2;
     --crit: #902024;
     --crit-soft: #f7e6e7;
-    --new: #902024;
     --band-ink: #ffffff;
-    --band-mark: #eac401;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 6px 20px rgba(0, 0, 0, 0.05);
-    --radius: 3px;
-    --font: "Helvetica Neue", Helvetica, Arial, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-    --mono: "Helvetica Neue", Helvetica, Arial, "Noto Sans KR", sans-serif;
+    --band-sub: #f3c9cb;
+    --font: "Archivo", "Noto Sans KR", "Helvetica Neue", Helvetica, Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -42,21 +36,19 @@
       --ink: #f0ecea;
       --ink-2: #bdb6b2;
       --ink-3: #8c8480;
+      --ink-4: #5e5854;
       --crimson: #902024;
       --crimson-deep: #6f1519;
+      --crimson-soft: #3a1c1e;
       --gold: #eac401;
-      --gold-ink: #eac401;
-      --accent: #e0616a;
-      --accent-ink: #ffffff;
-      --accent-soft: #3d1d1f;
       --good: #7fcf8f;
       --good-soft: #1f3324;
       --warn: #eac401;
       --warn-soft: #3a3210;
       --crit: #f08a8f;
       --crit-soft: #3d1d1f;
-      --new: #e0616a;
-      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+      --band-ink: #ffffff;
+      --band-sub: #f3c9cb;
     }
   }
   :root[data-theme="dark"] {
@@ -68,381 +60,261 @@
     --ink: #f0ecea;
     --ink-2: #bdb6b2;
     --ink-3: #8c8480;
+    --ink-4: #5e5854;
     --crimson: #902024;
     --crimson-deep: #6f1519;
+    --crimson-soft: #3a1c1e;
     --gold: #eac401;
-    --gold-ink: #eac401;
-    --accent: #e0616a;
-    --accent-ink: #ffffff;
-    --accent-soft: #3d1d1f;
     --good: #7fcf8f;
     --good-soft: #1f3324;
     --warn: #eac401;
     --warn-soft: #3a3210;
     --crit: #f08a8f;
     --crit-soft: #3d1d1f;
-    --new: #e0616a;
-    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    --band-ink: #ffffff;
+    --band-sub: #f3c9cb;
   }
 
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body {
-    margin: 0;
-    background: var(--ground);
-    color: var(--ink);
-    font-family: var(--font);
-    font-size: 14px;
-    line-height: 1.55;
-    -webkit-font-smoothing: antialiased;
+    margin: 0; background: var(--ground); color: var(--ink); font-family: var(--font);
+    font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+    display: flex; flex-direction: column; min-height: 100vh;
   }
-  a { color: var(--accent); }
-  button { font: inherit; color: inherit; }
-  .wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; padding-block: 0 56px; }
-  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  a { color: var(--crimson); text-decoration: none; }
+  a:hover { color: var(--crimson-deep); }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--crimson); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+  svg { flex-shrink: 0; }
 
-  /* ---------- Verus band ---------- */
-  .band { background: var(--crimson); color: var(--band-ink); }
-  .band-in {
-    max-width: 1080px; margin: 0 auto; padding-inline: 20px; min-height: 58px;
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  }
-  .band-title { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; color: var(--band-ink); }
-  .band-title small { font-weight: 500; opacity: 0.8; font-size: 12.5px; margin-left: 10px; }
-  .wordmark { font-weight: 900; letter-spacing: 0.06em; font-size: 13px; color: var(--band-mark); text-transform: uppercase; white-space: nowrap; }
-  .gold-rule { height: 6px; background: var(--gold); }
+  /* band */
+  .band { background: var(--crimson); color: var(--band-ink); flex-shrink: 0; }
+  .band-in { min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-inline: 28px; }
+  .band-title { display: flex; align-items: baseline; gap: 14px; }
+  .band-title b { font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
+  .band-title span { font-size: 12px; font-weight: 500; color: var(--band-sub); }
+  .wordmark { font-size: 12px; font-weight: 800; letter-spacing: 0.12em; color: var(--gold); text-transform: uppercase; white-space: nowrap; }
+  .gold-rule { height: 4px; background: var(--gold); flex-shrink: 0; }
 
-  /* ---------- top bar ---------- */
-  .top {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
-    padding-block: 18px 14px;
-    border-bottom: 1px solid var(--line);
-  }
-  .brand { display: flex; flex-direction: column; gap: 2px; min-width: 200px; }
-  .brand .sub { color: var(--ink-2); font-size: 13px; }
-  .brand .sub b { color: var(--ink); font-weight: 700; }
-  .top .spacer { flex: 1; }
-  .stamp { display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; color: var(--ink-3); text-align: right; }
-  .stamp .num { color: var(--ink-2); }
-  .actions { display: flex; align-items: center; gap: 8px; }
-
-  .btn {
-    border: 1px solid var(--line-strong); background: var(--surface); border-radius: 3px;
-    padding: 8px 14px; cursor: pointer; font-weight: 700; font-size: 13.5px;
-    display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
-  }
+  /* app frame */
+  .app { display: flex; flex-grow: 1; min-height: 0; }
+  .rail { width: 232px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--line); display: flex; flex-direction: column; padding-block: 18px; overflow-y: auto; }
+  .rail .lbl { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--ink-3); padding: 0 24px 8px; }
+  .rail .grp { display: flex; flex-direction: column; }
+  .rail .grp + .lbl { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .rail .item { display: flex; align-items: center; gap: 10px; padding: 9px 24px 9px 21px; border-left: 3px solid transparent; font-size: 14px; font-weight: 500; color: var(--ink-2); text-align: left; width: 100%; }
+  .rail .item:hover { background: var(--surface-2); }
+  .rail .item[aria-current="true"] { border-left-color: var(--crimson); background: var(--crimson-soft); color: var(--crimson); font-weight: 700; }
+  .rail .item .t { flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rail .subj .item { padding-block: 8px; }
+  .cnt { font-size: 12px; font-weight: 700; color: var(--ink); }
+  .cnt.hot { background: var(--gold); color: #141414; padding: 1px 7px; border-radius: 2px; }
+  .cnt.crit { color: var(--crit); }
+  .cnt.zero { color: var(--ink-4); font-weight: 500; }
+  .rail .foot { margin-top: auto; padding: 18px 24px 0; display: flex; flex-direction: column; gap: 12px; }
+  .rail .stamp { font-size: 12px; color: var(--ink-3); line-height: 1.5; display: flex; flex-direction: column; gap: 3px; }
+  .rail .stamp b { color: var(--ink); font-weight: 600; }
+  .btn { height: 36px; padding: 0 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 700; border-radius: 3px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); white-space: nowrap; }
   .btn:hover { border-color: var(--ink-3); }
-  .btn:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
-    outline: 2px solid var(--accent); outline-offset: 2px;
-  }
-  .btn[disabled] { opacity: 0.55; cursor: not-allowed; }
-  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn.primary { height: 44px; background: var(--crimson); color: #ffffff; border-color: var(--crimson); font-size: 14px; }
   .btn.primary:hover { background: var(--crimson-deep); border-color: var(--crimson-deep); }
-  .btn.ghost { border-color: transparent; background: transparent; color: var(--ink-2); }
-  .btn.ghost:hover { background: var(--surface-2); }
-  .btn.small { padding: 5px 10px; font-size: 12.5px; border-radius: 3px; }
-  .btn .spin { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .btn.quiet { border-color: var(--line); color: var(--ink-2); font-weight: 600; height: 32px; font-size: 12.5px; padding: 0 12px; }
+  .btn.quiet:hover { border-color: var(--line-strong); color: var(--ink); }
+  .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+  .spin { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) { .btn .spin { animation-duration: 2s; } }
-
-  /* ---------- subject tabs ---------- */
-  .tabs {
-    display: flex; gap: 2px; margin-top: 14px; border-bottom: 1px solid var(--line);
-    overflow-x: auto; scrollbar-width: thin; -webkit-overflow-scrolling: touch;
-  }
-  .tabs button {
-    border: 0; background: transparent; padding: 10px 14px 9px; cursor: pointer; white-space: nowrap;
-    font-size: 13.5px; font-weight: 500; color: var(--ink-2); border-bottom: 2px solid transparent;
-    margin-bottom: -1px; display: inline-flex; align-items: center; gap: 7px;
-  }
-  .tabs button:hover { color: var(--ink); background: var(--surface-2); border-radius: 6px 6px 0 0; }
-  .tabs button[aria-selected="true"] { color: var(--crimson); border-bottom-color: var(--crimson); font-weight: 700; }
-  .tabs button:hover { border-radius: 0; }
-  .tabs .badge {
-    min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; font-size: 11px; font-weight: 600;
-    display: inline-flex; align-items: center; justify-content: center;
-    background: var(--surface-2); color: var(--ink-3); font-family: var(--mono);
-  }
-  .tabs .badge.hot { background: var(--gold); color: #111111; }
-  .tabs .badge.zero { opacity: 0.6; }
-  .folder-item .lbl { width: 110px; flex: none; }
-  .folder-item .lbl input { font: inherit; font-size: 12.5px; padding: 4px 8px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--ground); color: var(--ink); width: 100%; }
-
-  /* ---------- progress ---------- */
-  .progress {
-    margin-top: 14px; padding: 10px 14px; border-radius: 8px;
-    background: var(--accent-soft); color: var(--ink); font-size: 13px;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .progress .bar { flex: 1; height: 4px; background: var(--surface); border-radius: 2px; overflow: hidden; }
+  @media (prefers-reduced-motion: reduce) { .spin { animation-duration: 2s; } }
+  .rail .settings-link { font-size: 12px; font-weight: 600; color: var(--ink-3); text-align: center; padding: 4px; }
+  .rail .settings-link:hover { color: var(--ink); }
+  .progress { font-size: 12px; color: var(--ink-2); display: flex; flex-direction: column; gap: 6px; }
+  .progress .bar { height: 3px; background: var(--surface-2); overflow: hidden; }
   .progress .bar i { display: block; height: 100%; width: 0; background: var(--gold); transition: width 0.3s; }
-  .notice {
-    margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-size: 13px;
-    background: var(--warn-soft); color: var(--ink); border: 1px solid transparent;
-  }
-  .notice.crit { background: var(--crit-soft); }
 
-  /* ---------- summary strip ---------- */
-  .strip {
-    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px;
-    background: var(--line); border: 1px solid var(--line); border-radius: var(--radius);
-    overflow: hidden; margin-top: 18px;
-  }
-  .strip .cell { background: var(--surface); padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; }
-  .strip .cell .lbl { font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); font-weight: 700; }
-  .strip .cell .val { font-size: 24px; font-weight: 900; line-height: 1.2; }
-  .strip .cell .val small { font-size: 12px; font-weight: 400; color: var(--ink-3); margin-left: 4px; }
-  .strip .cell.hot .val { color: var(--new); }
-  @media (max-width: 640px) { .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  /* list */
+  .list { width: 430px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+  .list-head { padding: 20px 20px 12px; display: flex; flex-direction: column; gap: 12px; border-bottom: 1px solid var(--line); }
+  .list-head h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.01em; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .list-head h2 small { font-size: 13px; font-weight: 500; color: var(--ink-3); }
+  .list-tools { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .list-tools select { font: inherit; font-size: 12.5px; font-weight: 600; height: 30px; padding: 0 28px 0 10px; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--surface); color: var(--ink); max-width: 220px; appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8683' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat: no-repeat; background-position: right 9px center; }
+  .chip-btn { height: 30px; padding: 0 12px; display: inline-flex; align-items: center; background: var(--ground); color: var(--ink-2); font-size: 12.5px; font-weight: 600; border-radius: 3px; }
+  .chip-btn[aria-pressed="true"] { background: var(--crimson); color: #ffffff; }
+  .list-tools .grow { flex-grow: 1; }
+  .search { height: 30px; width: 30px; display: flex; align-items: center; justify-content: center; color: var(--ink-3); }
+  .list-tools input[type="search"] { font: inherit; font-size: 12.5px; height: 30px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--surface); color: var(--ink); width: 100%; }
+  .rows { overflow-y: auto; flex-grow: 1; }
+  .rows .day { padding: 12px 20px 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-3); }
+  .row { display: flex; gap: 14px; padding: 12px 20px; border-left: 3px solid transparent; border-bottom: 1px solid var(--surface-2); width: 100%; text-align: left; align-items: flex-start; }
+  .row:hover { background: var(--ground); }
+  .row[aria-current="true"] { border-left-color: var(--crimson); background: var(--crimson-soft); }
+  .row .sq { width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 800; border-radius: 3px; }
+  .sq.good { background: var(--good-soft); color: var(--good); }
+  .sq.warn { background: var(--warn-soft); color: var(--warn); }
+  .sq.crit { background: var(--crit-soft); color: var(--crit); }
+  .sq.none { border: 1px dashed var(--line-strong); color: var(--ink-3); font-size: 11px; font-weight: 700; }
+  .row .body { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex-grow: 1; }
+  .row .l1 { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .row .who { font-size: 14px; font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row .who span { font-weight: 500; color: var(--ink-2); }
+  .row .when { font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
+  .row .l2 { font-size: 12.5px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tag { display: inline-flex; align-items: center; font-size: 10.5px; font-weight: 700; padding: 0 5px; border-radius: 2px; vertical-align: 2px; margin-left: 4px; white-space: nowrap; }
+  .tag.flag { color: var(--crit); border: 1px solid var(--crit); }
+  .tag.moved { color: var(--good); gap: 4px; margin-left: 0; font-size: 11px; }
+  .tag.subj { color: var(--ink-3); background: var(--surface-2); }
+  .empty { padding: 40px 24px; color: var(--ink-3); font-size: 13.5px; text-align: center; line-height: 1.6; }
+  .empty b { color: var(--ink-2); }
 
-  /* ---------- toolbar ---------- */
-  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 22px; }
-  .seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 3px; overflow: hidden; }
-  .seg button { border: 0; background: var(--surface); padding: 6px 12px; cursor: pointer; font-size: 13px; color: var(--ink-2); }
-  .seg button + button { border-left: 1px solid var(--line); }
-  .seg button[aria-pressed="true"] { background: var(--crimson); color: #ffffff; }
-  .toolbar label { font-size: 12.5px; color: var(--ink-3); display: inline-flex; align-items: center; gap: 6px; }
-  .toolbar select, .toolbar input[type="search"] {
-    font: inherit; font-size: 13px; padding: 6px 10px; border: 1px solid var(--line-strong);
-    border-radius: 3px; background: var(--surface); color: var(--ink); min-width: 0;
-  }
-  .toolbar input[type="search"] { width: 180px; }
+  /* detail */
+  .detail { flex-grow: 1; min-width: 0; overflow-y: auto; padding: 28px 40px 40px; display: flex; flex-direction: column; gap: 22px; }
+  .d-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+  .d-head .left { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .d-crumb { font-size: 12px; font-weight: 600; color: var(--ink-3); }
+  .d-title { font-size: 26px; font-weight: 800; letter-spacing: -0.015em; line-height: 1.2; text-wrap: balance; }
+  .d-title span { color: var(--ink-2); font-weight: 600; }
+  .d-meta { font-size: 12.5px; color: var(--ink-3); }
+  .d-links { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+  .d-head .right { display: flex; align-items: flex-start; gap: 14px; flex-shrink: 0; }
+  .bigsq { width: 64px; height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 3px; line-height: 1; }
+  .bigsq b { font-size: 26px; font-weight: 800; }
+  .bigsq small { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; margin-top: 3px; }
+  .bigsq.none { border: 1px dashed var(--line-strong); color: var(--ink-3); font-size: 11px; font-weight: 700; text-align: center; line-height: 1.25; }
+  .d-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+  .seen-note { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: var(--good); }
+  .d-actions .btns { display: flex; gap: 6px; }
+  .d-summary { font-size: 17px; font-weight: 600; line-height: 1.5; padding-left: 14px; border-left: 4px solid var(--gold); max-width: 640px; text-wrap: pretty; }
+  .cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+  .sec { display: flex; flex-direction: column; gap: 10px; }
+  .sec h3 { margin: 0; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--ink-3); }
+  .sec h3.good { color: var(--good); }
+  .sec h3.crit { color: var(--crit); }
+  .sec ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; line-height: 1.55; }
+  .sec li { display: flex; gap: 10px; }
+  .sec li::before { content: ""; width: 6px; height: 6px; margin-top: 7px; flex-shrink: 0; background: var(--ink-3); }
+  .sec.good li::before { background: var(--good); }
+  .sec.crit li::before { background: var(--crit); }
+  .box { background: var(--surface); border: 1px solid var(--line); padding: 16px 18px; font-size: 13.5px; line-height: 1.6; max-width: 720px; display: flex; flex-direction: column; gap: 10px; white-space: pre-wrap; }
+  .box .btns { display: flex; gap: 8px; white-space: normal; }
+  .hist { background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; max-width: 720px; }
+  .hist .h { display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-bottom: 1px solid var(--surface-2); text-align: left; width: 100%; }
+  .hist .h:last-child { border-bottom: 0; }
+  .hist .h:hover { background: var(--ground); }
+  .hist .sq { width: 30px; height: 30px; font-size: 14px; }
+  .hist .n { font-size: 14px; font-weight: 700; white-space: nowrap; }
+  .hist .s { font-size: 13px; color: var(--ink-2); flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hist .s.crit { color: var(--crit); font-weight: 600; }
+  .hist .w { font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+  .d-empty { margin: auto; color: var(--ink-3); text-align: center; font-size: 14px; max-width: 32ch; line-height: 1.6; }
+  .back { display: none; }
 
-  /* ---------- review list ---------- */
-  .group { margin-top: 22px; }
-  .group h2 {
-    margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--ink);
-    display: flex; align-items: baseline; gap: 10px; padding-left: 10px; border-left: 3px solid var(--gold);
-  }
-  .group h2 .cnt { font-weight: 400; color: var(--ink-3); }
-  .list { display: flex; flex-direction: column; gap: 8px; }
-  .card {
-    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
-    overflow: hidden;
-  }
-  .card.new { border-left: 4px solid var(--crimson); }
-  .card .head {
-    display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 12px 14px; align-items: center;
-    padding: 12px 14px; cursor: pointer; width: 100%; border: 0; background: transparent; text-align: left;
-  }
-  .card .head:hover { background: var(--surface-2); }
-  .score {
-    width: 56px; height: 44px; border-radius: 3px; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; line-height: 1; gap: 3px;
-    font-family: var(--mono); font-weight: 900;
-  }
-  .score b { font-size: 19px; }
-  .score small { font-size: 10px; opacity: 0.8; }
-  .score.good { background: var(--good-soft); color: var(--good); }
-  .score.warn { background: var(--warn-soft); color: var(--warn); }
-  .score.crit { background: var(--crit-soft); color: var(--crit); }
-  .score.none { background: var(--surface-2); color: var(--ink-3); }
-  .who { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-  .who .t { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
-  .who .t .student { font-weight: 700; font-size: 14.5px; }
-  .who .t .doc { color: var(--ink-2); }
-  .who .t .folder { color: var(--ink-3); font-size: 12px; }
-  .who .summary { color: var(--ink-2); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .card[open] .who .summary { white-space: normal; }
-  .meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: 12px; color: var(--ink-3); white-space: nowrap; }
-  .chips { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
-  .chip {
-    display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 2px;
-    font-size: 11px; font-weight: 700; background: var(--surface-2); color: var(--ink-2);
-  }
-  .chip.new { background: var(--gold); color: #111111; }
-  .chip.flag { background: var(--crit-soft); color: var(--crit); }
-  .chip.auto { background: var(--surface-2); }
-  .chip.partial { background: var(--warn-soft); color: var(--warn); }
-
-  .body { border-top: 1px solid var(--line); padding: 14px 16px 16px; display: none; }
-  .card[open] .body { display: block; }
-  .body .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-  @media (max-width: 720px) { .body .cols { grid-template-columns: 1fr; } }
-  .body h3 { margin: 0 0 6px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); font-weight: 700; }
-  .body h3.good { color: var(--good); }
-  .body h3.warn { color: var(--warn); }
-  .body ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; max-width: 60ch; }
-  .body li { font-size: 13.5px; }
-  .body .foot { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 12.5px; color: var(--ink-3); }
-  .body .foot .grow { flex: 1; }
-  .body .comment { margin-top: 12px; padding: 10px 12px; background: var(--surface-2); border-left: 3px solid var(--crimson); border-radius: 0; font-size: 13.5px; max-width: 72ch; white-space: pre-wrap; }
-  .empty {
-    padding: 36px 20px; text-align: center; color: var(--ink-3); border: 1px dashed var(--line-strong);
-    border-radius: var(--radius); margin-top: 22px; font-size: 13.5px;
-  }
-  .empty b { color: var(--ink-2); font-weight: 500; }
-
-  /* ---------- runs ---------- */
-  .runs { margin-top: 32px; }
-  .runs h2 { font-size: 13px; font-weight: 700; color: var(--ink); margin: 0 0 8px; padding-left: 10px; border-left: 3px solid var(--gold); }
-  .runs .tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-  table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
-  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; vertical-align: top; }
-  th { color: var(--ink-3); font-weight: 700; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; }
-  tr:last-child td { border-bottom: 0; }
-  td.err { color: var(--crit); white-space: normal; max-width: 40ch; }
-
-  /* ---------- settings drawer ---------- */
-  .drawer {
-    position: fixed; inset: 0; background: rgba(10, 14, 20, 0.45); display: none; z-index: 20;
-  }
-  .drawer[open] { display: block; }
-  .panel {
-    position: absolute; top: 0; right: 0; bottom: 0; width: min(520px, 100%);
-    background: var(--surface); box-shadow: var(--shadow); overflow-y: auto;
-    padding: 22px 24px 32px; display: flex; flex-direction: column; gap: 18px;
-  }
-  .panel h2 { margin: 0; font-size: 16px; font-weight: 900; padding-left: 10px; border-left: 4px solid var(--crimson); }
-  .panel .row { display: flex; flex-direction: column; gap: 6px; }
-  .panel label { font-size: 12.5px; font-weight: 500; color: var(--ink-2); }
-  .panel .hint { font-size: 12px; color: var(--ink-3); }
-  .panel input[type="text"], .panel input[type="number"], .panel textarea {
-    font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid var(--line-strong);
-    border-radius: 3px; background: var(--ground); color: var(--ink); width: 100%;
-  }
+  /* drawer */
+  .drawer { position: fixed; inset: 0; background: rgba(10, 8, 8, 0.45); z-index: 20; }
+  .panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(520px, 100%); background: var(--surface); overflow-y: auto; padding: 22px 24px 32px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 0 40px rgba(0,0,0,0.25); }
+  .panel h2 { margin: 0; font-size: 16px; font-weight: 800; padding-left: 10px; border-left: 4px solid var(--crimson); }
+  .panel .row-f { display: flex; flex-direction: column; gap: 6px; }
+  .panel label { font-size: 12.5px; font-weight: 700; color: var(--ink-2); }
+  .panel .hint { font-size: 12px; color: var(--ink-3); line-height: 1.5; }
+  .panel input[type="text"], .panel input[type="number"], .panel textarea { font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--ground); color: var(--ink); width: 100%; }
   .panel textarea { min-height: 150px; resize: vertical; line-height: 1.5; }
   .folders { display: flex; flex-direction: column; gap: 6px; }
-  .folder-item {
-    display: flex; align-items: center; gap: 10px; padding: 8px 10px;
-    border: 1px solid var(--line); border-radius: 3px; font-size: 13px;
-  }
+  .folder-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 3px; font-size: 13px; }
+  .folder-item .lblin { width: 100px; flex: none; }
+  .folder-item .lblin input { font: inherit; font-size: 12.5px; padding: 4px 8px; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--ground); color: var(--ink); width: 100%; }
   .folder-item .n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .folder-item .id { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .folder-item .id { font-size: 11px; color: var(--ink-3); }
   .addrow { display: flex; gap: 8px; }
   .addrow input { flex: 1; }
   .panel .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .panel .foot { display: flex; gap: 8px; justify-content: flex-end; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--line); }
+  .notice { margin: 0 20px 12px; padding: 10px 12px; font-size: 12.5px; background: var(--warn-soft); color: var(--ink); }
+  .notice.crit { background: var(--crit-soft); }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--crimson); color: #ffffff; padding: 10px 16px; border-radius: 3px; font-size: 13px; z-index: 30; max-width: calc(100% - 32px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
 
-  .toast {
-    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
-    background: var(--crimson); color: #ffffff; padding: 10px 16px; border-radius: 3px;
-    font-size: 13px; box-shadow: var(--shadow); z-index: 30; max-width: calc(100% - 32px);
+  /* responsive */
+  @media (max-width: 1100px) { .list { width: 360px; } .detail { padding: 24px 28px 32px; } .cols { grid-template-columns: 1fr; } }
+  @media (max-width: 860px) {
+    .app { flex-direction: column; }
+    .rail { width: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px; padding: 10px 12px; border-right: 0; border-bottom: 1px solid var(--line); overflow: visible; }
+    .rail .lbl { display: none; }
+    .rail .grp { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+    .rail .grp + .lbl { margin: 0; padding: 0; border: 0; }
+    .rail .item { width: auto; padding: 6px 10px; border-left: 0; border-radius: 3px; font-size: 13px; gap: 6px; }
+    .rail .item[aria-current="true"] { border-left: 0; }
+    .rail .foot { margin: 0 0 0 auto; padding: 0; flex-direction: row; align-items: center; gap: 8px; }
+    .rail .stamp, .rail .settings-link { display: none; }
+    .btn.primary { height: 36px; font-size: 13px; }
+    .list { width: 100%; border-right: 0; flex-grow: 1; }
+    .app[data-pane="detail"] .list { display: none; }
+    .app[data-pane="list"] .detail { display: none; }
+    .detail { padding: 20px 16px 32px; }
+    .back { display: inline-flex; align-self: flex-start; }
   }
-  .toast[hidden] { display: none; }
 </style>
 
-<div class="band"><div class="band-in"><span class="band-title">숙제 리뷰 데스크<small>Homework Review Desk</small></span><span class="wordmark">Verusacademy</span></div></div>
+<div class="band"><div class="band-in">
+  <div class="band-title"><b>숙제 리뷰 데스크</b><span id="bandSub">2026 Fall</span></div>
+  <div class="wordmark">Verusacademy</div>
+</div></div>
 <div class="gold-rule"></div>
-<div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <div class="sub" id="folderLine">감시 폴더가 아직 없습니다</div>
-    </div>
-    <div class="spacer"></div>
-    <div class="stamp">
-      <span>마지막 확인 <span class="num" id="lastRun">—</span></span>
-      <span>자동 확인 <span class="num" id="schedule">매일 08:00 · 17:00 (KST)</span></span>
-    </div>
-    <div class="actions">
-      <button class="btn ghost" id="settingsBtn" type="button">설정</button>
-      <button class="btn primary" id="runBtn" type="button"><span id="runLabel">지금 확인하기</span></button>
-    </div>
-  </header>
 
-  <nav class="tabs" id="tabs" role="tablist" aria-label="과목"></nav>
+<div class="app" id="app" data-pane="list">
+  <aside class="rail" aria-label="보기">
+    <div class="lbl">모아보기</div>
+    <div class="grp" id="views"></div>
+    <div class="lbl">과목</div>
+    <div class="grp subj" id="subjects"></div>
+    <div class="foot">
+      <div class="progress" id="progress" hidden><span id="progressText"></span><div class="bar"><i id="progressBar"></i></div></div>
+      <div class="stamp"><div>마지막 확인 <b id="lastRun">—</b></div><div>자동 확인 <b>매일 08:00 · 17:00</b></div></div>
+      <button class="btn primary" id="runBtn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span id="runLabel">지금 확인하기</span></button>
+      <button class="settings-link" id="settingsBtn" type="button">설정</button>
+    </div>
+  </aside>
 
-  <div class="progress" id="progress" hidden>
-    <span class="spin" style="width:14px;height:14px;border:2px solid var(--crimson);border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite;display:inline-block"></span>
-    <span id="progressText">준비 중…</span>
-    <div class="bar"><i id="progressBar"></i></div>
-  </div>
-  <div class="notice" id="notice" hidden></div>
-
-  <section class="strip" aria-label="요약">
-    <div class="cell hot"><span class="lbl">확인 안 한 리뷰</span><span class="val num" id="sUnseen">0</span></div>
-    <div class="cell"><span class="lbl">오늘 제출</span><span class="val num" id="sToday">0</span></div>
-    <div class="cell"><span class="lbl">학생</span><span class="val num" id="sStudents">0</span></div>
-    <div class="cell"><span class="lbl">주의 필요</span><span class="val num" id="sFlags">0</span></div>
+  <section class="list" aria-label="목록">
+    <div class="list-head">
+      <h2 id="listTitle">확인 안 함 <small id="listSub"></small></h2>
+      <div class="list-tools" id="listTools"></div>
+    </div>
+    <div class="notice" id="notice" hidden></div>
+    <div class="rows" id="rows"></div>
   </section>
 
-  <div class="toolbar">
-    <div class="seg" role="group" aria-label="보기">
-      <button type="button" data-filter="unseen" aria-pressed="true">확인 안 함</button>
-      <button type="button" data-filter="all" aria-pressed="false">전체</button>
-      <button type="button" data-filter="flag" aria-pressed="false">주의</button>
-    </div>
-    <label>묶기
-      <select id="groupSel">
-        <option value="date">제출일</option>
-        <option value="student">학생</option>
-        <option value="folder">폴더</option>
-      </select>
-    </label>
-    <label>정렬
-      <select id="sortSel">
-        <option value="recent">최근 제출순</option>
-        <option value="score-asc">점수 낮은순</option>
-        <option value="score-desc">점수 높은순</option>
-        <option value="student">이름순</option>
-      </select>
-    </label>
-    <input type="search" id="q" placeholder="학생·문서 검색" aria-label="검색">
-    <span class="spacer" style="flex:1"></span>
-    <button class="btn small ghost" id="markAllBtn" type="button">보이는 항목 모두 확인함</button>
-  </div>
-
-  <div id="groups"></div>
-
-  <section class="runs">
-    <h2>실행 기록</h2>
-    <div class="tbl">
-      <table>
-        <thead><tr><th>시각 (KST)</th><th>출처</th><th>검사</th><th>리뷰</th><th>건너뜀</th><th>소요</th><th>오류</th></tr></thead>
-        <tbody id="runsBody"><tr><td colspan="7" style="color:var(--ink-3)">아직 실행 기록이 없습니다.</td></tr></tbody>
-      </table>
-    </div>
-  </section>
+  <section class="detail" id="detail" aria-label="상세"></section>
 </div>
 
-<div class="drawer" id="drawer">
+<div class="drawer" id="drawer" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
     <h2 id="panelTitle">설정</h2>
-
-    <div class="row">
-      <label>감시 폴더</label>
-      <div class="hint">폴더 하나가 과목 탭 하나가 됩니다. 폴더 안의 구글 문서와, 한 단계 아래 하위 폴더(학생 폴더)의 문서를 확인합니다. 하위 폴더 이름에서 수업 이름을 뺀 부분을 학생 이름으로 씁니다. 탭 이름은 짧게 바꿀 수 있습니다.</div>
+    <div class="row-f">
+      <label>과목 폴더</label>
+      <div class="hint">폴더 하나가 과목 하나입니다. 학생 폴더(한 단계 아래)의 구글 문서를 리뷰하고, 과목 폴더 안의 「자료실 › Homework › Due 날짜」 폴더를 과제 목록으로 읽습니다.</div>
       <div class="folders" id="folderList"></div>
-      <div class="addrow">
-        <input type="text" id="folderInput" placeholder="드라이브 폴더 링크 또는 폴더 ID 붙여넣기" aria-label="폴더 링크">
-        <button class="btn" id="folderAdd" type="button">추가</button>
-      </div>
+      <div class="addrow"><input type="text" id="folderInput" placeholder="드라이브 폴더 링크 또는 ID"><button class="btn" id="folderAdd" type="button">추가</button></div>
     </div>
-
-    <div class="row">
-      <label for="excludeInput">건너뛸 하위 폴더 (쉼표로 구분)</label>
-      <input type="text" id="excludeInput" placeholder="자료실, 비공개">
-    </div>
-
     <div class="two">
-      <div class="row">
-        <label for="sinceInput">최근 며칠 안에 수정된 문서만</label>
-        <input type="number" id="sinceInput" min="1" max="120" step="1">
-      </div>
-      <div class="row">
-        <label for="minCharsInput">이 글자 수 미만이면 "내용 없음"</label>
-        <input type="number" id="minCharsInput" min="0" max="2000" step="10">
-      </div>
+      <div class="row-f"><label for="materialsInput">자료실 폴더 이름에 포함된 말</label><input type="text" id="materialsInput" placeholder="자료실"></div>
+      <div class="row-f"><label for="homeworkInput">숙제 폴더 이름에 포함된 말</label><input type="text" id="homeworkInput" placeholder="Homework"></div>
     </div>
-
-    <div class="row">
+    <div class="row-f"><label for="excludeInput">학생 폴더로 보지 않을 하위 폴더 (쉼표 구분)</label><input type="text" id="excludeInput" placeholder="자료실, 비공개"></div>
+    <div class="two">
+      <div class="row-f"><label for="sinceInput">최근 며칠 안에 수정된 문서만</label><input type="number" id="sinceInput" min="1" max="120"></div>
+      <div class="row-f"><label for="minCharsInput">이 글자 수 미만이면 빈 문서</label><input type="number" id="minCharsInput" min="0" max="2000" step="10"></div>
+    </div>
+    <div class="row-f">
       <label for="rubricInput">리뷰 기준 (Claude에게 주는 지시)</label>
-      <div class="hint">수업·과제 성격에 맞게 자유롭게 고치세요. 자동 확인과 수동 확인 모두 이 기준을 씁니다.</div>
       <textarea id="rubricInput"></textarea>
     </div>
-
-    <div class="foot">
-      <button class="btn ghost" id="panelClose" type="button">닫기</button>
-      <button class="btn primary" id="panelSave" type="button">저장</button>
-    </div>
+    <div class="foot"><button class="btn" id="panelClose" type="button">닫기</button><button class="btn primary" id="panelSave" type="button" style="height:36px">저장</button></div>
   </div>
 </div>
-
 <div class="toast" id="toast" hidden></div>
 
 <script>
 (function () {
   'use strict';
-
   var FOLDER = 'application/vnd.google-apps.folder';
   var GDOC = 'application/vnd.google-apps.document';
   var DRIVE = 'Google Drive';
@@ -451,7 +323,7 @@
     '',
     '평가 관점:',
     '1. 과제 요구를 충족했는가 (완성도, 분량, 질문에 실제로 답했는가)',
-    '2. 내용의 정확성 — 교과 개념·용어(경제학, 심리학 등)를 바르게 사용했는가, 사실 오류나 오개념이 있는가',
+    '2. 내용의 정확성 — 교과 개념·용어(경제학, 경영학, 심리학, 정치학 등)를 바르게 사용했는가, 사실 오류나 오개념이 있는가',
     '3. 논리와 구조 — 주장, 근거, 설명(예: 정의 → 설명 → 예시/도표 → 평가)이 이어지는가',
     '4. 표현 — 학술적 영어 문장, 용어의 정확성 (문법은 의미를 해치는 경우만 지적)',
     '',
@@ -461,81 +333,40 @@
     '- 점수는 0~10 정수. 8 이상은 거의 수정 없이 통과, 5~7은 보완 필요, 4 이하는 다시 써야 하는 수준.',
     '- 미완성·빈 문서·과제와 무관한 내용·AI가 그대로 쓴 듯한 글은 flags에 표시하세요.'
   ].join('\n');
+  var ICON_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"></path></svg>';
+  var ICON_DOC = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"></path><path d="M20 4l-9 9"></path><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"></path></svg>';
+  var ICON_FOLDER = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>';
+  var ICON_INBOX = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6"></path><rect x="3" y="5" width="18" height="14"></rect></svg>';
+  var ICON_ALERT = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5"></path><path d="M12 16h.01"></path></svg>';
+  var ICON_BACK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>';
 
   var state = {
-    db: null, mcp: null, sample: null,
-    config: null, reviews: {}, runs: [],
-    filter: 'unseen', group: 'date', sort: 'recent', q: '', tab: 'all',
-    running: false, capsReady: false
+    db: null, mcp: null, sample: null, capsReady: false,
+    config: null, reviews: {}, runs: [], roster: {}, assignments: {},
+    view: 'unseen', subject: 'all', q: '', selected: null, selectedStudent: null,
+    keep: {}, assignSel: {}, running: false, pane: 'list'
   };
   var draftFolders = [];
 
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function fmtKST(iso, opts) {
+  function fmt(iso, opts) {
     if (!iso) return '—';
     var d = new Date(iso); if (isNaN(d)) return '—';
     var o = opts || { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
     o.timeZone = 'Asia/Seoul';
-    return d.toLocaleString('ko-KR', o).replace(/\.\s*$/, '');
+    return d.toLocaleString('ko-KR', o).replace(/\.\s*$/, '').replace(/\.\s+/g, '.').replace(/\.(\d{2}:)/, ' $1');
   }
-  function dayKST(iso) { return fmtKST(iso, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }); }
-  function todayKST() { return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }); }
-  function dateKeyKST(iso) { return new Date(iso).toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }); }
+  function fmtTime(iso) { return fmt(iso, { hour: '2-digit', minute: '2-digit', hour12: false }); }
+  function dayKey(iso) { return iso ? new Date(iso).toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }) : '0000'; }
+  function dayLabel(iso) { return fmt(iso, { month: 'long', day: 'numeric', weekday: 'long' }); }
+  function today() { return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }); }
   var toastTimer = null;
-  function toast(msg, ms) {
-    var t = $('toast'); t.textContent = msg; t.hidden = false;
-    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.hidden = true; }, ms || 3200);
-  }
-  function notice(msg, crit) {
-    var n = $('notice'); if (!msg) { n.hidden = true; return; }
-    n.textContent = msg; n.className = 'notice' + (crit ? ' crit' : ''); n.hidden = false;
-  }
-  function use(name) {
-    try {
-      if (window.claude && typeof window.claude.use === 'function') return window.claude.use(name);
-    } catch (e) { /* no runtime */ }
-    return Promise.resolve(null);
-  }
+  function toast(msg, ms) { var t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.hidden = true; }, ms || 3200); }
+  function notice(msg, crit) { var n = $('notice'); if (!msg) { n.hidden = true; return; } n.textContent = msg; n.className = 'notice' + (crit ? ' crit' : ''); n.hidden = false; }
+  function use(name) { try { if (window.claude && typeof window.claude.use === 'function') return window.claude.use(name); } catch (e) { /* none */ } return Promise.resolve(null); }
 
-  /* ---------------- boot ---------------- */
-  try { var savedTab = localStorage.getItem('reviewDesk.tab'); if (savedTab) state.tab = savedTab; } catch (e) { /* ignore */ }
-  render();
-  bindUI();
-  Promise.all([use('db'), use('mcp'), use('sample')]).then(function (caps) {
-    state.db = caps[0]; state.mcp = caps[1]; state.sample = caps[2];
-    state.capsReady = true;
-    if (!state.db) {
-      notice('이 페이지는 claude.ai 안에서 열어야 리뷰 데이터를 불러올 수 있습니다.', true);
-      render();
-      return;
-    }
-    subscribe();
-    if (!state.mcp || !state.sample) {
-      notice('드라이브 연결 또는 Claude 리뷰 기능을 이 화면에서 쓸 수 없습니다. 자동 확인 결과는 계속 보이지만 "지금 확인하기"는 동작하지 않습니다.');
-    }
-    render();
-  });
-
-  function subscribe() {
-    var db = state.db;
-    db.doc('config/main').onSnapshot(function (snap) {
-      state.config = snap.exists ? snap.data() : null;
-      render();
-    }, function (e) { toast('설정을 읽지 못했습니다: ' + e.message); });
-    db.collection('reviews').onSnapshot(function (snap) {
-      var map = {};
-      snap.docs.forEach(function (d) { map[d.id] = d.data(); });
-      state.reviews = map;
-      render();
-    }, function (e) { toast('리뷰를 읽지 못했습니다: ' + e.message); });
-    db.collection('runs').orderBy('startedAt', 'desc').limit(30).onSnapshot(function (snap) {
-      state.runs = snap.docs.map(function (d) { return d.data(); });
-      render();
-    }, function (e) { /* runs are optional */ });
-  }
-
-  /* ---------------- rendering ---------------- */
+  /* ---------- config helpers ---------- */
   function cfg() {
     var c = state.config || {};
     return {
@@ -543,462 +374,493 @@
       exclude: Array.isArray(c.exclude) ? c.exclude : ['자료실', '비공개'],
       sinceDays: Number(c.sinceDays) > 0 ? Number(c.sinceDays) : 14,
       minChars: Number(c.minChars) >= 0 ? Number(c.minChars) : 40,
-      rubric: typeof c.rubric === 'string' && c.rubric.trim() ? c.rubric : DEFAULT_RUBRIC
+      rubric: typeof c.rubric === 'string' && c.rubric.trim() ? c.rubric : DEFAULT_RUBRIC,
+      materialsPattern: (c.materialsPattern || '자료실').trim(),
+      homeworkPattern: (c.homeworkPattern || 'Homework').trim()
     };
   }
-  function scoreClass(r) {
-    if (r.status === 'empty' || typeof r.score !== 'number') return 'none';
-    return r.score >= 8 ? 'good' : r.score >= 5 ? 'warn' : 'crit';
+  function folderById(id) { var fs = cfg().folders; for (var i = 0; i < fs.length; i++) if (fs[i].id === id) return fs[i]; return null; }
+  function label(f) { return f.label || f.name || f.id; }
+  function inFolder(r, f) { if (!f) return true; if (r.folderId) return r.folderId === f.id; return !!f.name && r.folderName === f.name; }
+  function allReviews() { return Object.keys(state.reviews).map(function (k) { return state.reviews[k]; }); }
+  function scoreClass(r) { if (!r || r.status === 'empty' || typeof r.score !== 'number') return 'none'; return r.score >= 8 ? 'good' : r.score >= 5 ? 'warn' : 'crit'; }
+  function isFlagged(r) { return (r.flags && r.flags.length) || (typeof r.score === 'number' && r.score < 5); }
+  function cmpRecent(a, b) { return String(b.modifiedTime || '').localeCompare(String(a.modifiedTime || '')); }
+  function assignmentsFor(folderId) { var a = state.assignments[folderId]; return a && Array.isArray(a.items) ? a.items.slice().sort(function (x, y) { return String(y.due || '').localeCompare(String(x.due || '')); }) : []; }
+  function currentAssignment(folderId) {
+    var items = assignmentsFor(folderId); if (!items.length) return null;
+    var sel = state.assignSel[folderId]; if (sel) for (var i = 0; i < items.length; i++) if (items[i].id === sel) return items[i];
+    var t = today(); var soon = new Date(Date.now() + 3 * 86400000).toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' });
+    for (var j = 0; j < items.length; j++) if (items[j].due && items[j].due <= soon) return items[j];
+    return items[items.length - 1] || null;
   }
-  function tabLabel(f) { return f.label || f.name || f.id; }
-  function inFolder(r, f) {
-    if (!f) return true;
-    if (r.folderId) return r.folderId === f.id;
-    return !!f.name && r.folderName === f.name;
+  function guessAssignment(items, modifiedTime) {
+    if (!items || !items.length || !modifiedTime) return null;
+    var m = new Date(modifiedTime).getTime(); var best = null; var bestD = Infinity;
+    items.forEach(function (a) {
+      if (!a.due) return; var d = new Date(a.due + 'T23:59:59+09:00').getTime();
+      var late = m - d; if (late > 10 * 86400000) return;
+      var dist = Math.abs(late); if (dist < bestD) { bestD = dist; best = a; }
+    });
+    return best;
   }
-  function currentFolder() {
-    if (state.tab === 'all') return null;
-    var fs = cfg().folders;
-    for (var i = 0; i < fs.length; i++) if (fs[i].id === state.tab) return fs[i];
-    return null;
+  function reviewAssignment(r) {
+    if (r.assignmentId) return { id: r.assignmentId, name: r.assignmentName || '', due: r.assignmentDue || '' };
+    var g = guessAssignment(assignmentsFor(r.folderId), r.modifiedTime); return g ? { id: g.id, name: g.name, due: g.due, guessed: true } : null;
   }
-  function tabReviews() {
-    var f = currentFolder();
-    if (state.tab !== 'all' && !f) { state.tab = 'all'; }
-    return Object.keys(state.reviews).map(function (k) { return state.reviews[k]; }).filter(function (r) { return inFolder(r, f); });
+
+  /* ---------- boot ---------- */
+  try { var saved = JSON.parse(localStorage.getItem('reviewDesk.ui') || '{}'); if (saved.view) state.view = saved.view; if (saved.subject) state.subject = saved.subject; } catch (e) { /* ignore */ }
+  render(); bindUI();
+  Promise.all([use('db'), use('mcp'), use('sample')]).then(function (caps) {
+    state.db = caps[0]; state.mcp = caps[1]; state.sample = caps[2]; state.capsReady = true;
+    if (!state.db) { notice('이 페이지는 claude.ai 안에서 열어야 리뷰 데이터를 불러올 수 있습니다.', true); render(); return; }
+    subscribe();
+    if (!state.mcp || !state.sample) notice('이 화면에서는 드라이브 연결 또는 Claude 리뷰를 쓸 수 없어 "지금 확인하기"가 동작하지 않습니다. 자동 확인 결과는 계속 보입니다.');
+    render();
+  });
+  function subscribe() {
+    var db = state.db;
+    db.doc('config/main').onSnapshot(function (s) { state.config = s.exists ? s.data() : null; render(); }, function (e) { toast('설정을 읽지 못했습니다: ' + e.message); });
+    db.collection('reviews').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { m[d.id] = d.data(); }); state.reviews = m; render(); }, function (e) { toast('리뷰를 읽지 못했습니다: ' + e.message); });
+    db.collection('runs').orderBy('startedAt', 'desc').limit(10).onSnapshot(function (s) { state.runs = s.docs.map(function (d) { return d.data(); }); render(); }, function () {});
+    db.collection('roster').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { m[d.id] = d.data(); }); state.roster = m; render(); }, function () {});
+    db.collection('assignments').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { m[d.id] = d.data(); }); state.assignments = m; render(); }, function () {});
   }
-  function visibleReviews() {
-    var list = tabReviews();
+  function persistUI() { try { localStorage.setItem('reviewDesk.ui', JSON.stringify({ view: state.view, subject: state.subject })); } catch (e) { /* ignore */ } }
+
+  /* ---------- derived lists ---------- */
+  function subjectFolder() { return state.subject === 'all' ? null : folderById(state.subject); }
+  function reviewsInScope() { var f = subjectFolder(); return allReviews().filter(function (r) { return inFolder(r, f); }); }
+  function listReviews() {
     var q = state.q.trim().toLowerCase();
-    list = list.filter(function (r) {
-      if (state.filter === 'unseen' && r.seen) return false;
-      if (state.filter === 'flag' && !((r.flags && r.flags.length) || (typeof r.score === 'number' && r.score < 5))) return false;
+    return reviewsInScope().filter(function (r) {
+      if (state.view === 'unseen' && r.seen && !state.keep[r.fileId]) return false;
+      if (state.view === 'seen' && !r.seen) return false;
       if (q && !((r.student || '') + ' ' + (r.title || '') + ' ' + (r.folderName || '')).toLowerCase().includes(q)) return false;
       return true;
-    });
-    list.sort(function (a, b) {
-      if (state.sort === 'score-asc') return (a.score == null ? 99 : a.score) - (b.score == null ? 99 : b.score) || cmpRecent(a, b);
-      if (state.sort === 'score-desc') return (b.score == null ? -1 : b.score) - (a.score == null ? -1 : a.score) || cmpRecent(a, b);
-      if (state.sort === 'student') return String(a.student || '').localeCompare(String(b.student || ''), 'ko') || cmpRecent(a, b);
-      return cmpRecent(a, b);
-    });
-    return list;
+    }).sort(cmpRecent);
   }
-  function cmpRecent(a, b) { return String(b.modifiedTime || '').localeCompare(String(a.modifiedTime || '')); }
-
-  function render() {
-    var c = cfg();
-    var everything = Object.keys(state.reviews).map(function (k) { return state.reviews[k]; });
-    var all = tabReviews();
-    var folder = currentFolder();
-
-    // tabs
-    var unseenAll = everything.filter(function (r) { return !r.seen; }).length;
-    var tabsHtml = '<button type="button" role="tab" data-tab="all" aria-selected="' + (state.tab === 'all') + '">전체<span class="badge' + (unseenAll ? ' hot' : ' zero') + '">' + unseenAll + '</span></button>';
-    c.folders.forEach(function (f) {
-      var n = everything.filter(function (r) { return !r.seen && inFolder(r, f); }).length;
-      tabsHtml += '<button type="button" role="tab" data-tab="' + esc(f.id) + '" aria-selected="' + (state.tab === f.id) + '" title="' + esc(f.name) + '">' + esc(tabLabel(f)) + '<span class="badge' + (n ? ' hot' : ' zero') + '">' + n + '</span></button>';
+  function missingRows() {
+    var fs = subjectFolder() ? [subjectFolder()] : cfg().folders; var out = [];
+    fs.forEach(function (f) {
+      var ro = state.roster[f.id]; var students = ro && Array.isArray(ro.students) ? ro.students : [];
+      if (!students.length) return;
+      var a = currentAssignment(f.id);
+      var byStudent = {}; allReviews().filter(function (r) { return inFolder(r, f); }).forEach(function (r) { var k = r.student || ''; (byStudent[k] = byStudent[k] || []).push(r); });
+      students.forEach(function (s) {
+        var mine = (byStudent[s.name] || []).sort(cmpRecent);
+        var submitted = a ? mine.some(function (r) { var ra = reviewAssignment(r); return ra && ra.id === a.id; }) : mine.length > 0;
+        if (submitted) return;
+        var last = mine[0] || null;
+        out.push({ key: f.id + ':' + s.name, folder: f, student: s, assignment: a, history: mine, last: last, never: !mine.length });
+      });
     });
-    $('tabs').innerHTML = tabsHtml;
+    var q = state.q.trim().toLowerCase();
+    if (q) out = out.filter(function (m) { return (m.student.name + ' ' + m.folder.name).toLowerCase().includes(q); });
+    return out;
+  }
+  function missingCount() { var s = state.subject; state.subject = 'all'; var n = 0; try { n = missingRows().length; } catch (e) { n = 0; } state.subject = s; return n; }
 
-    // header
-    $('folderLine').innerHTML = c.folders.length
-      ? '감시 중 · ' + c.folders.map(function (f) { return '<b>' + esc(f.name || f.id) + '</b>'; }).join(', ')
-      : '감시 폴더가 아직 없습니다 — <b>설정</b>에서 추가하세요';
+  /* ---------- render ---------- */
+  function render() {
+    var c = cfg(); var all = allReviews(); var f = subjectFolder();
+    if (state.subject !== 'all' && !f) { state.subject = 'all'; }
+    var unseenAll = all.filter(function (r) { return !r.seen; }).length;
+    var seenAll = all.length - unseenAll;
+    var missingAll = missingCount();
+
+    // rail: views
+    var views = [
+      { id: 'unseen', icon: ICON_INBOX, t: '확인 안 함', n: unseenAll, cls: unseenAll ? 'hot' : 'zero' },
+      { id: 'missing', icon: ICON_ALERT, t: '미제출자', n: missingAll, cls: missingAll ? 'crit' : 'zero' },
+      { id: 'seen', icon: ICON_CHECK, t: '확인함', n: seenAll, cls: seenAll ? '' : 'zero' }
+    ];
+    $('views').innerHTML = views.map(function (v) {
+      return '<button class="item" type="button" data-view="' + v.id + '" aria-current="' + (state.view === v.id) + '">' + v.icon + '<span class="t">' + v.t + '</span><span class="cnt ' + v.cls + '">' + v.n + '</span></button>';
+    }).join('');
+    // rail: subjects
+    var sub = '<button class="item" type="button" data-subject="all" aria-current="' + (state.subject === 'all') + '"><span class="t">전체</span><span class="cnt ' + (unseenAll ? '' : 'zero') + '">' + unseenAll + '</span></button>';
+    c.folders.forEach(function (fo) {
+      var n = all.filter(function (r) { return !r.seen && inFolder(r, fo); }).length;
+      sub += '<button class="item" type="button" data-subject="' + esc(fo.id) + '" aria-current="' + (state.subject === fo.id) + '" title="' + esc(fo.name) + '"><span class="t">' + esc(label(fo)) + '</span><span class="cnt ' + (n ? 'hot' : 'zero') + '">' + n + '</span></button>';
+    });
+    if (!c.folders.length) sub += '<div class="empty" style="padding:12px 24px;text-align:left">설정에서 과목 폴더를 추가하세요.</div>';
+    $('subjects').innerHTML = sub;
+    // rail: foot
     var last = state.runs[0];
-    $('lastRun').textContent = last ? fmtKST(last.finishedAt || last.startedAt) + (last.source === 'scheduled' ? ' 자동' : ' 수동') : '아직 없음';
-
-    // strip
-    var today = todayKST();
-    var unseen = all.filter(function (r) { return !r.seen; }).length;
-    var todayN = all.filter(function (r) { return r.modifiedTime && dateKeyKST(r.modifiedTime) === today; }).length;
-    var students = {}; all.forEach(function (r) { if (r.student) students[r.student] = 1; });
-    var flags = all.filter(function (r) { return (r.flags && r.flags.length) || (typeof r.score === 'number' && r.score < 5); }).length;
-    $('sUnseen').textContent = unseen; $('sToday').textContent = todayN;
-    $('sStudents').textContent = Object.keys(students).length; $('sFlags').textContent = flags;
-
-    // run button
-    var canRun = state.capsReady && state.db && state.mcp && state.sample && !state.running;
+    $('lastRun').textContent = last ? fmt(last.finishedAt || last.startedAt) + (last.source === 'scheduled' ? ' 자동' : ' 수동') : '아직 없음';
+    var canRun = state.capsReady && state.db && state.mcp && state.sample && !state.running && c.folders.length;
     $('runBtn').disabled = !canRun;
-    $('runBtn').innerHTML = state.running ? '<span class="spin"></span><span>확인 중…</span>' : '<span>지금 확인하기' + (folder ? ' · ' + esc(tabLabel(folder)) : '') + '</span>';
-    $('runBtn').title = folder ? tabLabel(folder) + ' 폴더만 확인합니다' : '모든 과목 폴더를 확인합니다';
+    $('runBtn').innerHTML = state.running ? '<span class="spin"></span><span>확인 중…</span>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span>지금 확인하기' + (f ? ' · ' + esc(label(f)) : '') + '</span>';
+    $('bandSub').textContent = c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall';
 
     // list
-    var list = visibleReviews();
-    var host = $('groups');
-    if (!list.length) {
-      var msg = all.length
-        ? (state.filter === 'unseen' ? '확인하지 않은 리뷰가 없습니다. <b>전체</b> 보기에서 지난 리뷰를 볼 수 있습니다.' : '조건에 맞는 리뷰가 없습니다.')
-        : (folder
-          ? '<b>' + esc(tabLabel(folder)) + '</b>에는 아직 리뷰가 없습니다. 최근 ' + c.sinceDays + '일 안에 제출된 문서가 없으면 정상입니다. 새 숙제가 올라오면 자동 확인(08:00 · 17:00) 때 리뷰됩니다.'
-          : (c.folders.length ? '아직 리뷰가 없습니다. <b>지금 확인하기</b>를 누르거나 다음 자동 확인(08:00 · 17:00)을 기다리세요.' : '먼저 <b>설정</b>에서 학생들이 숙제를 올리는 드라이브 폴더를 추가하세요.'));
-      host.innerHTML = '<div class="empty">' + msg + '</div>';
+    var titleMap = { unseen: '확인 안 함', missing: '미제출자', seen: '확인함' };
+    $('listTitle').firstChild.nodeValue = titleMap[state.view] + ' ';
+    var tools = '';
+    if (state.view === 'missing') {
+      if (f) {
+        var items = assignmentsFor(f.id); var cur = currentAssignment(f.id);
+        tools += '<select id="assignSel" aria-label="과제 선택">' + (items.length ? items.map(function (a) { return '<option value="' + esc(a.id) + '"' + (cur && cur.id === a.id ? ' selected' : '') + '>' + esc(a.name) + (a.due ? ' · ' + a.due.slice(5).replace('-', '/') : '') + '</option>'; }).join('') : '<option>과제 폴더 없음 · 최근 ' + c.sinceDays + '일 기준</option>') + '</select>';
+      } else {
+        tools += '<span class="chip-btn" aria-pressed="true">과목별 최근 과제 기준</span>';
+      }
     } else {
-      var groups = {}; var order = [];
-      list.forEach(function (r) {
-        var key, label;
-        if (state.group === 'student') { key = r.student || '(이름 없음)'; label = key; }
-        else if (state.group === 'folder') { key = r.folderName || '(폴더 없음)'; label = key; }
-        else { key = r.modifiedTime ? dateKeyKST(r.modifiedTime) : '0000'; label = r.modifiedTime ? dayKST(r.modifiedTime) + (key === today ? ' · 오늘' : '') : '날짜 없음'; }
-        if (!groups[key]) { groups[key] = { label: label, items: [] }; order.push(key); }
-        groups[key].items.push(r);
-      });
-      if (state.group === 'date') order.sort().reverse();
-      host.innerHTML = order.map(function (k) {
-        var g = groups[k];
-        return '<section class="group"><h2>' + esc(g.label) + ' <span class="cnt num">' + g.items.length + '</span></h2><div class="list">' +
-          g.items.map(cardHTML).join('') + '</div></section>';
-      }).join('');
+      tools += '<button class="chip-btn" type="button" id="flagOnly" aria-pressed="' + (state.flagOnly ? 'true' : 'false') + '">주의만</button>';
     }
+    tools += '<span class="grow"></span><input type="search" id="q" placeholder="검색" aria-label="검색" value="' + esc(state.q) + '" style="width:140px">';
+    $('listTools').innerHTML = tools;
 
-    // runs
-    var rb = $('runsBody');
-    if (!state.runs.length) rb.innerHTML = '<tr><td colspan="7" style="color:var(--ink-3)">아직 실행 기록이 없습니다.</td></tr>';
-    else rb.innerHTML = state.runs.map(function (r) {
-      var dur = r.finishedAt && r.startedAt ? Math.round((new Date(r.finishedAt) - new Date(r.startedAt)) / 1000) + '초' : (r.status === 'running' ? '진행 중' : '—');
-      var errs = (r.errors || []).map(function (e) { return esc(typeof e === 'string' ? e : (e.title ? e.title + ': ' : '') + (e.message || '')); }).join('<br>');
-      return '<tr><td class="num">' + fmtKST(r.startedAt) + '</td><td>' + (r.source === 'scheduled' ? '자동' : '수동') + '</td>' +
-        '<td class="num">' + (r.checked == null ? '—' : r.checked) + '</td><td class="num">' + (r.reviewed == null ? '—' : r.reviewed) + '</td>' +
-        '<td class="num">' + (r.skipped == null ? '—' : r.skipped) + '</td><td class="num">' + dur + '</td><td class="err">' + (errs || '') + '</td></tr>';
-    }).join('');
+    var rowsHtml = '';
+    if (state.view === 'missing') {
+      var ms = missingRows();
+      $('listSub').textContent = (f ? label(f) : '전체 과목') + ' · ' + ms.length + '명';
+      if (!ms.length) rowsHtml = '<div class="empty">' + (Object.keys(state.roster).length ? '미제출자가 없습니다.' : '학생 명단이 아직 없습니다. <b>지금 확인하기</b>를 한 번 실행하면 학생 폴더와 과제 폴더를 읽어 옵니다.') + '</div>';
+      else {
+        var never = ms.filter(function (m) { return m.never; }); var lapsed = ms.filter(function (m) { return !m.never; });
+        var block = function (title, arr) {
+          if (!arr.length) return '';
+          return '<div class="day">' + title + ' · ' + arr.length + '</div>' + arr.map(function (m) {
+            var l2 = m.never ? '폴더에 문서 없음' : (m.last ? fmt(m.last.modifiedTime, { month: 'numeric', day: 'numeric' }) + ' ' + esc(m.last.title) + (typeof m.last.score === 'number' ? ' ' + m.last.score + '점' : '') + ' · 이번 과제 없음' : '');
+            return '<button class="row" type="button" data-missing="' + esc(m.key) + '" aria-current="' + (state.selectedStudent === m.key) + '"><div class="sq none">없음</div><div class="body"><div class="l1"><div class="who">' + esc(m.student.name) + (!f ? ' <span class="tag subj">' + esc(label(m.folder)) + '</span>' : '') + '</div><div class="when">' + (m.assignment ? esc(m.assignment.name) : '') + '</div></div><div class="l2">' + l2 + '</div></div></button>';
+          }).join('');
+        };
+        rowsHtml = block('한 번도 안 낸 학생', never) + block('지난 과제는 냈는데 이번엔 안 냄', lapsed);
+      }
+    } else {
+      var list = listReviews(); if (state.flagOnly) list = list.filter(isFlagged);
+      $('listSub').textContent = (f ? label(f) : '전체 과목') + ' · ' + list.length + '건';
+      if (!list.length) {
+        rowsHtml = '<div class="empty">' + (state.view === 'unseen'
+          ? (all.length ? '확인하지 않은 리뷰가 없습니다.' : (c.folders.length ? '아직 리뷰가 없습니다. <b>지금 확인하기</b>를 누르거나 다음 자동 확인(08:00 · 17:00)을 기다리세요.' : '먼저 <b>설정</b>에서 과목 폴더를 추가하세요.'))
+          : '아직 확인한 리뷰가 없습니다.') + '</div>';
+      } else {
+        var curDay = null;
+        list.forEach(function (r) {
+          var dk = dayKey(r.modifiedTime);
+          if (dk !== curDay) { curDay = dk; rowsHtml += '<div class="day">' + (r.modifiedTime ? dayLabel(r.modifiedTime) + (dk === today() ? ' · 오늘' : '') : '날짜 없음') + '</div>'; }
+          var sc = scoreClass(r);
+          var right = (state.view === 'unseen' && r.seen) ? '<span class="tag moved">' + ICON_CHECK + '확인함으로 이동</span>' : '<div class="when">' + fmtTime(r.modifiedTime) + '</div>';
+          var flags = (r.flags || []).map(function (x) { return '<span class="tag flag">' + esc(x) + '</span>'; }).join('');
+          rowsHtml += '<button class="row" type="button" data-id="' + esc(r.fileId) + '" aria-current="' + (state.selected === r.fileId) + '">' +
+            '<div class="sq ' + sc + '">' + (sc === 'none' ? '빈' : r.score) + '</div>' +
+            '<div class="body"><div class="l1"><div class="who">' + esc(r.student || '(이름 없음)') + ' <span>' + esc(r.title) + '</span>' + flags + (!f && r.folderId ? ' <span class="tag subj">' + esc(label(folderById(r.folderId) || { name: r.folderName })) + '</span>' : '') + '</div>' + right + '</div>' +
+            '<div class="l2">' + esc(r.summary || '') + '</div></div></button>';
+        });
+      }
+    }
+    $('rows').innerHTML = rowsHtml;
+
+    // detail
+    renderDetail();
+    $('app').setAttribute('data-pane', state.pane);
   }
 
-  function cardHTML(r) {
-    var sc = scoreClass(r);
-    var scoreBox = sc === 'none'
-      ? '<div class="score none"><b>–</b><small>' + (r.status === 'empty' ? '빈 문서' : '점수 없음') + '</small></div>'
-      : '<div class="score ' + sc + '"><b>' + r.score + '</b><small>/ 10</small></div>';
-    var chips = [];
-    if (!r.seen) chips.push('<span class="chip new">새 리뷰</span>');
-    if (r.completeness === 'partial') chips.push('<span class="chip partial">미완성</span>');
-    (r.flags || []).forEach(function (f) { chips.push('<span class="chip flag">' + esc(f) + '</span>'); });
-    if (r.revision > 1) chips.push('<span class="chip">' + r.revision + '차 수정</span>');
-    chips.push('<span class="chip auto">' + (r.source === 'scheduled' ? '자동' : '수동') + '</span>');
-    var lists = function (title, cls, arr) {
-      if (!arr || !arr.length) return '';
-      return '<div><h3 class="' + cls + '">' + title + '</h3><ul>' + arr.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
-    };
-    return '<article class="card' + (r.seen ? '' : ' new') + '" data-id="' + esc(r.fileId) + '">' +
-      '<button class="head" type="button" aria-expanded="false">' + scoreBox +
-      '<div class="who"><div class="t"><span class="student">' + esc(r.student || '(이름 없음)') + '</span><span class="doc">' + esc(r.title) + '</span><span class="folder">' + esc(r.folderName || '') + '</span></div>' +
-      '<div class="summary">' + esc(r.summary || '') + '</div></div>' +
-      '<div class="meta"><span class="num">제출 ' + fmtKST(r.modifiedTime) + '</span><div class="chips">' + chips.join('') + '</div></div></button>' +
-      '<div class="body"><div class="cols">' +
-      lists('잘한 점', 'good', r.strengths) + lists('고칠 점', 'warn', r.improvements) + lists('다음 단계', '', r.nextSteps) +
-      '</div>' + (r.comment ? '<div class="comment">' + esc(r.comment) + '</div>' : '') +
-      '<div class="foot"><span>리뷰 ' + fmtKST(r.reviewedAt) + '</span><span class="num">' + (r.wordCount || 0) + ' 단어</span><span class="grow"></span>' +
-      '<a class="btn small" href="' + esc(r.viewUrl || '#') + '" target="_blank" rel="noopener">문서 열기</a>' +
-      '<button class="btn small" type="button" data-act="rereview">다시 리뷰</button>' +
-      '<button class="btn small ' + (r.seen ? '' : 'primary') + '" type="button" data-act="seen">' + (r.seen ? '확인 취소' : '확인함') + '</button>' +
-      '</div></div></article>';
+  function renderDetail() {
+    var d = $('detail'); var back = '<button class="btn quiet back" type="button" id="backBtn">' + ICON_BACK + '목록</button>';
+    if (state.view === 'missing') {
+      var m = missingRows().filter(function (x) { return x.key === state.selectedStudent; })[0];
+      if (!m) { d.innerHTML = back + '<div class="d-empty">왼쪽에서 학생을 고르면 제출 이력이 여기에 나옵니다.</div>'; return; }
+      var a = m.assignment;
+      var hist = (a ? '<button class="h" type="button"><div class="sq none">—</div><div class="n">' + esc(a.name) + '</div><div class="s crit">미제출</div><div class="w">마감 ' + (a.due ? a.due.slice(5).replace('-', '/') : '') + '</div></button>' : '') +
+        m.history.map(function (r) { return '<button class="h" type="button" data-open="' + esc(r.fileId) + '"><div class="sq ' + scoreClass(r) + '">' + (scoreClass(r) === 'none' ? '빈' : r.score) + '</div><div class="n">' + esc(r.title) + '</div><div class="s">' + esc(r.summary || '') + '</div><div class="w">' + fmt(r.modifiedTime) + '</div></button>'; }).join('');
+      var msg = m.student.name.replace(/^[가-힣]{1}/, '') || m.student.name;
+      var draft = m.student.name + ' 학생, ' + (a ? a.name + ' 과제' : '이번 과제') + '가 아직 폴더에 없어요. ' + (m.last ? '지난 ' + m.last.title + '처럼 ' : '') + '정의 → 도표 → 설명 순서로 써서 올려 주세요.';
+      d.innerHTML = back +
+        '<div class="d-head"><div class="left"><div class="d-crumb">' + esc(m.folder.name) + (m.student.folderName ? ' · ' + esc(m.student.folderName) : '') + '</div><div class="d-title">' + esc(m.student.name) + '</div>' +
+        '<div class="d-meta">' + (m.last ? '마지막 제출 ' + fmt(m.last.modifiedTime) + ' · 최근 제출 ' + m.history.length + '건' : '최근 ' + cfg().sinceDays + '일 안에 제출 없음') + '</div>' +
+        '<div class="d-links">' + (m.student.url ? '<a class="btn quiet" href="' + esc(m.student.url) + '" target="_blank" rel="noopener">' + ICON_FOLDER + '학생 폴더 열기</a>' : '') + (a && a.url ? '<a class="btn quiet" href="' + esc(a.url) + '" target="_blank" rel="noopener">' + ICON_FOLDER + '과제 폴더 열기</a>' : '') + '</div></div>' +
+        '<div class="right"><div class="bigsq none">이번<br>과제<br>없음</div></div></div>' +
+        '<div class="d-summary">' + (a ? esc(a.name) + ' 과제가 폴더에 없습니다.' : '최근 ' + cfg().sinceDays + '일 안에 제출된 문서가 없습니다.') + (m.last && typeof m.last.score === 'number' ? ' 지난 ' + esc(m.last.title) + '은(는) ' + m.last.score + '점이었습니다.' : '') + '</div>' +
+        '<div class="sec"><h3>제출 이력</h3><div class="hist">' + (hist || '<div class="h" style="color:var(--ink-3)">기록 없음</div>') + '</div></div>' +
+        '<div class="sec"><h3>학생에게 보낼 메시지</h3><div class="box"><div id="draftText">' + esc(draft) + '</div><div class="btns"><button class="btn quiet" type="button" data-copy="draftText">복사</button></div></div></div>';
+      return;
+    }
+    var r = state.reviews[state.selected];
+    if (!r) { d.innerHTML = back + '<div class="d-empty">왼쪽 목록에서 항목을 누르면 리뷰가 여기에 열리고, 그 순간 확인함으로 옮겨집니다.</div>'; return; }
+    var sc = scoreClass(r); var fo = folderById(r.folderId) || { name: r.folderName || '' };
+    var ra = reviewAssignment(r);
+    var studentFolderUrl = r.subfolderUrl || studentFolderFromRoster(r);
+    var lists = function (title, cls, arr) { if (!arr || !arr.length) return ''; return '<div class="sec ' + cls + '"><h3 class="' + cls + '">' + title + '</h3><ul>' + arr.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>'; };
+    d.innerHTML = back +
+      '<div class="d-head"><div class="left"><div class="d-crumb">' + esc(fo.name) + (r.subfolder ? ' · ' + esc(r.subfolder) : '') + (ra ? ' · 과제 ' + esc(ra.name) + (ra.guessed ? ' (추정)' : '') : '') + '</div>' +
+      '<div class="d-title">' + esc(r.student || '(이름 없음)') + ' <span>' + esc(r.title) + '</span></div>' +
+      '<div class="d-meta">제출 ' + fmt(r.modifiedTime) + ' · 리뷰 ' + fmt(r.reviewedAt) + (r.source === 'scheduled' ? ' 자동' : ' 수동') + ' · ' + (r.wordCount || 0) + ' 단어' + (r.revision > 1 ? ' · ' + r.revision + '차 수정' : '') + '</div>' +
+      '<div class="d-links"><a class="btn quiet" href="' + esc(r.viewUrl || '#') + '" target="_blank" rel="noopener">' + ICON_DOC + '구글 문서 열기</a>' + (studentFolderUrl ? '<a class="btn quiet" href="' + esc(studentFolderUrl) + '" target="_blank" rel="noopener">' + ICON_FOLDER + '학생 폴더 열기</a>' : '') + '</div></div>' +
+      '<div class="right"><div class="bigsq ' + sc + '">' + (sc === 'none' ? '빈<br>문서' : '<b>' + r.score + '</b><small>/ 10</small>') + '</div>' +
+      '<div class="d-actions">' + (r.seen ? '<div class="seen-note">' + ICON_CHECK + '<span>확인함</span></div>' : '') +
+      '<div class="btns">' + (r.seen ? '<button class="btn quiet" type="button" data-act="unseen">확인 안 함으로 되돌리기</button>' : '<button class="btn quiet" type="button" data-act="seen">확인함</button>') + '<button class="btn quiet" type="button" data-act="rereview"' + (state.mcp && state.sample ? '' : ' disabled') + '>다시 리뷰</button></div></div></div></div>' +
+      '<div class="d-summary">' + esc(r.summary || '') + '</div>' +
+      ((r.flags && r.flags.length) ? '<div>' + r.flags.map(function (x) { return '<span class="tag flag" style="margin-left:0;margin-right:6px;font-size:12px;padding:2px 8px">' + esc(x) + '</span>'; }).join('') + '</div>' : '') +
+      '<div class="cols">' + lists('잘한 점', 'good', r.strengths) + lists('고칠 점', 'crit', r.improvements) + '</div>' +
+      lists('다음 단계', '', r.nextSteps) +
+      (r.comment ? '<div class="sec"><h3>학생에게 보낼 코멘트</h3><div class="box"><div id="commentText">' + esc(r.comment) + '</div><div class="btns"><button class="btn quiet" type="button" data-copy="commentText">복사</button></div></div></div>' : '');
+  }
+  function studentFolderFromRoster(r) {
+    var ro = state.roster[r.folderId]; if (!ro || !Array.isArray(ro.students)) return '';
+    for (var i = 0; i < ro.students.length; i++) if (ro.students[i].name === r.student) return ro.students[i].url || '';
+    return '';
   }
 
-  /* ---------------- UI events ---------------- */
+  /* ---------- events ---------- */
   function bindUI() {
-    document.querySelectorAll('.seg button').forEach(function (b) {
-      b.addEventListener('click', function () {
-        state.filter = b.getAttribute('data-filter');
-        document.querySelectorAll('.seg button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
-        render();
-      });
+    $('views').addEventListener('click', function (ev) { var b = ev.target.closest('[data-view]'); if (!b) return; state.view = b.getAttribute('data-view'); state.keep = {}; state.selected = null; state.selectedStudent = null; state.pane = 'list'; persistUI(); render(); });
+    $('subjects').addEventListener('click', function (ev) { var b = ev.target.closest('[data-subject]'); if (!b) return; state.subject = b.getAttribute('data-subject'); state.keep = {}; state.pane = 'list'; persistUI(); render(); });
+    $('listTools').addEventListener('input', function (ev) { if (ev.target.id === 'q') { state.q = ev.target.value; var pos = ev.target.selectionStart; render(); var q = $('q'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (e) { /* ignore */ } } } });
+    $('listTools').addEventListener('change', function (ev) { if (ev.target.id === 'assignSel') { var f = subjectFolder(); if (f) { state.assignSel[f.id] = ev.target.value; state.selectedStudent = null; render(); } } });
+    $('listTools').addEventListener('click', function (ev) { if (ev.target.id === 'flagOnly') { state.flagOnly = !state.flagOnly; render(); } });
+    $('rows').addEventListener('click', function (ev) {
+      var b = ev.target.closest('[data-id]'); if (b) { openReview(b.getAttribute('data-id')); return; }
+      var m = ev.target.closest('[data-missing]'); if (m) { state.selectedStudent = m.getAttribute('data-missing'); state.pane = 'detail'; render(); }
     });
-    $('tabs').addEventListener('click', function (ev) {
-      var b = ev.target.closest('[data-tab]'); if (!b) return;
-      state.tab = b.getAttribute('data-tab');
-      try { localStorage.setItem('reviewDesk.tab', state.tab); } catch (e) { /* ignore */ }
-      render();
-    });
-    $('groupSel').addEventListener('change', function () { state.group = this.value; render(); });
-    $('sortSel').addEventListener('change', function () { state.sort = this.value; render(); });
-    $('q').addEventListener('input', function () { state.q = this.value; render(); });
-    $('groups').addEventListener('click', function (ev) {
+    $('detail').addEventListener('click', function (ev) {
       var act = ev.target.closest('[data-act]');
-      var card = ev.target.closest('.card');
-      if (!card) return;
-      var id = card.getAttribute('data-id');
-      if (act) {
-        ev.stopPropagation();
-        if (act.getAttribute('data-act') === 'seen') toggleSeen(id);
-        if (act.getAttribute('data-act') === 'rereview') rereview(id);
-        return;
-      }
-      if (ev.target.closest('.head')) {
-        var open = card.hasAttribute('open');
-        if (open) card.removeAttribute('open'); else card.setAttribute('open', '');
-        card.querySelector('.head').setAttribute('aria-expanded', open ? 'false' : 'true');
-      }
+      if (act) { var a = act.getAttribute('data-act'); if (a === 'seen') setSeen(state.selected, true); if (a === 'unseen') setSeen(state.selected, false); if (a === 'rereview') runReview('manual', [state.selected]); return; }
+      var cp = ev.target.closest('[data-copy]'); if (cp) { copyText($(cp.getAttribute('data-copy')).textContent); return; }
+      var op = ev.target.closest('[data-open]'); if (op) { state.view = 'seen'; state.keep = {}; openReview(op.getAttribute('data-open')); return; }
+      if (ev.target.closest('#backBtn')) { state.pane = 'list'; render(); }
     });
-    $('markAllBtn').addEventListener('click', function () {
-      if (!state.db) return;
-      var list = visibleReviews().filter(function (r) { return !r.seen; });
-      if (!list.length) { toast('확인할 항목이 없습니다.'); return; }
-      var now = new Date().toISOString();
-      Promise.all(list.map(function (r) { return state.db.doc('reviews/' + r.fileId).update({ seen: true, seenAt: now }); }))
-        .then(function () { toast(list.length + '건을 확인함으로 표시했습니다.'); })
-        .catch(function (e) { toast('저장 실패: ' + e.message); });
-    });
-    $('runBtn').addEventListener('click', function () { var f = currentFolder(); runReview('manual', null, f ? [f.id] : null); });
+    $('runBtn').addEventListener('click', function () { var f = subjectFolder(); runReview('manual', null, f ? [f.id] : null); });
     $('settingsBtn').addEventListener('click', openSettings);
     $('panelClose').addEventListener('click', closeSettings);
     $('drawer').addEventListener('click', function (ev) { if (ev.target === $('drawer')) closeSettings(); });
-    document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && $('drawer').hasAttribute('open')) closeSettings(); });
+    document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !$('drawer').hidden) closeSettings(); });
     $('folderAdd').addEventListener('click', addFolder);
     $('folderInput').addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); addFolder(); } });
-    $('folderList').addEventListener('click', function (ev) {
-      var b = ev.target.closest('[data-remove]'); if (!b) return;
-      draftFolders = draftFolders.filter(function (f) { return f.id !== b.getAttribute('data-remove'); });
-      renderFolderList();
-    });
-    $('folderList').addEventListener('input', function (ev) {
-      var i = ev.target.closest('[data-label]'); if (!i) return;
-      var id = i.getAttribute('data-label');
-      draftFolders.forEach(function (f) { if (f.id === id) f.label = i.value.trim(); });
-    });
+    $('folderList').addEventListener('click', function (ev) { var b = ev.target.closest('[data-remove]'); if (!b) return; draftFolders = draftFolders.filter(function (f) { return f.id !== b.getAttribute('data-remove'); }); renderFolderList(); });
+    $('folderList').addEventListener('input', function (ev) { var i = ev.target.closest('[data-label]'); if (!i) return; var id = i.getAttribute('data-label'); draftFolders.forEach(function (f) { if (f.id === id) f.label = i.value.trim(); }); });
     $('panelSave').addEventListener('click', saveSettings);
   }
-
-  function toggleSeen(id) {
-    var r = state.reviews[id]; if (!r || !state.db) return;
-    state.db.doc('reviews/' + id).update({ seen: !r.seen, seenAt: new Date().toISOString() })
-      .catch(function (e) { toast('저장 실패: ' + e.message); });
-  }
-  function rereview(id) {
+  function openReview(id) {
     var r = state.reviews[id]; if (!r) return;
-    if (!(state.mcp && state.sample && state.db)) { toast('이 화면에서는 리뷰를 실행할 수 없습니다.'); return; }
-    runReview('manual', [id]);
+    state.selected = id; state.pane = 'detail';
+    if (!r.seen && state.view === 'unseen') { state.keep[id] = true; setSeen(id, true); }
+    render();
   }
+  function setSeen(id, seen) {
+    var r = state.reviews[id]; if (!r || !state.db) return;
+    if (!seen) delete state.keep[id];
+    r.seen = seen; r.seenAt = new Date().toISOString(); render();
+    state.db.doc('reviews/' + id).update({ seen: seen, seenAt: r.seenAt }).catch(function (e) { toast('저장 실패: ' + e.message); });
+  }
+  function copyText(t) {
+    var done = function () { toast('복사했습니다.'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, function () { fallbackCopy(t); done(); });
+    else { fallbackCopy(t); done(); }
+  }
+  function fallbackCopy(t) { var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) { /* ignore */ } document.body.removeChild(ta); }
 
-  /* ---------------- settings ---------------- */
+  /* ---------- settings ---------- */
   function openSettings() {
-    var c = cfg();
-    draftFolders = c.folders.slice();
-    renderFolderList();
-    $('excludeInput').value = c.exclude.join(', ');
-    $('sinceInput').value = c.sinceDays;
-    $('minCharsInput').value = c.minChars;
-    $('rubricInput').value = c.rubric;
-    $('drawer').setAttribute('open', '');
-    setTimeout(function () { $('folderInput').focus(); }, 0);
+    var c = cfg(); draftFolders = c.folders.slice(); renderFolderList();
+    $('materialsInput').value = c.materialsPattern; $('homeworkInput').value = c.homeworkPattern;
+    $('excludeInput').value = c.exclude.join(', '); $('sinceInput').value = c.sinceDays; $('minCharsInput').value = c.minChars; $('rubricInput').value = c.rubric;
+    $('drawer').hidden = false; setTimeout(function () { $('folderInput').focus(); }, 0);
   }
-  function closeSettings() { $('drawer').removeAttribute('open'); }
+  function closeSettings() { $('drawer').hidden = true; }
   function renderFolderList() {
     var host = $('folderList');
     if (!draftFolders.length) { host.innerHTML = '<div class="hint">아직 없음</div>'; return; }
     host.innerHTML = draftFolders.map(function (f) {
-      return '<div class="folder-item"><span class="lbl"><input type="text" value="' + esc(f.label || '') + '" placeholder="탭 이름" aria-label="탭 이름" data-label="' + esc(f.id) + '"></span>' +
-        '<span class="n">' + esc(f.name || '(이름 없음)') + ' <span class="id">' + esc(f.id) + '</span></span>' +
-        '<button class="btn small ghost" type="button" data-remove="' + esc(f.id) + '">제거</button></div>';
+      return '<div class="folder-item"><span class="lblin"><input type="text" value="' + esc(f.label || '') + '" placeholder="탭 이름" aria-label="탭 이름" data-label="' + esc(f.id) + '"></span><span class="n">' + esc(f.name || '(이름 없음)') + ' <span class="id">' + esc(f.id) + '</span></span><button class="btn quiet" type="button" data-remove="' + esc(f.id) + '">제거</button></div>';
     }).join('');
   }
   function shortLabel(name) {
     if (!name) return '';
-    return name.replace(/\bEconomics\b/i, 'Econ').replace(/\bBusiness( Management)?\b/i, 'BM').replace(/\bPsychology\b/i, 'Psych')
-      .replace(/\bGlobal Politics\b/i, 'GloPo').replace(/\bSocial Science\b/i, 'SS').replace(/\bGrade\b/i, '').replace(/\bYR\s*/i, 'Y').replace(/\s+/g, ' ').trim();
+    return name.replace(/\bEconomics\b/i, 'Econ').replace(/\bBusiness( Management)?\b/i, 'BM').replace(/\bPsychology\b/i, 'Psych').replace(/\bGlobal Politics\b/i, 'GloPo').replace(/\bSocial Science\b/i, 'SS').replace(/\bGrade\b/i, '').replace(/\bYR\s*/i, 'Y').replace(/\bIB\s+/i, '').replace(/\s+/g, ' ').trim();
   }
-  function parseFolderId(s) {
-    s = (s || '').trim();
-    var m = s.match(/\/folders\/([A-Za-z0-9_-]{10,})/) || s.match(/[?&]id=([A-Za-z0-9_-]{10,})/);
-    if (m) return m[1];
-    if (/^[A-Za-z0-9_-]{10,}$/.test(s)) return s;
-    return null;
-  }
+  function parseFolderId(s) { s = (s || '').trim(); var m = s.match(/\/folders\/([A-Za-z0-9_-]{10,})/) || s.match(/[?&]id=([A-Za-z0-9_-]{10,})/); if (m) return m[1]; if (/^[A-Za-z0-9_-]{10,}$/.test(s)) return s; return null; }
   function addFolder() {
     var id = parseFolderId($('folderInput').value);
     if (!id) { toast('폴더 링크나 ID 형식이 아닙니다.'); return; }
     if (draftFolders.some(function (f) { return f.id === id; })) { toast('이미 추가된 폴더입니다.'); return; }
     var btn = $('folderAdd'); btn.disabled = true; btn.textContent = '확인 중…';
-    var done = function (name) {
-      draftFolders.push({ id: id, name: name, label: shortLabel(name) });
-      $('folderInput').value = '';
-      renderFolderList();
-      btn.disabled = false; btn.textContent = '추가';
-    };
+    var done = function (name) { draftFolders.push({ id: id, name: name, label: shortLabel(name) }); $('folderInput').value = ''; renderFolderList(); btn.disabled = false; btn.textContent = '추가'; };
     if (!state.mcp) { done(''); return; }
-    state.mcp.server(DRIVE).then(function (drive) {
-      return drive.get_file_metadata({ fileId: id, excludeContentSnippets: true });
-    }).then(function (meta) {
+    state.mcp.server(DRIVE).then(function (drive) { return drive.get_file_metadata({ fileId: id, excludeContentSnippets: true }); }).then(function (meta) {
       if (meta && meta.mimeType && meta.mimeType !== FOLDER) { toast('폴더가 아니라 파일입니다: ' + (meta.title || id)); btn.disabled = false; btn.textContent = '추가'; return; }
       done((meta && meta.title) || '');
-    }).catch(function (e) {
-      toast('폴더 정보를 가져오지 못했습니다 (' + (e && e.message ? e.message : e) + '). 이름 없이 추가합니다.');
-      done('');
-    });
+    }).catch(function (e) { toast('폴더 정보를 가져오지 못했습니다 (' + ((e && e.message) || e) + '). 이름 없이 추가합니다.'); done(''); });
   }
   function saveSettings() {
     if (!state.db) { toast('저장할 수 없습니다 (데이터 연결 없음).'); return; }
     var data = {
-      folders: draftFolders,
-      exclude: $('excludeInput').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean),
-      sinceDays: Math.max(1, parseInt($('sinceInput').value, 10) || 14),
-      minChars: Math.max(0, parseInt($('minCharsInput').value, 10) || 0),
-      rubric: $('rubricInput').value.trim() || DEFAULT_RUBRIC,
+      folders: draftFolders, exclude: $('excludeInput').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean),
+      sinceDays: Math.max(1, parseInt($('sinceInput').value, 10) || 14), minChars: Math.max(0, parseInt($('minCharsInput').value, 10) || 0),
+      rubric: $('rubricInput').value.trim() || DEFAULT_RUBRIC, materialsPattern: $('materialsInput').value.trim() || '자료실', homeworkPattern: $('homeworkInput').value.trim() || 'Homework',
       updatedAt: new Date().toISOString()
     };
-    state.db.doc('config/main').set(data).then(function () { toast('설정을 저장했습니다.'); closeSettings(); })
-      .catch(function (e) { toast('저장 실패: ' + e.message); });
+    state.db.doc('config/main').set(data).then(function () { toast('설정을 저장했습니다.'); closeSettings(); }).catch(function (e) { toast('저장 실패: ' + e.message); });
   }
 
-  /* ---------------- review run ---------------- */
-  function setProgress(text, frac) {
-    var p = $('progress');
-    if (text == null) { p.hidden = true; return; }
-    p.hidden = false; $('progressText').textContent = text;
-    $('progressBar').style.width = Math.round(Math.max(0, Math.min(1, frac || 0)) * 100) + '%';
-  }
-
-  function listAll(drive, parentId) {
+  /* ---------- drive helpers ---------- */
+  function setProgress(text, frac) { var p = $('progress'); if (text == null) { p.hidden = true; return; } p.hidden = false; $('progressText').textContent = text; $('progressBar').style.width = Math.round(Math.max(0, Math.min(1, frac || 0)) * 100) + '%'; }
+  function listAll(drive, parentId, extra) {
     var out = [];
     function page(token) {
-      var input = { query: "parentId = '" + parentId + "'", excludeContentSnippets: true, pageSize: 100 };
+      var input = { query: "parentId = '" + parentId + "'" + (extra || ''), excludeContentSnippets: true, pageSize: 100 };
       if (token) input.pageToken = token;
-      return drive.search_files(input).then(function (res) {
-        var files = (res && res.files) || [];
-        out = out.concat(files);
-        if (res && res.nextPageToken && files.length) return page(res.nextPageToken);
-        return out;
-      });
+      return drive.search_files(input).then(function (res) { var files = (res && res.files) || []; out = out.concat(files); if (res && res.nextPageToken && files.length) return page(res.nextPageToken); return out; });
     }
     return page(null);
   }
+  function studentFromFolder(sub, parentName) { var s = sub; if (parentName) s = s.split(parentName).join(' '); s = s.replace(/[_\-–·|]+/g, ' ').replace(/\s+/g, ' ').trim(); return s || sub; }
+  function parseDue(title) {
+    var m = String(title || '').match(/(\d{1,2})\s*[.\/\-월]\s*(\d{1,2})/); if (!m) return '';
+    var now = new Date(); var y = now.getFullYear(); var mo = parseInt(m[1], 10); var da = parseInt(m[2], 10);
+    if (mo < 1 || mo > 12 || da < 1 || da > 31) return '';
+    var d = new Date(Date.UTC(y, mo - 1, da)); var diff = (d.getTime() - now.getTime()) / 86400000;
+    if (diff > 120) y -= 1; if (diff < -240) y += 1;
+    return y + '-' + String(mo).padStart(2, '0') + '-' + String(da).padStart(2, '0');
+  }
+  function contains(title, pat) { return !!pat && String(title || '').toLowerCase().indexOf(pat.toLowerCase()) >= 0; }
 
-  function studentFromFolder(sub, parentName) {
-    var s = sub;
-    if (parentName) s = s.split(parentName).join(' ');
-    s = s.replace(/[_\-–·|]+/g, ' ').replace(/\s+/g, ' ').trim();
-    return s || sub;
+  /* ---------- roster + assignments ---------- */
+  function scanFolder(drive, c, folder) {
+    // returns {students:[], assignments:[], docs:[]}
+    return listAll(drive, folder.id).then(function (items) {
+      var students = []; var docs = []; var materials = null; var subs = [];
+      items.forEach(function (it) {
+        if (it.mimeType === FOLDER) {
+          if (contains(it.title, c.materialsPattern) && !materials) { materials = it; return; }
+          if (c.exclude.some(function (x) { return x && contains(it.title, x); })) return;
+          subs.push(it);
+        } else if (it.mimeType === GDOC) {
+          docs.push({ id: it.id, title: it.title, modifiedTime: it.modifiedTime, viewUrl: it.viewUrl, student: it.owner ? String(it.owner).split('@')[0] : '', folderId: folder.id, folderName: folder.name || '', subfolder: '', subfolderId: '', subfolderUrl: '' });
+        }
+      });
+      var chain = Promise.resolve();
+      subs.forEach(function (sub) {
+        var name = studentFromFolder(sub.title, folder.name);
+        students.push({ name: name, folderId: sub.id, folderName: sub.title, url: sub.viewUrl || ('https://drive.google.com/drive/folders/' + sub.id) });
+        chain = chain.then(function () { return listAll(drive, sub.id); }).then(function (ds) {
+          ds.forEach(function (d) { if (d.mimeType !== GDOC) return; docs.push({ id: d.id, title: d.title, modifiedTime: d.modifiedTime, viewUrl: d.viewUrl, student: name, folderId: folder.id, folderName: folder.name || '', subfolder: sub.title, subfolderId: sub.id, subfolderUrl: sub.viewUrl || '' }); });
+        });
+      });
+      var assignments = [];
+      if (materials) {
+        chain = chain.then(function () { return listAll(drive, materials.id); }).then(function (ms) {
+          var hw = ms.filter(function (x) { return x.mimeType === FOLDER && contains(x.title, c.homeworkPattern); })[0];
+          if (!hw) return;
+          return listAll(drive, hw.id).then(function (as) {
+            var ac = Promise.resolve();
+            as.filter(function (x) { return x.mimeType === FOLDER; }).forEach(function (af) {
+              var a = { id: af.id, name: af.title, due: parseDue(af.title), url: af.viewUrl || ('https://drive.google.com/drive/folders/' + af.id), docs: [], prompt: '' };
+              assignments.push(a);
+              ac = ac.then(function () { return listAll(drive, af.id); }).then(function (pd) {
+                a.docs = pd.filter(function (x) { return x.mimeType === GDOC; }).map(function (x) { return { id: x.id, title: x.title }; });
+                var recent = a.due && (Date.now() - new Date(a.due).getTime()) < 60 * 86400000;
+                if (!recent || !a.docs.length) return;
+                return drive.read_file_content({ fileId: a.docs[0].id }).then(function (res) { a.prompt = ((res && res.fileContent) || '').trim().slice(0, 2000); }).catch(function () {});
+              });
+            });
+            return ac;
+          });
+        });
+      }
+      return chain.then(function () { return { students: students, assignments: assignments, docs: docs }; });
+    });
   }
 
-  function buildPrompt(c, doc, text) {
-    return c.rubric + '\n\n' +
-      '--- 문서 정보 ---\n학생: ' + (doc.student || '(알 수 없음)') + '\n문서 제목: ' + doc.title + '\n폴더: ' + (doc.folderName || '') +
-      '\n제출(수정) 시각: ' + fmtKST(doc.modifiedTime) + ' KST\n\n--- 문서 내용 시작 ---\n' + text + '\n--- 문서 내용 끝 ---\n\n' +
+  /* ---------- review run ---------- */
+  function buildPrompt(c, doc, text, assignments) {
+    var alist = assignments.length ? assignments.map(function (a) { return '- id: ' + a.id + ' | 이름: ' + a.name + (a.due ? ' | 마감: ' + a.due : '') + (a.docs.length ? ' | 과제 문서: ' + a.docs.map(function (d) { return d.title; }).join(', ') : '') + (a.prompt ? ' | 과제 내용: ' + a.prompt.replace(/\s+/g, ' ').slice(0, 400) : ''); }).join('\n') : '(등록된 과제 없음)';
+    return c.rubric + '\n\n--- 이 과목의 과제 목록 (교사가 만든 Due 폴더) ---\n' + alist + '\n\n' +
+      '--- 문서 정보 ---\n학생: ' + (doc.student || '(알 수 없음)') + '\n문서 제목: ' + doc.title + '\n과목: ' + (doc.folderName || '') + '\n제출(수정) 시각: ' + fmt(doc.modifiedTime) + ' KST\n\n--- 문서 내용 시작 ---\n' + text + '\n--- 문서 내용 끝 ---\n\n' +
+      '먼저 이 문서가 위 과제 목록 중 어느 과제의 답인지 판단하세요 (문서 제목, 내용, 제출 시각과 마감일을 비교. 학생이 결석 등으로 늦게 낼 수 있으니 날짜보다 내용을 우선). 확신이 없으면 null.\n' +
       '반드시 아래 형식의 JSON 객체 하나만 출력하세요. 다른 텍스트나 코드펜스는 넣지 마세요.\n' +
-      '{"score": 0에서 10 사이 정수, "completeness": "complete" | "partial" | "empty", "summary": "교사가 한눈에 볼 한 문장 (60자 이내)", ' +
+      '{"assignmentId": "위 목록의 id 또는 null", "score": 0에서 10 사이 정수, "completeness": "complete" | "partial" | "empty", "summary": "교사가 한눈에 볼 한 문장 (60자 이내)", ' +
       '"strengths": ["구체적인 잘한 점", ...], "improvements": ["구체적인 고칠 점과 고치는 방법", ...], "nextSteps": ["학생에게 줄 다음 과제·행동 1~3개"], ' +
       '"flags": ["미완성" | "과제와 무관" | "AI 작성 의심" | "표절 의심" 등 해당하는 것만, 없으면 빈 배열], "comment": "학생에게 그대로 전달해도 되는 3~5문장 코멘트 (한국어)"}';
   }
-
   function runReview(source, onlyIds, folderIds) {
     if (state.running) return;
     if (!(state.db && state.mcp && state.sample)) { toast('이 화면에서는 리뷰를 실행할 수 없습니다.'); return; }
-    var c = cfg();
-    if (!c.folders.length) { openSettings(); toast('먼저 감시 폴더를 추가하세요.'); return; }
+    var c = cfg(); if (!c.folders.length) { openSettings(); toast('먼저 과목 폴더를 추가하세요.'); return; }
     state.running = true; render();
     var db = state.db;
     var runId = 'run_' + new Date().toISOString().replace(/[:.]/g, '-');
     var run = { id: runId, source: source, startedAt: new Date().toISOString(), status: 'running', checked: 0, reviewed: 0, skipped: 0, errors: [] };
-    var drive = null;
-    var candidates = [];
-
-    setProgress('폴더를 확인하는 중…', 0.02);
-    db.doc('runs/' + runId).set(run).catch(function () { /* non-fatal */ });
-
+    var drive = null; var candidates = []; var assignByFolder = {};
+    setProgress('폴더를 읽는 중…', 0.02);
+    db.doc('runs/' + runId).set(run).catch(function () {});
+    var targets = folderIds ? c.folders.filter(function (f) { return folderIds.indexOf(f.id) >= 0; }) : c.folders;
+    if (onlyIds) { targets = c.folders.filter(function (f) { return onlyIds.some(function (id) { var r = state.reviews[id]; return r && inFolder(r, f); }); }); }
     state.mcp.server(DRIVE).then(function (d) {
-      drive = d;
-      var since = Date.now() - c.sinceDays * 86400000;
-      var chain = Promise.resolve();
-      var targets = folderIds ? c.folders.filter(function (f) { return folderIds.indexOf(f.id) >= 0; }) : c.folders;
+      drive = d; var chain = Promise.resolve(); var i = 0;
       targets.forEach(function (folder) {
-        chain = chain.then(function () { return listAll(drive, folder.id); }).then(function (items) {
-          var subs = [];
-          items.forEach(function (it) {
-            if (it.mimeType === FOLDER) {
-              var skip = c.exclude.some(function (x) { return x && it.title && it.title.indexOf(x) >= 0; });
-              if (!skip) subs.push(it);
-            } else if (it.mimeType === GDOC) {
-              candidates.push({ id: it.id, title: it.title, modifiedTime: it.modifiedTime, viewUrl: it.viewUrl, student: it.owner ? String(it.owner).split('@')[0] : '', folderId: folder.id, folderName: folder.name || '', subfolder: '' });
-            }
-          });
-          var sc = Promise.resolve();
-          subs.forEach(function (sub) {
-            sc = sc.then(function () { return listAll(drive, sub.id); }).then(function (docs) {
-              docs.forEach(function (d) {
-                if (d.mimeType !== GDOC) return;
-                candidates.push({ id: d.id, title: d.title, modifiedTime: d.modifiedTime, viewUrl: d.viewUrl, student: studentFromFolder(sub.title, folder.name), folderId: folder.id, folderName: folder.name || '', subfolder: sub.title });
-              });
-            });
-          });
-          return sc;
-        });
+        chain = chain.then(function () { i += 1; setProgress('폴더 읽는 중 ' + i + '/' + targets.length + ' · ' + label(folder), 0.05 + 0.25 * (i / targets.length)); return scanFolder(drive, c, folder); }).then(function (res) {
+          assignByFolder[folder.id] = res.assignments;
+          candidates = candidates.concat(res.docs);
+          var now = new Date().toISOString();
+          return Promise.all([
+            db.doc('roster/' + folder.id).set({ folderId: folder.id, folderName: folder.name, students: res.students, updatedAt: now }),
+            db.doc('assignments/' + folder.id).set({ folderId: folder.id, folderName: folder.name, items: res.assignments, updatedAt: now })
+          ]).catch(function (e) { run.errors.push({ title: label(folder), message: '명단/과제 저장 실패: ' + e.message }); });
+        }).catch(function (e) { run.errors.push({ title: label(folder), message: (e && e.message) || String(e) }); });
       });
-      return chain.then(function () {
-        if (onlyIds) return candidates.filter(function (d) { return onlyIds.indexOf(d.id) >= 0; });
-        return candidates.filter(function (d) { return d.modifiedTime && new Date(d.modifiedTime).getTime() >= since; });
-      });
-    }).then(function (recent) {
+      return chain;
+    }).then(function () {
+      var since = Date.now() - c.sinceDays * 86400000;
+      var recent = onlyIds ? candidates.filter(function (d) { return onlyIds.indexOf(d.id) >= 0; }) : candidates.filter(function (d) { return d.modifiedTime && new Date(d.modifiedTime).getTime() >= since; });
       run.checked = recent.length;
-      var todo = onlyIds ? recent : recent.filter(function (d) {
-        var prev = state.reviews[d.id];
-        return !prev || !prev.modifiedTime || String(prev.modifiedTime) < String(d.modifiedTime);
-      });
+      var todo = onlyIds ? recent : recent.filter(function (d) { var prev = state.reviews[d.id]; return !prev || !prev.modifiedTime || String(prev.modifiedTime) < String(d.modifiedTime); });
       run.skipped = recent.length - todo.length;
-      if (!todo.length) {
-        setProgress('새로 제출되거나 수정된 문서가 없습니다.', 1);
-        return;
-      }
-      var i = 0;
-      var chain = Promise.resolve();
+      // backfill assignment on existing reviews that lack one
+      var fills = [];
+      recent.forEach(function (d) {
+        var prev = state.reviews[d.id]; if (!prev || prev.assignmentId || todo.indexOf(d) >= 0) return;
+        var g = guessAssignment(assignByFolder[d.folderId] || [], prev.modifiedTime); if (!g) return;
+        fills.push(db.doc('reviews/' + d.id).update({ assignmentId: g.id, assignmentName: g.name, assignmentDue: g.due, folderId: d.folderId, subfolderId: d.subfolderId, subfolderUrl: d.subfolderUrl }).catch(function () {}));
+      });
+      if (!todo.length) { setProgress('새로 제출되거나 수정된 문서가 없습니다.', 1); return Promise.all(fills); }
+      var i = 0; var chain = Promise.resolve();
       todo.forEach(function (doc) {
         chain = chain.then(function () {
-          i += 1;
-          setProgress('리뷰 중 ' + i + '/' + todo.length + ' · ' + (doc.student ? doc.student + ' · ' : '') + doc.title, (i - 0.5) / todo.length);
-          return reviewOne(drive, c, doc, source).then(function () { run.reviewed += 1; })
-            .catch(function (e) {
-              run.errors.push({ title: (doc.student ? doc.student + ' · ' : '') + doc.title, message: (e && e.message) || String(e) });
-            });
+          i += 1; setProgress('리뷰 중 ' + i + '/' + todo.length + ' · ' + (doc.student ? doc.student + ' · ' : '') + doc.title, 0.3 + 0.7 * ((i - 0.5) / todo.length));
+          return reviewOne(drive, c, doc, source, assignByFolder[doc.folderId] || []).then(function () { run.reviewed += 1; }).catch(function (e) { run.errors.push({ title: (doc.student ? doc.student + ' · ' : '') + doc.title, message: (e && e.message) || String(e) }); });
         });
       });
-      return chain.then(function () { setProgress('완료: ' + run.reviewed + '건 리뷰' + (run.errors.length ? ', 오류 ' + run.errors.length + '건' : ''), 1); });
+      return chain.then(function () { return Promise.all(fills); }).then(function () { setProgress('완료: ' + run.reviewed + '건 리뷰' + (run.errors.length ? ', 오류 ' + run.errors.length + '건' : ''), 1); });
     }).catch(function (e) {
       run.errors.push({ title: '실행', message: (e && e.message) || String(e) });
       setProgress('실행 중 오류: ' + ((e && e.message) || e), 1);
       if (e && e.code === 'needs_reauth') notice('구글 드라이브 연결을 다시 승인해야 합니다. claude.ai 설정 › 커넥터에서 Google Drive를 다시 연결하세요.', true);
     }).then(function () {
-      run.finishedAt = new Date().toISOString(); run.status = 'done';
-      state.running = false;
+      run.finishedAt = new Date().toISOString(); run.status = 'done'; state.running = false;
       setTimeout(function () { setProgress(null); }, 6000);
-      return db.doc('runs/' + runId).set(run).catch(function () { /* ignore */ });
-    }).then(function () {
-      render();
-      if (run.reviewed) toast(run.reviewed + '건 리뷰를 저장했습니다.');
-    });
+      return db.doc('runs/' + runId).set(run).catch(function () {});
+    }).then(function () { render(); if (run.reviewed) toast(run.reviewed + '건 리뷰를 저장했습니다.'); else if (run.errors.length) toast('오류 ' + run.errors.length + '건: ' + run.errors[0].message, 6000); });
   }
-
-  function reviewOne(drive, c, doc, source) {
+  function reviewOne(drive, c, doc, source, assignments) {
     var prev = state.reviews[doc.id];
     var base = {
-      fileId: doc.id, title: doc.title, student: doc.student || '', folderId: doc.folderId || '', folderName: doc.folderName || '', subfolder: doc.subfolder || '',
-      viewUrl: doc.viewUrl || ('https://docs.google.com/document/d/' + doc.id + '/edit'),
-      modifiedTime: doc.modifiedTime, reviewedAt: new Date().toISOString(), source: source,
+      fileId: doc.id, title: doc.title, student: doc.student || '', folderId: doc.folderId || '', folderName: doc.folderName || '', subfolder: doc.subfolder || '', subfolderId: doc.subfolderId || '', subfolderUrl: doc.subfolderUrl || '',
+      viewUrl: doc.viewUrl || ('https://docs.google.com/document/d/' + doc.id + '/edit'), modifiedTime: doc.modifiedTime, reviewedAt: new Date().toISOString(), source: source,
       revision: prev ? (prev.revision || 1) + 1 : 1, seen: false
+    };
+    var setAssignment = function (obj, id) {
+      var a = null; if (id) a = assignments.filter(function (x) { return x.id === id; })[0] || null;
+      if (!a) a = guessAssignment(assignments, doc.modifiedTime);
+      obj.assignmentId = a ? a.id : ''; obj.assignmentName = a ? a.name : ''; obj.assignmentDue = a ? a.due : ''; return obj;
     };
     return drive.read_file_content({ fileId: doc.id }).then(function (res) {
       var text = (res && typeof res.fileContent === 'string') ? res.fileContent.trim() : '';
-      var words = text ? text.split(/\s+/).length : 0;
-      base.wordCount = words;
+      base.wordCount = text ? text.split(/\s+/).length : 0;
       if (text.length < c.minChars) {
-        return Object.assign(base, {
-          status: 'empty', score: null, completeness: 'empty', summary: '문서에 내용이 거의 없습니다 (' + text.length + '자).',
-          strengths: [], improvements: ['문서를 열어 과제를 작성해야 합니다.'], nextSteps: [], flags: ['미완성'], comment: ''
-        });
+        return setAssignment(Object.assign(base, { status: 'empty', score: null, completeness: 'empty', summary: '문서에 내용이 거의 없습니다 (' + text.length + '자).', strengths: [], improvements: ['문서를 열어 과제를 작성해야 합니다.'], nextSteps: [], flags: ['미완성'], comment: '' }), null);
       }
-      var MAX = 60000;
-      if (text.length > MAX) text = text.slice(0, MAX) + '\n[... 이후 내용은 길이 제한으로 생략됨 ...]';
-      return state.sample.json(buildPrompt(c, doc, text), { modelTier: 'default', cache: false }).then(function (j) {
-        j = j || {};
-        var sc = parseInt(j.score, 10);
-        return Object.assign(base, {
-          status: 'reviewed',
-          score: isNaN(sc) ? null : Math.max(0, Math.min(10, sc)),
+      var MAX = 60000; if (text.length > MAX) text = text.slice(0, MAX) + '\n[... 이후 내용은 길이 제한으로 생략됨 ...]';
+      return state.sample.json(buildPrompt(c, doc, text, assignments), { modelTier: 'default', cache: false }).then(function (j) {
+        j = j || {}; var sc = parseInt(j.score, 10);
+        return setAssignment(Object.assign(base, {
+          status: 'reviewed', score: isNaN(sc) ? null : Math.max(0, Math.min(10, sc)),
           completeness: ['complete', 'partial', 'empty'].indexOf(j.completeness) >= 0 ? j.completeness : 'complete',
-          summary: String(j.summary || '').slice(0, 200),
-          strengths: arr(j.strengths), improvements: arr(j.improvements), nextSteps: arr(j.nextSteps), flags: arr(j.flags),
-          comment: String(j.comment || '')
-        });
+          summary: String(j.summary || '').slice(0, 200), strengths: arr(j.strengths), improvements: arr(j.improvements), nextSteps: arr(j.nextSteps), flags: arr(j.flags), comment: String(j.comment || '')
+        }), typeof j.assignmentId === 'string' ? j.assignmentId : null);
       });
-    }).then(function (review) {
-      return state.db.doc('reviews/' + doc.id).set(review);
-    });
+    }).then(function (review) { return state.db.doc('reviews/' + doc.id).set(review); });
   }
   function arr(x) { return Array.isArray(x) ? x.map(function (s) { return String(s); }).filter(Boolean).slice(0, 12) : []; }
 })();

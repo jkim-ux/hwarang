@@ -422,10 +422,10 @@
   function subscribe() {
     var db = state.db;
     db.doc('config/main').onSnapshot(function (s) { state.config = s.exists ? s.data() : null; render(); }, function (e) { toast('설정을 읽지 못했습니다: ' + e.message); });
-    db.collection('reviews').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { m[d.id] = d.data(); }); state.reviews = m; render(); }, function (e) { toast('리뷰를 읽지 못했습니다: ' + e.message); });
+    db.collection('reviews').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { var x = d.data() || {}; var k = x.fileId || String(d.id).split('/').pop(); if (!x.fileId) x.fileId = k; m[k] = x; }); state.reviews = m; render(); }, function (e) { toast('리뷰를 읽지 못했습니다: ' + e.message); });
     db.collection('runs').orderBy('startedAt', 'desc').limit(10).onSnapshot(function (s) { state.runs = s.docs.map(function (d) { return d.data(); }); render(); }, function () {});
-    db.collection('roster').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { m[d.id] = d.data(); }); state.roster = m; render(); }, function () {});
-    db.collection('assignments').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { m[d.id] = d.data(); }); state.assignments = m; render(); }, function () {});
+    db.collection('roster').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { var x = d.data() || {}; m[x.folderId || String(d.id).split('/').pop()] = x; }); state.roster = m; render(); }, function () {});
+    db.collection('assignments').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { var x = d.data() || {}; m[x.folderId || String(d.id).split('/').pop()] = x; }); state.assignments = m; render(); }, function () {});
   }
   function persistUI() { try { localStorage.setItem('reviewDesk.ui', JSON.stringify({ view: state.view, subject: state.subject })); } catch (e) { /* ignore */ } }
 

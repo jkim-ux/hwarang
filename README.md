@@ -3,15 +3,14 @@
 학생들이 구글 드라이브 폴더에 올린 구글 문서 숙제를 Claude가 읽고 리뷰한 결과를 한 화면에서 보는 교사용 도구입니다.
 
 - 게시된 페이지: https://claude.ai/code/artifact/b3743ca6-bd7f-4fd2-8b24-fcf536678b5b
-- 자동 확인: 매일 08:00 · 17:00 (KST). claude.ai/code 의 Routines 에서 관리 (루틴은 드라이브 커넥터가 연결된 원래 세션으로 돌아와 실행됨. 자세한 내용은 `review-desk/routine-prompt.md`)
-- 수동 확인: 페이지의 **지금 확인하기** 버튼
+- 확인은 페이지의 **지금 확인하기** 버튼으로만 한다 (정기 자동 실행은 토큰 절약을 위해 2026-09-12에 껐음. 다시 켜려면 `review-desk/routine-prompt.md` 의 프롬프트로 claude.ai Routines 에 루틴을 만들면 된다)
 
 ## 구성
 
 | 파일 | 역할 |
 | --- | --- |
 | `review-desk/index.html` | 페이지 소스. Artifact 로 게시하며 `db`, `sample`, `mcp`(Google Drive: search_files, read_file_content, get_file_metadata, download_file_content) 런타임 기능과 cdnjs 의 pdf.js 3.11.174 를 씀 |
-| `review-desk/routine-prompt.md` | 자동 실행 루틴에 들어가는 프롬프트 (새 세션이 매번 이 지시로 실행) |
+| `review-desk/routine-prompt.md` | (현재 미사용) 자동 실행 루틴을 다시 켤 때 쓰는 프롬프트 |
 
 채점 범위: IB 과목(Econ Y1·Y2, BM Y1·Y2, Psych Y1, GloPo Y1)의 숙제만. 9th·10th Grade Social Science 는 과목 목록에서 뺐고, IA·Task 3 문서는 제목 패턴으로 건너뛴다.
 
@@ -33,7 +32,7 @@
 5. **리뷰 저장** (`reviews/<fileId>`): 점수(문제별 만점 기준. 만점은 학생 문서나 과제 파일의 배점에서 읽고, 없으면 문제 유형으로 추정), 한 줄 요약, 잘한 점 / 고칠 점 / 다음 단계, 주의 표시, 학생에게 전달할 코멘트.
 6. **실행 기록** (`runs/<id>`): 시각, 출처(자동/수동), 검사·리뷰·건너뜀 건수, 오류.
 
-수동 확인은 페이지 안에서 드라이브 조회 → Claude 리뷰 → DB 저장까지 모두 처리하고, 자동 확인은 루틴이 띄운 Claude 세션이 같은 스키마로 DB에 씁니다.
+페이지 안에서 드라이브 조회 → Claude 리뷰 → DB 저장까지 모두 처리합니다. (자동 확인 루틴을 켜면 Claude 세션이 같은 스키마로 DB에 씁니다.)
 
 ## 제한
 

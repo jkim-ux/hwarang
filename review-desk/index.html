@@ -318,7 +318,7 @@
     <div class="grp subj" id="subjects"></div>
     <div class="foot">
       <div class="progress" id="progress" hidden><span id="progressText"></span><div class="bar"><i id="progressBar"></i></div></div>
-      <div class="stamp"><div>마지막 확인 <b id="lastRun">—</b></div><div>자동 확인 <b>매일 08:00 · 17:00</b></div></div>
+      <div class="stamp"><div>마지막 확인 <b id="lastRun">—</b></div><div>자동 확인 <b>없음 · 버튼으로만</b></div></div>
       <button class="btn primary" id="runBtn" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span id="runLabel">지금 확인하기</span></button>
       <button class="settings-link" id="settingsBtn" type="button">설정</button>
     </div>
@@ -487,7 +487,7 @@
     state.db = caps[0]; state.mcp = caps[1]; state.sample = caps[2]; state.capsReady = true;
     if (!state.db) { notice('이 페이지는 claude.ai 안에서 열어야 리뷰 데이터를 불러올 수 있습니다.', true); render(); return; }
     subscribe();
-    if (!state.mcp || !state.sample) notice('이 화면에서는 드라이브 연결 또는 Claude 리뷰를 쓸 수 없어 "지금 확인하기"가 동작하지 않습니다. 자동 확인 결과는 계속 보입니다.');
+    if (!state.mcp || !state.sample) notice('이 화면에서는 드라이브 연결 또는 Claude 리뷰를 쓸 수 없어 "지금 확인하기"가 동작하지 않습니다. 저장된 리뷰는 계속 보입니다.');
     render();
   });
   function subscribe() {
@@ -563,7 +563,7 @@
     var canRun = state.capsReady && state.db && state.mcp && state.sample && !state.running && c.folders.length;
     $('runBtn').disabled = !canRun;
     $('runBtn').innerHTML = state.running ? '<span class="spin"></span><span>확인 중…</span>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span>지금 확인하기' + (f ? ' · ' + esc(label(f)) : '') + '</span>';
-    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v14';
+    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v15';
 
     // list
     if (state.view === 'missing') state.view = 'unseen';
@@ -604,7 +604,7 @@
       $('listSub').textContent = (f ? label(f) : '전체 과목') + ' · ' + list.length + '건';
       if (!list.length) {
         rowsHtml = '<div class="empty">' + (state.view === 'unseen'
-          ? (all.length ? '확인하지 않은 리뷰가 없습니다.' : (c.folders.length ? '아직 리뷰가 없습니다. <b>지금 확인하기</b>를 누르거나 다음 자동 확인(08:00 · 17:00)을 기다리세요.' : '먼저 <b>설정</b>에서 과목 폴더를 추가하세요.'))
+          ? (all.length ? '확인하지 않은 리뷰가 없습니다.' : (c.folders.length ? '아직 리뷰가 없습니다. <b>지금 확인하기</b>를 누르세요.' : '먼저 <b>설정</b>에서 과목 폴더를 추가하세요.'))
           : '아직 확인한 리뷰가 없습니다.') + '</div>';
       } else {
         var curDay = null;

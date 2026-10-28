@@ -311,6 +311,29 @@
   .keys-sel { display: flex; flex-wrap: wrap; gap: 6px; }
   .key-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 6px 0 10px; border: 1px solid var(--gold); background: var(--warn-soft); border-radius: 14px; font-size: 12.5px; font-weight: 600; max-width: 100%; }
   .key-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px; }
+  .tag.key { color: var(--good); border: 1px solid var(--good); max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+  .tag.keyx { color: var(--warn); border: 1px solid var(--warn); }
+  .keyuse { border: 1px solid var(--line); border-left: 3px solid var(--good); background: var(--surface); padding: 12px 16px; max-width: 720px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 1.55; }
+  .keyuse.warn { border-left-color: var(--warn); }
+  .keyuse.none { border-left-color: var(--line-strong); }
+  .keyuse .k-top { font-weight: 700; }
+  .keyuse .k-top a { color: var(--ink); }
+  .keyuse .k-why { color: var(--ink-2); }
+  .keyuse .k-other { font-size: 12px; color: var(--ink-3); }
+  .keyuse ul.k-check { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+  .keyuse ul.k-check li { display: flex; gap: 8px; align-items: baseline; }
+  .keyuse ul.k-check b { flex-shrink: 0; width: 34px; font-size: 11px; text-align: center; border-radius: 2px; padding: 0 3px; }
+  .keyuse ul.k-check b.yes { color: var(--good); background: var(--good-soft); }
+  .keyuse ul.k-check b.partial { color: var(--warn); background: var(--warn-soft); }
+  .keyuse ul.k-check b.no { color: var(--crit); background: var(--crit-soft); }
+  .keyuse details summary { cursor: pointer; font-size: 12px; color: var(--ink-3); }
+  .keyuse pre { white-space: pre-wrap; font: inherit; font-size: 12.5px; max-height: 320px; overflow: auto; background: var(--surface-2); padding: 10px 12px; margin: 6px 0 0; }
+  .bind-box { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; background: var(--surface-2); font-size: 12.5px; }
+  .bind-box .bind-on { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .bind-box select { font: inherit; font-size: 12.5px; height: 28px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); border-radius: 3px; }
+  .bind-list { display: flex; flex-direction: column; gap: 4px; }
+  .bind-list .b-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .bind-list .b-where { color: var(--ink-3); font-size: 12px; }
   .key-chip button { border: 0; background: transparent; color: var(--ink-3); font-size: 15px; line-height: 1; cursor: pointer; padding: 0 4px; }
   .key-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
   .filebtn { position: relative; overflow: hidden; cursor: pointer; }
@@ -458,7 +481,7 @@
     db: null, mcp: null, sample: null, capsReady: false,
     config: null, reviews: {}, runs: [], roster: {}, assignments: {},
     view: 'unseen', subject: 'all', q: '', selected: null, selectedStudent: null,
-    keep: {}, assignSel: {}, running: false, pane: 'list', feedback: [], fb: null, dlg: null
+    keep: {}, assignSel: {}, running: false, pane: 'list', feedback: [], fb: null, dlg: null, keyBindings: {}, keyText: {}
   };
   var draftFolders = []; var draftCriteria = [];
 
@@ -547,6 +570,7 @@
     db.doc('config/main').onSnapshot(function (s) { state.config = s.exists ? clone(s.data()) : null; render(); }, function (e) { toast('설정을 읽지 못했습니다: ' + e.message); });
     db.collection('reviews').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { var x = clone(d.data()); var k = x.fileId || String(d.id).split('/').pop(); if (!x.fileId) x.fileId = k; m[k] = x; }); state.reviews = m; render(); }, function (e) { toast('리뷰를 읽지 못했습니다: ' + e.message); });
     db.collection('feedback').onSnapshot(function (s) { state.feedback = s.docs.map(function (d) { var x = clone(d.data()); if (!x.id) x.id = String(d.id).split('/').pop(); return x; }).sort(function (a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)); }); renderFbList(); render(); }, function () {});
+    db.collection('keyBindings').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { var x = clone(d.data()); m[x.id || String(d.id).split('/').pop()] = x; }); state.keyBindings = m; if (state.dlg && state.dlg.step === 'setup') { readSetup(); renderRunDlg(); } }, function () {});
     db.collection('runs').orderBy('startedAt', 'desc').limit(10).onSnapshot(function (s) { state.runs = s.docs.map(function (d) { return clone(d.data()); }); render(); }, function () {});
     db.collection('roster').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { var x = clone(d.data()); m[x.folderId || String(d.id).split('/').pop()] = x; }); state.roster = m; render(); }, function () {});
     db.collection('assignments').onSnapshot(function (s) { var m = {}; s.docs.forEach(function (d) { var x = clone(d.data()); m[x.folderId || String(d.id).split('/').pop()] = x; }); state.assignments = m; render(); }, function () {});
@@ -617,7 +641,7 @@
     $('runBtn').disabled = !canRun;
     var fbn = activeFeedbackCount(); $('fbBtn').textContent = '시스템 피드백' + (fbn ? ' · ' + fbn : '');
     $('runBtn').innerHTML = state.running ? '<span class="spin"></span><span>확인 중…</span>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span>지금 확인하기' + (f ? ' · ' + esc(label(f)) : '') + '</span>';
-    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v20';
+    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v21';
 
     // list
     if (state.view === 'missing') state.view = 'unseen';
@@ -667,9 +691,9 @@
           if (dk !== curDay) { curDay = dk; rowsHtml += '<div class="day">' + (r.modifiedTime ? dayLabel(r.modifiedTime) + (dk === today() ? ' · 오늘' : '') : '날짜 없음') + '</div>'; }
           var sc = scoreClass(r);
           var right = (state.view === 'unseen' && r.seen) ? '<span class="tag moved">' + ICON_CHECK + '확인함으로 이동</span>' : '<div class="when">' + fmtTime(r.modifiedTime) + '</div>';
-          var flags = (r.flags || []).map(function (x) { return '<span class="tag flag">' + esc(x) + '</span>'; }).join('');
+          var flags = (r.flags || []).map(function (x) { return '<span class="tag flag">' + esc(x) + '</span>'; }).join('') + keyTag(r);
           rowsHtml += '<button class="row" type="button" data-id="' + esc(r.fileId) + '" aria-current="' + (state.selected === r.fileId) + '">' +
-            '<div class="sq ' + sc + '">' + (sc === 'none' ? '빈' : scoreText(r)) + '</div>' +
+            '<div class="sq ' + sc + '">' + (sc === 'none' ? (r.status === 'needs_vision' ? '대기' : '빈') : scoreText(r)) + '</div>' +
             '<div class="body"><div class="l1"><div class="who">' + esc(r.student || '(이름 없음)') + ' <span>' + esc(r.title) + '</span>' + flags + (!f && r.folderId ? ' <span class="tag subj">' + esc(label(folderById(r.folderId) || { name: r.folderName })) + '</span>' : '') + '</div>' + right + '</div>' +
             '<div class="l2">' + esc(r.summary || '') + '</div></div></button>';
         });
@@ -714,19 +738,52 @@
     d.innerHTML = back +
       '<div class="d-head"><div class="left"><div class="d-crumb">' + esc(fo.name) + (r.subfolder ? ' · ' + esc(r.subfolder) : '') + (ra ? ' · 과제 ' + esc(ra.name) + (ra.guessed ? ' (추정)' : '') : '') + '</div>' +
       '<div class="d-title">' + esc(r.student || '(이름 없음)') + ' <span>' + esc(r.title) + '</span></div>' +
-      '<div class="d-meta">제출 ' + fmt(r.modifiedTime) + ' · 리뷰 ' + fmt(r.reviewedAt) + (r.source === 'scheduled' ? ' 자동' : ' 수동') + ' · ' + (r.wordCount || 0) + ' 단어' + (r.revision > 1 ? ' · ' + r.revision + '차 수정' : '') + (r.modelTier ? ' · ' + (TIER_NAME[r.modelTier] || r.modelTier) : '') + (Array.isArray(r.answerKeys) && r.answerKeys.length ? ' · 답안지 ' + r.answerKeys.map(function (x) { return x.title; }).join(', ') : '') + (typeof r.graphImages === 'number' ? (r.graphImages > 0 ? ' · graph 이미지 ' + r.graphImages + '장 확인' : ' · graph 못 봄' + (r.graphNote ? ' (' + r.graphNote + ')' : '')) : '') + '</div>' +
+      '<div class="d-meta">제출 ' + fmt(r.modifiedTime) + ' · 리뷰 ' + fmt(r.reviewedAt) + (r.source === 'scheduled' ? ' 자동' : r.source === 'session' ? ' Claude Code 세션 채점' : ' 수동') + ' · ' + (r.wordCount || 0) + ' 단어' + (r.revision > 1 ? ' · ' + r.revision + '차 수정' : '') + (r.modelTier ? ' · ' + (TIER_NAME[r.modelTier] || r.modelTier) : '') + (typeof r.graphImages === 'number' ? (r.graphImages > 0 ? ' · graph 이미지 ' + r.graphImages + '장 확인' : ' · graph 못 봄' + (r.graphNote ? ' (' + r.graphNote + ')' : '')) : '') + '</div>' +
       '<div class="d-links"><button class="btn quiet primary" type="button" data-act="compare" style="height:32px">문서 보며 코멘트 달기' + (Array.isArray(r.annotations) && r.annotations.length ? ' · ' + r.annotations.length : '') + '</button><a class="btn quiet" href="' + esc(r.viewUrl || '#') + '" target="_blank" rel="noopener">' + ICON_DOC + '구글 문서 열기</a>' + (studentFolderUrl ? '<a class="btn quiet" href="' + esc(studentFolderUrl) + '" target="_blank" rel="noopener">' + ICON_FOLDER + '학생 폴더 열기</a>' : '') + '</div></div>' +
-      '<div class="right"><div class="bigsq ' + sc + '">' + (sc === 'none' ? '빈<br>문서' : '<b>' + r.score + '</b><small>/ ' + maxOf(r) + '</small>') + '</div>' +
+      '<div class="right"><div class="bigsq ' + sc + '">' + (sc === 'none' ? (r.status === 'needs_vision' ? '채점<br>대기' : '빈<br>문서') : '<b>' + r.score + '</b><small>/ ' + maxOf(r) + '</small>') + '</div>' +
       (r.scoreBasis ? '<div style="font-size:11px;color:var(--ink-3);text-align:right;margin-top:4px">' + esc(r.scoreBasis) + '</div>' : '') + '<div class="d-actions">' + (r.seen ? '<div class="seen-note">' + ICON_CHECK + '<span>확인함</span></div>' : '') +
       '<div class="btns">' + (r.seen ? '<button class="btn quiet" type="button" data-act="unseen">확인 안 함으로 되돌리기</button>' : '<button class="btn quiet" type="button" data-act="seen">확인함</button>') + '<button class="btn quiet" type="button" data-act="rereview"' + (state.mcp && state.sample ? '' : ' disabled') + '>다시 리뷰</button></div></div></div></div>' +
       '<div class="d-summary">' + esc(r.summary || '') + '</div>' +
       ((r.flags && r.flags.length) ? '<div>' + r.flags.map(function (x) { return '<span class="tag flag" style="margin-left:0;margin-right:6px;font-size:12px;padding:2px 8px">' + esc(x) + '</span>'; }).join('') + '</div>' : '') +
+      keyBlock(r) +
       '<div class="cols">' + lists('잘한 점', 'good', r.strengths) + lists('고칠 점', 'crit', r.improvements) + '</div>' +
       lists('다음 단계', '', r.nextSteps) +
       '<div class="sec"><h3>학생에게 보낼 코멘트</h3><div class="box">' +
         (state.editComment ? '<textarea id="commentEdit">' + esc(r.comment || '') + '</textarea><div class="btns"><button class="btn quiet primary" type="button" data-act="saveComment" style="height:32px">저장</button><button class="btn quiet" type="button" data-act="cancelComment">취소</button></div>'
           : '<div class="n" id="commentText">' + esc(r.comment || '(코멘트 없음)') + '</div><div class="btns"><button class="btn quiet" type="button" data-copy="commentText">복사</button><button class="btn quiet" type="button" data-act="editComment">수정</button></div>') +
       '</div></div>';
+  }
+  function keyTag(r) {
+    var st = r.answerKeyStatus;
+    if (st === 'used') return ' <span class="tag key" title="' + esc(r.answerKeyUsed && r.answerKeyUsed.title) + '">답안지 ✓</span>';
+    if (st === 'nomatch' || st === 'unknown' || st === 'unread') return ' <span class="tag keyx">답안지 ' + (st === 'unread' ? '못 읽음' : '안 맞음') + '</span>';
+    return '';
+  }
+  function keyLink(x) {
+    if (!x) return '';
+    if (x.source === 'drive' && x.fileId) return '<a href="https://drive.google.com/open?id=' + encodeURIComponent(x.fileId) + '" target="_blank" rel="noopener">' + esc(x.title) + ' ↗</a>';
+    return esc(x.title) + (x.source === 'saved' ? ' <span style="font-weight:400;color:var(--ink-3)">(올린 파일)</span>' : '');
+  }
+  var MET_NAME = { yes: '충족', partial: '부분', no: '빠짐' };
+  function keyBlock(r) {
+    var offered = Array.isArray(r.answerKeys) ? r.answerKeys : []; var st = r.answerKeyStatus;
+    if (r.status === 'needs_vision') return '';
+    var others = function (skip) { var o = offered.filter(function (x) { return !skip || refKey(x) !== refKey(skip); }); return o.length ? '<div class="k-other">' + (skip ? '같이 받았지만 안 쓴 답안지: ' : '받은 답안지: ') + o.map(function (x) { return keyLink(x); }).join(', ') + '</div>' : ''; };
+    var src = function (x) { return x && x.via === 'bound' ? ' <span class="tag dim">반·주 연결</span>' : ''; };
+    if (st === 'used') {
+      var u = r.answerKeyUsed || {}; var full = offered.filter(function (x) { return refKey(x) === refKey(u); })[0] || u;
+      var chk = Array.isArray(r.keyChecklist) && r.keyChecklist.length ? '<ul class="k-check">' + r.keyChecklist.map(function (c) { return '<li><b class="' + esc(c.met) + '">' + (MET_NAME[c.met] || esc(c.met)) + '</b><span>' + esc(c.point) + '</span></li>'; }).join('') + '</ul>' : '';
+      var txt = full.source === 'saved' && full.keyId ? '<details data-keyid="' + esc(full.keyId) + '"><summary>답안지 내용 보기</summary><pre>' + esc(state.keyText[full.keyId] != null ? state.keyText[full.keyId] : '불러오는 중…') + '</pre></details>' : '';
+      return '<div class="sec"><h3>채점에 쓴 답안지</h3><div class="keyuse"><div class="k-top">✓ ' + keyLink(full) + src(full) + '</div>' +
+        (r.answerKeyMatch ? '<div class="k-why">' + esc(r.answerKeyMatch) + '</div>' : '') + chk + txt + others(full) + '</div></div>';
+    }
+    if (st === 'nomatch' || st === 'unknown' || st === 'unread') {
+      var msg = st === 'unread' ? '답안지를 골랐지만 내용을 하나도 읽지 못해서 답안지 없이 채점함.' : st === 'unknown' ? 'Claude가 쓴 답안지라고 적은 제목이 받은 목록에 없음: ' + esc(r.answerKeyUsed && r.answerKeyUsed.title) + '. 점수를 그대로 믿지 말고 확인해.' : '받은 답안지 중 이 문서 문제와 맞는 게 없어서 답안지 없이 과목 기준으로 채점함.';
+      return '<div class="sec"><h3>답안지</h3><div class="keyuse warn"><div class="k-top">' + msg + '</div>' + (r.answerKeyMatch ? '<div class="k-why">' + esc(r.answerKeyMatch) + '</div>' : '') + others(null) + '</div></div>';
+    }
+    if (offered.length) return '<div class="sec"><h3>답안지</h3><div class="keyuse none"><div class="k-top">답안지 ' + offered.length + '개를 받았지만 어느 걸 썼는지 기록이 없음 (v21 이전 채점). 다시 채점하면 기록된다.</div>' + others(null) + '</div></div>';
+    if (r.status === 'reviewed') return '<div class="sec"><h3>답안지</h3><div class="keyuse none"><div class="k-top" style="font-weight:500">답안지 없이 과목 채점 기준만으로 채점함.</div></div></div>';
+    return '';
   }
   function studentFolderFromRoster(r) {
     var ro = state.roster[r.folderId]; if (!ro || !Array.isArray(ro.students)) return '';
@@ -764,6 +821,11 @@
     $('settingsBtn').addEventListener('click', openSettings);
     $('panelClose').addEventListener('click', closeSettings);
     $('drawer').addEventListener('click', function (ev) { if (ev.target === $('drawer')) closeSettings(); });
+    document.addEventListener('toggle', function (ev) {
+      var t = ev.target; if (!t || !t.open || !t.getAttribute || !t.getAttribute('data-keyid')) return; var id = t.getAttribute('data-keyid');
+      if (state.keyText[id] != null || !state.db) return;
+      Promise.resolve(state.db.doc('answerKeys/' + id).get()).then(function (s) { var x = s && s.exists ? s.data() : null; state.keyText[id] = x ? (x.text || '(글자 없음: 이미지로만 된 답안지)') : '(저장된 답안지를 찾지 못함)'; }).catch(function (e) { state.keyText[id] = '읽기 실패: ' + ((e && e.message) || e); }).then(function () { var pre = t.querySelector('pre'); if (pre) pre.textContent = state.keyText[id]; });
+    }, true);
     document.addEventListener('keydown', function (ev) { if (ev.key !== 'Escape') return; if (!$('fbDlg').hidden) { closeFb(); return; } if (!$('runDlg').hidden) { closeRunDlg(); return; } if (!$('drawer').hidden) closeSettings(); });
     $('folderAdd').addEventListener('click', addFolder);
     $('folderInput').addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); addFolder(); } });
@@ -931,15 +993,17 @@
     var fb = feedbackFor(doc.folderId); var fbText = fb.length ? '\n\n--- 교사 피드백 (이전 채점에 대한 교사의 지적. 무엇보다 우선해서 반영) ---\n' + fb.map(function (x, i) { return (i + 1) + '. ' + x.text + (x.context ? ' (관련 리뷰: ' + (x.context.student ? x.context.student + ' · ' : '') + (x.context.title || '') + (x.context.summary ? ' — 당시 요약: ' + x.context.summary : '') + ')' : ''); }).join('\n') : '';
     var noteText = note ? '\n\n--- 이번 검사에 대한 교사 지시 ---\n' + note : '';
     var keyText = keysPromptText(keys);
+    var keySpec = keyText ? '"answerKeyUsed": "채점에 실제로 쓴 답안지 제목을 위 답안지 목록에서 글자 그대로 하나. 학생 문서 문제와 맞는 답안지가 없으면 null", "answerKeyMatch": "답안지의 어느 문제와 학생 문서의 어느 문제가 같은지 근거 한 문장 (양쪽 문제 문구를 짧게 인용). null 이면 왜 안 맞는지 한 문장", "keyChecklist": [{"point": "쓴 답안지의 채점 요소 하나 (짧게, English 용어)", "met": "yes" | "partial" | "no"}, ... 4~10개, 답안지를 안 썼으면 빈 배열], ' : '';
     return c.rubric + ctext + fbText + noteText + keyText + '\n\n--- 이 과목의 과제 목록 (교사가 만든 Due 폴더) ---\n' + alist + '\n\n' +
       '--- 문서 정보 ---\n학생: ' + (doc.student || '(알 수 없음)') + '\n문서 제목: ' + doc.title + '\n과목: ' + (doc.folderName || '') + '\n제출(수정) 시각: ' + fmt(doc.modifiedTime) + ' KST\n\n--- 문서 내용 시작 ---\n' + text + '\n--- 문서 내용 끝 ---' + subNote + imgNote + keyNote + '\n\n' +
       '먼저 이 문서가 위 과제 목록 중 어느 과제의 답인지 판단하세요 (문서 제목, 내용, 제출 시각과 마감일을 비교. 학생이 결석 등으로 늦게 낼 수 있으니 날짜보다 내용을 우선). 확신이 없으면 null.\n' +
       '반드시 아래 형식의 JSON 객체 하나만 출력하세요. 다른 텍스트나 코드펜스는 넣지 마세요.\n' +
       '{"assignmentId": "위 목록의 id 또는 null", "maxScore": 이 문제의 만점 정수, "scoreBasis": "만점을 어디서 잡았는지 한 구절", "score": 0에서 maxScore 사이 정수, "completeness": "complete" | "partial" | "empty", "summary": "교사가 한눈에 볼 한 문장 (60자 이내)", ' +
       '"strengths": ["구체적인 잘한 점", ...], "improvements": ["구체적인 고칠 점과 고치는 방법", ...], "nextSteps": ["학생에게 줄 다음 과제·행동 1~3개"], ' +
-      '"flags": ["미완성" | "과제와 무관" | "AI 작성 의심" | "표절 의심" 등 해당하는 것만, 없으면 빈 배열], "comment": "학생에게 그대로 전달해도 되는 3~5문장 코멘트 (한국어)", ' +
+      '"flags": ["미완성" | "과제와 무관" | "AI 작성 의심" | "표절 의심" 등 해당하는 것만, 없으면 빈 배열], "comment": "학생에게 그대로 전달해도 되는 3~5문장 코멘트 (한국어)", ' + keySpec +
       '"annotations": [{"quote": "문서 본문에서 그대로 복사한 구절 (10~200자, 한 글자도 바꾸지 말고 줄바꿈 없이)", "note": "그 부분에 달 코멘트 (comment와 같은 말투, 1~2문장)"}, ...]}\n' +
-      'annotations는 고칠 부분 위주로 최대 8개. quote는 반드시 본문에 있는 문자열 그대로여야 하고, 없는 문장을 만들지 마세요.';
+      'annotations는 고칠 부분 위주로 최대 8개. quote는 반드시 본문에 있는 문자열 그대로여야 하고, 없는 문장을 만들지 마세요.' +
+      (keyText ? '\n답안지를 썼다면 점수와 improvements 가 keyChecklist 와 서로 맞아야 한다. 답안지와 학생 문서의 문제가 다르면 억지로 맞추지 말고 answerKeyUsed 를 null 로 둔다.' : '');
   }
   /* ---------- answer keys (teacher's model answers / markschemes) ---------- */
   var KEY_TEXT_MAX = 12000, KEY_TEXT_TOTAL = 20000, KEY_IMG_MAX = 3;
@@ -1001,6 +1065,7 @@
         '<div class="kb-list">' + (files.length ? files.map(function (x) { return '<label class="pick"><input type="checkbox" data-kb="' + esc(x.id) + '"' + (chosen[x.id] ? ' checked' : '') + '><span class="ttl" style="color:var(--ink)">' + esc(x.title) + '</span><span class="tag dim">' + esc(KIND_NAME[kindOf(x.mimeType, x.title)] || '') + '</span><span class="when">' + esc(x.where || '') + ' · ' + esc(fmt(x.modifiedTime, { month: 'numeric', day: 'numeric' })) + '</span></label>'; }).join('') : '<div class="kb-empty">' + (q ? '맞는 파일이 없어.' : '폴더에 읽을 수 있는 파일이 없어.') + '</div>') + '</div>';
       html += '</div>';
     }
+    html += bindHtml(d);
     html += '<div class="hint">고른 답안지는 이번에 채점하는 모든 문서에 같이 들어가고, 여러 개면 Claude가 문서의 문제에 맞는 것만 쓴다. 답안지 분량만큼 문서마다 토큰이 더 든다. 구글 문서·PDF·Word·텍스트는 글자로, 스캔본·사진은 이미지로 보낸다.</div></div>';
     return html;
   }
@@ -1025,6 +1090,7 @@
     });
     host.addEventListener('click', function (ev) {
       var d = state.dlg; if (!d) return;
+      var ub = ev.target.closest('[data-unbind]'); if (ub) { readSetup(); unbindKey(ub.getAttribute('data-unbind'), ub.getAttribute('data-rk')); return; }
       var rm = ev.target.closest('[data-key-rm]'); if (rm) { readSetup(); d.keys.splice(parseInt(rm.getAttribute('data-key-rm'), 10), 1); renderRunDlg(); return; }
       var b = ev.target.closest('[data-dlg]'); if (!b) return; var a = b.getAttribute('data-dlg');
       if (a === 'kb') { readSetup(); if (d.kb) { d.kb = null; renderRunDlg(); } else keyBrowseLoad(d); }
@@ -1122,13 +1188,78 @@
   }
   function keysPromptText(keys) {
     if (!keys || (!keys.texts.length && !keys.images.length)) return '';
+    var titles = []; (keys.refs || []).forEach(function (x) { if (titles.indexOf(x.title) < 0) titles.push(x.title); });
     return '\n\n--- 교사 답안지 (모범답안 · markscheme. 과목별 채점 기준보다 우선) ---\n' +
+      (titles.length ? '답안지 목록 (answerKeyUsed 에는 이 중 하나를 글자 그대로):\n' + titles.map(function (t) { return '- ' + t; }).join('\n') + '\n\n' : '') +
       keys.texts.map(function (x) { return '[답안지: ' + x.title + ']\n' + x.text + (x.cut ? '\n[... 길이 제한으로 생략 ...]' : ''); }).join('\n\n') +
       (keys.images.length ? '\n(답안지 이미지 ' + keys.images.length + '장은 첨부 이미지 목록에 따로 표시)' : '') +
       '\n답안지 사용법: 학생 문서의 문제에 해당하는 답안지만 쓴다 (맞는 게 없으면 무시하고 일반 기준으로 채점). 답안지에 배점이나 markscheme 이 있으면 maxScore 와 점수의 최우선 근거로 쓰고 scoreBasis 에 답안지라고 적는다. 답안지의 핵심 요소 (definition, graph, 메커니즘 단계, 평가 포인트) 중 학생이 빠뜨린 것을 improvements 에 구체적으로 적는다. 학생이 답안지와 다른 방식이라도 경제학적으로 타당하면 인정한다. 답안지 문장을 그대로 베껴 코멘트에 쓰지 않는다.';
   }
-  function keysFromReview(r) {
-    return (r && Array.isArray(r.answerKeys) ? r.answerKeys : []).map(function (x) { return x.source === 'drive' ? { source: 'drive', fileId: x.fileId, title: x.title, kind: x.kind || 'doc', mime: x.mime || '' } : { source: 'saved', keyId: x.keyId, title: x.title }; });
+  function cleanRef(x) { return x.source === 'drive' ? { source: 'drive', fileId: x.fileId, title: x.title, kind: x.kind || 'doc', mime: x.mime || '' } : { source: 'saved', keyId: x.keyId, title: x.title }; }
+  function refKey(x) { return x ? (x.source === 'drive' ? 'd:' + x.fileId : x.keyId ? 's:' + x.keyId : 't:' + x.title) : ''; }
+  function keysFromReview(r) { return (r && Array.isArray(r.answerKeys) ? r.answerKeys : []).filter(function (x) { return x.via !== 'bound'; }).map(cleanRef); }
+  function keyStatus(keys, j) {
+    var refs = keys && keys.refs ? keys.refs : []; var offered = keys && (keys.texts.length || keys.images.length);
+    var why = String(j.answerKeyMatch || '').slice(0, 400);
+    if (!refs.length) return { answerKeyStatus: 'none', answerKeyUsed: null, answerKeyMatch: '', keyChecklist: [] };
+    if (!offered) return { answerKeyStatus: 'unread', answerKeyUsed: null, answerKeyMatch: '', keyChecklist: [] };
+    var raw = typeof j.answerKeyUsed === 'string' ? j.answerKeyUsed.trim() : '';
+    if (!raw || /^null$/i.test(raw)) return { answerKeyStatus: 'nomatch', answerKeyUsed: null, answerKeyMatch: why, keyChecklist: [] };
+    var n = function (t) { return String(t || '').toLowerCase().replace(/\s+/g, ' ').trim(); };
+    var hit = refs.filter(function (x) { return n(x.title) === n(raw); })[0] || refs.filter(function (x) { return n(x.title) && (n(raw).indexOf(n(x.title)) >= 0 || n(x.title).indexOf(n(raw)) >= 0); })[0];
+    var chk = (Array.isArray(j.keyChecklist) ? j.keyChecklist : []).map(function (c) { return c && typeof c === 'object' ? { point: String(c.point || '').slice(0, 200), met: ['yes', 'partial', 'no'].indexOf(c.met) >= 0 ? c.met : 'partial' } : null; }).filter(function (c) { return c && c.point; }).slice(0, 12);
+    return { answerKeyStatus: hit ? 'used' : 'unknown', answerKeyUsed: hit ? Object.assign(cleanRef(hit), hit.via ? { via: hit.via } : {}) : { title: raw.slice(0, 200) }, answerKeyMatch: why, keyChecklist: chk };
+  }
+  /* -- answer keys bound to a class (subject folder) + week, reused on every check -- */
+  function kstDay(t) { return new Date(t).toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }); }
+  function weekOf(ymd) { var d = new Date(String(ymd).slice(0, 10) + 'T00:00:00Z'); if (isNaN(d)) return ''; d.setUTCDate(d.getUTCDate() - (d.getUTCDay() + 6) % 7); return d.toISOString().slice(0, 10); }
+  function addDays(ymd, n) { var d = new Date(ymd + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+  function weekLabel(w) { var md = function (x) { return (+x.slice(5, 7)) + '/' + (+x.slice(8, 10)); }; return md(w) + '–' + md(addDays(w, 6)) + ' 주'; }
+  function docWeek(doc, assignments) { var g = guessAssignment(assignments || [], doc.modifiedTime); if (g && g.due) return weekOf(g.due); return doc.modifiedTime ? weekOf(kstDay(doc.modifiedTime)) : ''; }
+  function bindingFor(folderId, week) { return week ? state.keyBindings[folderId + '_' + week] || null : null; }
+  function docBoundRefs(doc, assignments) { var b = bindingFor(doc.folderId, docWeek(doc, assignments)); return b && Array.isArray(b.keys) ? b.keys.map(function (x) { return Object.assign(cleanRef(x), { via: 'bound' }); }) : []; }
+  function saveBindings(folderIds, week, refs) {
+    var now = new Date().toISOString();
+    return Promise.all(folderIds.map(function (fid) {
+      var id = fid + '_' + week; var prev = state.keyBindings[id]; var keys = prev && Array.isArray(prev.keys) ? prev.keys.slice() : [];
+      refs.forEach(function (x) { if (!keys.some(function (y) { return refKey(y) === refKey(x); })) keys.push(cleanRef(x)); });
+      var f = folderById(fid);
+      var doc = { id: id, folderId: fid, folderName: f ? label(f) : '', week: week, keys: keys, createdAt: (prev && prev.createdAt) || now, updatedAt: now };
+      state.keyBindings[id] = doc;
+      return Promise.resolve(state.db.doc('keyBindings/' + id).set(doc));
+    }));
+  }
+  function unbindKey(id, rk) {
+    var b = state.keyBindings[id]; if (!b || !state.db) return;
+    var keys = (b.keys || []).filter(function (x) { return refKey(x) !== rk; });
+    var p = keys.length ? state.db.doc('keyBindings/' + id).update({ keys: keys, updatedAt: new Date().toISOString() }) : state.db.doc('keyBindings/' + id).delete();
+    Promise.resolve(p).catch(function (e) { toast('연결 해제 실패: ' + ((e && e.message) || e)); });
+  }
+  function weekChoices(d) {
+    var c = cfg(); var ids = c.folders.filter(function (f) { return d.sel[f.id]; }).map(function (f) { return f.id; });
+    var dues = {}; ids.forEach(function (fid) { assignmentsFor(fid).forEach(function (a) { if (a.due) { var w = weekOf(a.due); (dues[w] = dues[w] || []).indexOf(a.name) < 0 && dues[w].push(a.name); } }); });
+    var now = weekOf(today()); var soon = addDays(today(), 3); var def = '';
+    ids.forEach(function (fid) { assignmentsFor(fid).forEach(function (a) { if (a.due && a.due <= soon && weekOf(a.due) > def) def = weekOf(a.due); }); });
+    if (!def) def = now;
+    var weeks = []; for (var k = -5; k <= 1; k++) weeks.push(addDays(now, 7 * k));
+    if (weeks.indexOf(def) < 0) weeks.push(def); weeks.sort().reverse();
+    return { def: def, list: weeks.map(function (w) { return { week: w, label: weekLabel(w) + (w === now ? ' (이번 주)' : '') + (dues[w] ? ' · ' + dues[w].slice(0, 3).join(', ') : '') }; }) };
+  }
+  function bindHtml(d) {
+    var c = cfg(); var sel = c.folders.filter(function (f) { return d.sel[f.id]; });
+    var html = '';
+    if ((d.keys || []).length) {
+      var wc = weekChoices(d); if (!d.bindWeek) d.bindWeek = wc.def;
+      html += '<div class="bind-box"><label class="bind-on"><input type="checkbox" id="dlgBind"' + (d.bindOn ? ' checked' : '') + '> 이 답안지를 같은 반·같은 주 숙제에 계속 쓰기 <select id="dlgWeek">' + wc.list.map(function (o) { return '<option value="' + o.week + '"' + (o.week === d.bindWeek ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') + '</select></label>' +
+        '<div class="hint">켜 두면 ' + (sel.length ? esc(sel.map(label).join(', ')) : '선택한 반') + ' 의 그 주 숙제 (Due 날짜 기준, 없으면 제출일 기준)를 채점할 때마다 다음 검사·다시 채점에서도 이 답안지가 자동으로 들어간다.</div></div>';
+    }
+    var ids = {}; sel.forEach(function (f) { ids[f.id] = 1; });
+    var bl = Object.keys(state.keyBindings).map(function (k) { return state.keyBindings[k]; }).filter(function (b) { return b && ids[b.folderId] && Array.isArray(b.keys) && b.keys.length; }).sort(function (a, b) { return String(b.week).localeCompare(String(a.week)); }).slice(0, 12);
+    if (bl.length) html += '<div class="bind-box"><b>이 반에 연결해 둔 답안지</b><div class="bind-list">' + bl.map(function (b) {
+      var f = folderById(b.folderId);
+      return '<div class="b-row"><span class="b-where">' + esc(f ? label(f) : b.folderName) + ' · ' + esc(weekLabel(b.week)) + '</span>' + b.keys.map(function (x) { return '<span class="key-chip" title="' + esc(x.title) + '"><span>' + esc(x.title) + '</span><button type="button" data-unbind="' + esc(b.id) + '" data-rk="' + esc(refKey(x)) + '" aria-label="연결 해제">×</button></span>'; }).join('') + '</div>';
+    }).join('') + '</div></div>';
+    return html;
   }
 
   /* ---------- check dialog: subject / year pick, instruction, preview ---------- */
@@ -1157,7 +1288,7 @@
     var c = cfg(); if (!c.folders.length) { openSettings(); toast('먼저 과목 폴더를 추가하세요.'); return; }
     var f = subjectFolder(); var sel = {};
     c.folders.forEach(function (x) { sel[x.id] = f ? x.id === f.id : true; });
-    var d = state.dlg = { step: 'setup', sel: sel, since: c.sinceDays, redo: false, skipRule: true, note: '', found: [], picked: {}, reason: '', status: '', imgCap: null, keys: [], kb: null };
+    var d = state.dlg = { step: 'setup', sel: sel, since: c.sinceDays, redo: false, skipRule: true, note: '', found: [], picked: {}, reason: '', status: '', imgCap: null, keys: [], kb: null, bindOn: true, bindWeek: '' };
     renderRunDlg(); $('runDlg').hidden = false;
     setTimeout(function () { var t = $('dlgNote'); if (t) t.focus(); }, 0);
     imageCapability().then(function (n) { d.imgCap = n; if (state.dlg === d && d.step === 'setup') { readSetup(); renderRunDlg(); } });
@@ -1169,11 +1300,13 @@
     var s = $('dlgSince'); if (s) d.since = Math.max(1, Math.min(120, parseInt(s.value, 10) || cfg().sinceDays));
     var r = $('dlgRedo'); if (r) d.redo = r.checked;
     var k = $('dlgSkip'); if (k) d.skipRule = k.checked;
+    var bo = $('dlgBind'); if (bo) d.bindOn = bo.checked;
+    var bw = $('dlgWeek'); if (bw) d.bindWeek = bw.value;
   }
   function imgCapHtml(d) {
     if (d.imgCap == null) return '<div class="dlg-reason">graph 보기 가능 여부 확인 중…</div>';
     return d.imgCap > 0 ? '<div class="dlg-reason good">graph 보기 가능: 문서 페이지와 그림을 확대해서 Claude에게 같이 보낸다 (문서당 최대 ' + Math.min(d.imgCap, 10) + '장).</div>'
-      : '<div class="dlg-reason crit">이 화면에서는 Claude에게 이미지를 보낼 수 없어서 graph 를 못 본다. graph 관련은 텍스트로는 확인 불가로만 적힌다. graph 까지 채점하려면 Claude Code 세션에 채점해 달라고 말해줘.</div>';
+      : '<div class="dlg-reason crit">이 화면에서는 Claude에게 이미지를 보낼 수 없어서 graph 를 못 본다. graph 관련은 텍스트로는 확인 불가로만 적힌다. PDF·사진 제출물은 채점하지 않고 "채점 대기"로 남긴다. graph 나 PDF·사진까지 채점하려면 Claude Code 세션에 채점해 달라고 말해줘.</div>';
   }
   function renderRunDlg() {
     var d = state.dlg; var host = $('runDlg'); if (!d) { host.innerHTML = ''; return; }
@@ -1211,7 +1344,7 @@
         '<div class="pick-tools"><button class="btn tiny" type="button" data-dlg="all">전체 선택</button><button class="btn tiny" type="button" data-dlg="none">전체 해제</button><button class="btn tiny" type="button" data-dlg="new">새 문서·수정된 문서만</button>' + (noGraph ? '<button class="btn tiny" type="button" data-dlg="nograph">graph 못 본 리뷰 ' + noGraph + '건</button>' : '') + '</div>' +
         '<div class="pick-list">' + (d.found.length ? fOrder.map(function (k) { var f = folderById(k); return '<div class="pick-grp">' + esc(f ? label(f) : k) + '</div>' + byF[k].map(function (x) {
           var st = x.state === 'new' ? '<span class="tag new">새 문서</span>' : x.state === 'modified' ? '<span class="tag mod">수정됨</span>' : '<span class="tag dim">리뷰함' + (x.graphSeen ? '' : ' · graph 미확인') + '</span>';
-          return '<label class="pick"><input type="checkbox" data-pick="' + esc(x.id) + '"' + (d.picked[x.id] ? ' checked' : '') + '><span class="who">' + esc(x.student || '(이름 없음)') + '</span><span class="ttl">' + esc(x.title) + (x.kind && x.kind !== 'doc' ? ' <span class="tag dim">' + (x.kind === 'pdf' ? 'PDF' : '사진') + '</span>' : '') + (x.skip ? ' <span class="tag dim">제외 제목</span>' : '') + '</span>' + st + '<span class="when">' + esc(fmt(x.modifiedTime, { month: 'numeric', day: 'numeric' })) + '</span></label>';
+          return '<label class="pick"><input type="checkbox" data-pick="' + esc(x.id) + '"' + (d.picked[x.id] ? ' checked' : '') + '><span class="who">' + esc(x.student || '(이름 없음)') + '</span><span class="ttl">' + esc(x.title) + (x.kind && x.kind !== 'doc' ? ' <span class="tag dim">' + (x.kind === 'pdf' ? 'PDF' : '사진') + '</span>' : '') + (x.skip ? ' <span class="tag dim">제외 제목</span>' : '') + (x.bound && x.bound.length ? ' <span class="tag key" title="' + esc(x.bound.join(', ')) + '">답안지: ' + esc(x.bound.join(', ')) + '</span>' : '') + '</span>' + st + '<span class="when">' + esc(fmt(x.modifiedTime, { month: 'numeric', day: 'numeric' })) + '</span></label>';
         }).join(''); }).join('') : '<div class="hint" style="padding:12px">조건에 맞는 문서가 없어.</div>') + '</div>' +
         '<div class="dlg-foot"><button class="btn quiet" type="button" data-dlg="back">뒤로</button><span class="grow"></span><button class="btn quiet" type="button" data-dlg="close">취소</button><button class="btn quiet primary" type="button" data-dlg="start"' + (picked ? '' : ' disabled') + '>' + picked + '건 채점 시작</button></div></div>';
     }
@@ -1224,7 +1357,7 @@
       if (ev.target === host) { closeRunDlg(); return; }
       var g = ev.target.closest('[data-grp]');
       if (g) { readSetup(); var c = cfg(); var v = g.getAttribute('data-grp'); var groups = folderGroups(c.folders);
-        c.folders.forEach(function (f) { d.sel[f.id] = v === 'all' ? true : v === 'none' ? false : groups[+v].ids.indexOf(f.id) >= 0; });
+        c.folders.forEach(function (f) { d.sel[f.id] = v === 'all' ? true : v === 'none' ? false : groups[+v].ids.indexOf(f.id) >= 0; }); d.bindWeek = '';
         renderRunDlg(); return; }
       var b = ev.target.closest('[data-dlg]'); if (!b) return; var a = b.getAttribute('data-dlg');
       if (a === 'close') closeRunDlg();
@@ -1238,7 +1371,7 @@
     });
     host.addEventListener('change', function (ev) {
       var d = state.dlg; if (!d) return; var t = ev.target;
-      if (t.hasAttribute('data-f')) { readSetup(); d.sel[t.getAttribute('data-f')] = t.checked; renderRunDlg(); }
+      if (t.hasAttribute('data-f')) { readSetup(); d.sel[t.getAttribute('data-f')] = t.checked; d.bindWeek = ''; renderRunDlg(); }
       if (t.hasAttribute('data-pick')) { d.picked[t.getAttribute('data-pick')] = t.checked; var pl = host.querySelector('.pick-list'); var top = pl ? pl.scrollTop : 0; renderRunDlg(); pl = host.querySelector('.pick-list'); if (pl) pl.scrollTop = top; }
     });
     bindKeys(host);
@@ -1272,7 +1405,7 @@
       d.found = res.candidates.filter(function (x) { return x.modifiedTime && new Date(x.modifiedTime).getTime() >= since; }).map(function (x) {
         var prev = state.reviews[x.id];
         var st = !prev ? 'new' : (!prev.modifiedTime || String(prev.modifiedTime) < String(x.modifiedTime)) ? 'modified' : 'reviewed';
-        return Object.assign({}, x, { state: st, skip: isSkipped(x.title), graphSeen: !!(prev && prev.graphImages > 0) });
+        return Object.assign({}, x, { state: st, skip: isSkipped(x.title), graphSeen: !!(prev && prev.graphImages > 0), bound: docBoundRefs(x, res.assignByFolder[x.folderId] || []).map(function (k) { return k.title; }) });
       }).sort(function (a, b) { return String(b.modifiedTime).localeCompare(String(a.modifiedTime)); });
       d.found.forEach(function (x) {
         var prev = state.reviews[x.id]; if (!prev || prev.assignmentId) return;
@@ -1307,10 +1440,14 @@
     var d = state.dlg; if (!d || !d.ctx) return;
     var todo = d.found.filter(function (x) { return d.picked[x.id]; }); if (!todo.length) return;
     var ctx = d.ctx; var note = d.note.trim(); var checked = d.found.length; var keySel = (d.keys || []).slice();
+    var bind = keySel.length && d.bindOn && d.bindWeek ? { week: d.bindWeek, folders: cfg().folders.filter(function (f) { return d.sel[f.id]; }).map(function (f) { return f.id; }) } : null;
     closeRunDlg();
     state.running = true; render(); if (keySel.length) setProgress('답안지 준비 중…', 0.01);
     imageCapability().then(function (cap) { return prepareKeys(keySel, ctx.drive, cap > 0); }).then(function (keys) {
       if (keys.warnings.length) toast('답안지: ' + keys.warnings.join(' / '), 8000);
+      var saved = bind && keys.refs.length ? saveBindings(bind.folders, bind.week, keys.refs).then(function () { toast('답안지를 ' + weekLabel(bind.week) + ' 숙제에 연결했어. 다음 검사부터 자동으로 쓴다.'); }).catch(function (e) { toast('답안지 연결 저장 실패: ' + ((e && e.message) || e), 6000); }) : Promise.resolve();
+      return saved.then(function () { return keys; });
+    }).then(function (keys) {
       return reviewList(ctx.drive, cfg(), todo, ctx.assignByFolder, 'manual', note, { checked: checked, errors: ctx.errors || [], keys: keys });
     });
   }
@@ -1321,11 +1458,24 @@
     var run = { id: runId, source: source, startedAt: new Date().toISOString(), status: 'running', checked: (extra && extra.checked) || todo.length, reviewed: 0, skipped: 0, errors: ((extra && extra.errors) || []).slice(), note: note || '', answerKeys: extra && extra.keys ? extra.keys.refs.map(function (x) { return x.title; }) : [] };
     run.skipped = Math.max(0, run.checked - todo.length);
     db.doc('runs/' + runId).set(run).catch(function () {});
+    var runKeys = extra && extra.keys; var keyCache = {};
+    var keysFor = function (doc) {
+      var base = runKeys && runKeys.refs ? runKeys.refs : []; var have = {}; base.forEach(function (x) { have[refKey(x)] = 1; });
+      var add = docBoundRefs(doc, assignByFolder[doc.folderId] || []).filter(function (x) { return !have[refKey(x)]; });
+      if (!add.length) return Promise.resolve(runKeys);
+      var all = base.map(cleanRef).concat(add); var sig = all.map(refKey).sort().join('|');
+      if (!keyCache[sig]) keyCache[sig] = imageCapability().then(function (cap) { return prepareKeys(all, drive, cap > 0); }).then(function (k) {
+        k.refs.forEach(function (x) { if (add.some(function (y) { return refKey(y) === refKey(x); })) x.via = 'bound'; if (run.answerKeys.indexOf(x.title) < 0) run.answerKeys.push(x.title); });
+        if (k.warnings.length) run.errors.push({ title: '답안지', message: k.warnings.join(' / ') });
+        return k;
+      });
+      return keyCache[sig];
+    };
     var i = 0; var chain = Promise.resolve();
     todo.forEach(function (doc) {
       chain = chain.then(function () {
         i += 1; setProgress('채점 중 ' + i + '/' + todo.length + ' · ' + (doc.student ? doc.student + ' · ' : '') + doc.title, (i - 0.5) / todo.length);
-        var once = function () { return reviewOne(drive, c, doc, source, assignByFolder[doc.folderId] || [], note, extra && extra.keys); };
+        var once = function () { return keysFor(doc).then(function (k) { return reviewOne(drive, c, doc, source, assignByFolder[doc.folderId] || [], note, k); }); };
         return once().catch(function (e) { if (!isTransient(e)) throw e; return new Promise(function (r) { setTimeout(r, 4000); }).then(once); })
           .then(function () { run.reviewed += 1; })
           .catch(function (e) { run.errors.push({ title: (doc.student ? doc.student + ' · ' : '') + doc.title, message: (e && e.message) || String(e) }); });
@@ -1532,7 +1682,13 @@
       var MAX = 60000; if (text.length > MAX) text = text.slice(0, MAX) + '\n[... 이후 내용은 길이 제한으로 생략됨 ...]';
       var kImgs = keys && keys.images ? keys.images : [];
       return pageImages(doc, kImgs.length, scan).then(function (info) {
-        if (kind !== 'doc' && !info.imgs.length && text.length < c.minChars) { var er = new Error((kind === 'pdf' ? 'PDF' : '사진') + ' 제출물은 페이지 이미지를 보내야 채점할 수 있는데 못 보냄: ' + (info.reason || '이유 모름')); er.code = 'no_images'; throw er; }
+        if (kind !== 'doc' && !info.imgs.length) {
+          var why = (kind === 'pdf' ? 'PDF' : '사진') + ' 제출물은 페이지 이미지를 Claude에게 보내야 채점할 수 있는데 못 보냄 (' + (info.reason || '이유 모름') + ')';
+          var er = new Error(why); er.code = 'no_images';
+          if (prev && prev.status === 'reviewed' && prev.graphImages > 0 && prev.modifiedTime === doc.modifiedTime) throw er;
+          var hold = setAssignment(Object.assign(base, { status: 'needs_vision', score: null, maxScore: prev && prev.maxScore || null, completeness: 'partial', summary: 'Claude Code 세션 채점 필요: ' + (kind === 'pdf' ? 'PDF' : '사진') + '라 이 화면에서는 학생 답을 볼 수 없음', strengths: [], improvements: [], nextSteps: [], flags: ['세션 채점 필요'], comment: '', graphImages: 0, graphNote: String(info.reason || '').slice(0, 120), docText: text.slice(0, 30000), annotations: [], answerKeys: keys && keys.refs ? keys.refs : [], answerKeyStatus: '', answerKeyUsed: null, answerKeyMatch: '', keyChecklist: [] }), null);
+          return Promise.resolve(state.db.doc('reviews/' + doc.id).set(hold)).then(function () { throw er; });
+        }
         imgInfo = info; var all = { imgs: info.imgs.slice(), manifest: info.manifest.slice(), reason: info.reason, keyImgs: kImgs.length };
         kImgs.forEach(function (im) { all.imgs.push(im.blob); all.manifest.push('이미지 ' + all.imgs.length + ': 교사 답안지 (' + im.label + ') — 학생 답이 아님'); });
         var opts = { modelTier: 'complex', cache: false }; if (all.imgs.length) opts.images = all.imgs;
@@ -1544,7 +1700,7 @@
           completeness: ['complete', 'partial', 'empty'].indexOf(j.completeness) >= 0 ? j.completeness : 'complete',
           summary: String(j.summary || '').slice(0, 200), strengths: arr(j.strengths), improvements: arr(j.improvements), nextSteps: arr(j.nextSteps), flags: arr(j.flags), comment: String(j.comment || ''),
           docText: text.slice(0, 30000), annotations: annList(j.annotations, text)
-        }), typeof j.assignmentId === 'string' ? j.assignmentId : null);
+        }, keyStatus(keys, j)), typeof j.assignmentId === 'string' ? j.assignmentId : null);
       });
     }).then(function (review) { return state.db.doc('reviews/' + doc.id).set(review); });
   }

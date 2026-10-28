@@ -441,6 +441,8 @@
   'use strict';
   var FOLDER = 'application/vnd.google-apps.folder';
   var GDOC = 'application/vnd.google-apps.document';
+  var SUBMIT_IMG = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+  function submitKind(mime) { return mime === GDOC ? 'doc' : mime === 'application/pdf' ? 'pdf' : SUBMIT_IMG.indexOf(mime) >= 0 ? 'image' : null; }
   var DRIVE = 'Google Drive';
   var DEFAULT_SKIP = '\\bIA\\b|task\\s*3|internal assessment|supporting document|feedback';
   var DEFAULT_CRITERIA = [{"match": "Economics", "text": "IB Economics 채점 기준 (교사 규칙 반영)\n\n[공통]\n- 명령어가 요구한 것만 채점한다. define = 정의. explain = 원인 → 과정 → 결과. analyse = 이론 + graph + 둘의 연결. evaluate / discuss / to what extent = 분석 + 평가 + 판단.\n- 법칙(law of demand, law of supply)은 무슨 일이 일어나는지 말할 뿐 이유가 아니다. 법칙만 인용하고 왜 그런지(signal, incentive, utility, profit)를 설명하지 않으면 설명이 빠진 것으로 본다.\n- 근거 없는 일반론(예: 시장은 invisible hand 때문에 늘 균형이다)은 빼라고 지적한다. 조건에 따라 달라지는 주장을 단정하면 부정확한 서술이다.\n- 학교 채점은 terminology, explanation, diagram 세 항목을 1–7 로 본다. 세 항목을 모두 보되 점수는 아래 markband 로 낸다. 참고 앵커: 학교 7점 척도 6점 = 여기 10점 중 8점.\n- definition 은 교과서 수준으로 정확해야 한다. 핵심 조건(willing and able, per time period, ceteris paribus 등)이 빠지면 부분 점수.\n- graph 는 첨부 이미지로 확인한다. 체크: 축 label (Price / Quantity, Average price level / Real GDP, 두 재화 이름), curve label (D1 D2, S1 S2, AD1 AD2, SRAS, LRAS, PPC1 PPC2), 원래 equilibrium 과 new equilibrium, P1 P2 Q1 Q2 (또는 PL1 PL2 Y1 Y2), shift 화살표, 본문이 graph 를 참조하는지 (Figure 1, point A → B).\n- 흔한 감점: 결정요인 서술 오류 (tastes and preferences increase 는 틀림. tastes change in favour of X 이고 increase 하는 건 demand. income 도 demand 를 바꾸는 요인이지 demand 자체가 아님), shift 와 movement 혼동, demand 와 quantity demanded 혼동, 같은 label 두 번 (wrong label on Quantity), shift 원인(non-price determinant) 미제시, shortage / surplus → price 조정 과정 생략, actual growth (curve 안쪽 → curve 위) 와 potential growth (curve 자체 shift) 혼동.\n\n[2 marks — define / state / outline]\n- 2: 정확하고 완전한 definition. 1: 부분적이거나 핵심 조건이 빠짐. 0: 틀림.\n\n[4 marks — explain / analyse, graph 동반 (Paper 2 유형)]\n- 정확히 label 된 graph 2점 + graph 를 이용한 설명 2점. 문제가 text / data 를 가리키면 설명이 그것을 참조해야 한다.\n- 상한: graph 가 필요한 문제에 graph 가 없으면 최대 2. text / data 참조가 필요한데 없으면 최대 3.\n\n[가격 메커니즘 문항 — demand 나 supply 가 shift 해서 새 균형으로 가는 과정 (explain 유형, 배점 무관)]\n필수 요소:\n1. shift 원인: 어떤 non-price determinant 가 어떻게 바뀌는지 정확한 표현으로 (예: tastes change in favour of pasta → demand for pasta increases, D1 → D2).\n2. 원래 가격에서의 불균형: shortage (Qd > Qs) 또는 surplus, 크기 (Q2 − Q1) 까지.\n3. rationing: 가격이 움직이는 주체와 이유. shortage 면 consumers bid up the price to gain access to the increasingly scarce good. surplus 면 producers lower price to sell unsold stock.\n4. signalling: 오른 가격이 producer 에게는 demand 가 늘어 생산이 더 profitable 해졌다는 신호, consumer 에게는 같은 utility 에 더 많이 내야 한다는 신호.\n5. incentive: producer 는 늘어난 profitability 를 이용하려고 quantity supplied 를 늘리고 (supply curve 위 movement), consumer 는 얻는 utility 가 가격만 못해서 quantity demanded 를 줄인다 (demand curve 위 movement).\n6. 결과: 새 균형에서 시장이 다시 clear 되고 allocative efficiency 가 회복된다. 결과적으로 가격과 거래량이 어느 쪽으로 움직였는지 (예: higher quantity at a higher price) 를 본문 마지막 문장에서 분명히. 별도 결론 문단은 아님.\n상한: signalling 과 incentive 를 둘 다 설명하지 않으면 (law of demand / supply 인용만 있는 경우 포함) 10 marks 기준 최대 8. rationing (가격이 오르는 이유) 이 빠지면 1점 감점. 결정요인 서술 오류는 terminology 감점.\n\n[10 marks — Paper 1 part (a) explain / analyse]\n- 교사 규칙: real-life example 필요 없음. 결론 문단 필요 없음. evaluation 필요 없음 (써도 가산 없음). 이것들이 없다고 감점하거나 넣으라고 하지 마라.\n- 서론 문단은 필요 없다. 바로 상황(무엇이 어떤 결정요인을 바꾸는지)과 shift 로 들어가면 된다. 핵심 용어 definition 은 필요하지만 본문 흐름 안에서 처음 쓸 때 정의하면 충분하다. 서론에 definition 을 넣으라고 요구하지 마라. This essay will ... 같은 목적 문장이나 일반론으로 된 서론은 감점하지 말고 불필요하다고만 짧게 지적한다.\n- 분량 약 300~450 단어.\n- 9–10: 요구를 완전히 이해. 핵심 용어를 정확히 정의. 이론을 빠진 단계 없이 논리적으로 설명 (가격 메커니즘 문항이면 rationing, signalling, incentive 까지 모두 이유로 설명). graph 가 정확하고 완전하며 설명에 효과적으로 쓰임. 의미 있는 오류 없음.\n- 7–8: 요구를 명확히 이해. 핵심 용어 정의. 이론을 설명하고 graph 와 연결. label 하나 누락이나 표현 부정확 같은 작은 오류.\n- 5–6: 요구를 이해. 정의가 일부만 있거나 부정확. 설명에 단계 비약. graph 는 대체로 맞지만 label 누락이 여럿이거나 본문과 연결이 약함.\n- 3–4: 요구를 부분적으로만 이해. 정의 없거나 부정확. 이론 설명이 제한적. graph 가 부정확하거나 설명되지 않음.\n- 1–2: 관련 용어나 지식이 조금 있음. 0: 관련 없음.\n- 상한: graph 가 필요한 문제(\"using a diagram\", 수요공급, AD/AS, PPC, market failure 등)에 graph 가 없으면 최대 6. 틀린 모형의 graph 면 최대 4. definition 만 있고 설명이 없으면 최대 3. 두 부분을 묻는 문제에서 한쪽만 답하면 최대 5.\n\n[15 marks — Paper 1 part (b) / Paper 2 마지막 문항, evaluate / discuss / to what extent]\n- real-life example 필수: 국가, 시기, 수치가 특정되고 이론과 연결돼야 한다 (Paper 2 는 text / data 활용이 그 역할). 판단(judgement)도 필요하지만 별도 결론 문단일 필요는 없고 마지막 한두 문장으로 질문에 답하면 된다.\n- 13–15: 요구를 완전히 이해. 정의 정확. 이론과 graph 를 정확히 설명·적용. example 을 효과적으로 사용. 균형 잡힌 evaluation 과 근거 있는 판단.\n- 10–12: 위와 같지만 evaluation 이 덜 발전됐거나 example 이 일반적.\n- 7–9: 이론과 graph 는 있으나 evaluation 이 제한적이거나 example 이 없음.\n- 4–6: 부분적 이해. 설명 불완전. evaluation 거의 없음.\n- 1–3: 관련 지식이 조금 있음. 0: 관련 없음.\n- 상한: real-life example 없으면 최대 9. evaluation 없으면 최대 9. 한쪽만 논하면 최대 12.\n- evaluation 도구: short run vs long run, stakeholder 별 영향, 가정과 한계, 장단점 비교, 대안 정책, 우선순위와 상황 의존성.\n\n[계산 문항 (Paper 2, HL Paper 3)]\n- 식과 과정, 단위를 보여야 한다. 답만 맞으면 배점의 절반. 소수점과 % 처리 오류는 1점 감점."}, {"match": "Business", "text": "IB Business Management 채점 기준\n\n[공통]\n- 사례 회사(stimulus) 적용이 핵심이다. 회사 이름만 언급하고 사례 정보를 쓰지 않으면 적용으로 보지 않는다.\n- 도구(SWOT, STEEPLE, Ansoff, BCG, force field, decision tree, 비율 분석 등)를 쓰라고 했으면 정확히 적용했는지 본다. SWOT 은 strengths / weaknesses 가 내부, opportunities / threats 가 외부. 이 구분 오류가 흔하다.\n- 흔한 감점: shareholders 와 stakeholders 혼동, revenue 와 profit 혼동, advantage 나 disadvantage 를 문장으로 명시하지 않음, 용어를 정의 없이 씀.\n\n[2 marks — define / state / describe]\n- 2: 정확하고 완전한 정의 (사례 맥락 불필요). 1: 부분적.\n\n[4 marks — explain / distinguish (예: advantage 1개 + disadvantage 1개)]\n- 요구 요소마다 (이론 설명 1점 + 사례 적용 1점). 적용이 없으면 요소당 최대 1점.\n\n[6 marks — analyse / explain (긴 답)]\n- 이론 정확 2 + 사례 적용 2 + 원인과 결과를 잇는 분석 2.\n\n[10 marks — evaluate / discuss / recommend / to what extent]\n- 9–10: 관련 개념과 도구를 정확히 사용. 사례 정보를 전반에 통합. 양쪽 관점의 균형 잡힌 분석. 근거 있는 판단 또는 recommendation.\n- 7–8: 개념과 적용이 좋으나 한쪽이 덜 발전됐거나 판단 근거가 약함.\n- 5–6: 개념은 맞지만 적용이 부분적이거나 분석이 한쪽에 치우침.\n- 3–4: 지식은 있으나 적용과 분석이 제한적.\n- 1–2: 관련 지식이 조금 있음.\n- 상한: 사례 적용이 없으면 최대 4. 한쪽만 논하면 최대 6. evaluate / recommend 인데 판단이 없으면 최대 8. 판단은 마지막 한두 문장이면 되고 별도 결론 문단일 필요는 없다.\n\n[계산 문항]\n- 공식, 과정, 단위를 보여야 한다. 답만 맞으면 배점의 절반."}, {"match": "Psychology", "text": "IB Psychology 채점 기준\n\n[공통]\n- 연구를 쓸 때는 연구자와 연도, 그리고 질문과 관련된 부분(aim, participants, procedure, results, conclusion 중 필요한 것)만 쓴다. 연구를 질문에 명시적으로 연결해야 점수가 된다.\n- 용어 정확성: construct, operationalization, IV / DV, reliability, validity, credibility (qualitative), researcher bias, participant bias, demand characteristics, sampling bias.\n- 흔한 감점: 연구 설명만 하고 질문에 연결하지 않음, reliability 와 validity / credibility 혼동, 수업에서 다루지 않은 연구를 질문 요구 없이 끌어옴, 일화나 배경 설명으로 분량을 채움.\n\n[4 marks — 수업용 짧은 문항]\n- 질문이 요구한 요소를 나눠 요소당 1점. 예: operationalization 문항 = construct 설명 1 + 관찰 가능한 행동으로 정의 1 + 연구에서 실제로 측정한 방법 1 + quantitative research 에서 왜 필요한지 1. researcher bias 문항 = definition 1 + credibility 를 낮추는 기제 1 + 연구 참조 1 + 그 연구에서 bias 가 작용하거나 통제된 방식 1.\n- 상한: 연구를 참조하라는 문항에 연구가 없으면 최대 2.\n\n[9 marks — short answer (SAQ) 형]\n- 7–9: 개념 정확, 관련 연구를 정확히 서술하고 질문에 분명히 연결. 4–6: 연구는 있으나 연결이 약하거나 개념 설명 부족. 1–3: 관련성만 있음.\n\n[15 marks 이상 — extended response]\n- 문제 초점, knowledge and understanding, 연구 사용, critical thinking (방법론 평가, 대안 설명, 윤리·문화·성별 고려), 구성과 명료성을 본다. 연구는 2개 이상, 평가는 서술이 아니라 질문에 연결돼야 한다. 상한: 연구 없음이면 최대 절반. critical thinking 없으면 최대 60%."}, {"match": "Global Politics", "text": "IB Global Politics 채점 기준\n\n[공통]\n- 핵심 개념(power, sovereignty, legitimacy, interdependence 등)을 정확히 정의하고 질문에 맞게 쓴다.\n- 사례는 국가, 행위자, 사건, 시기가 특정돼야 한다. 막연한 일반론은 사례로 보지 않는다.\n\n[짧은 문항 (2~4 marks)]\n- 개념 definition + 특정 사례 한 줄 적용. 적용이 없으면 절반.\n\n[extended response / essay]\n- claim 과 counterclaim 이 모두 있고, 각각 사례로 뒷받침되며, 근거 있는 결론으로 질문에 답해야 한다.\n- 상한: 사례 없이 이론만이면 최대 절반. 한쪽 관점만이면 최대 60%."}];
@@ -615,7 +617,7 @@
     $('runBtn').disabled = !canRun;
     var fbn = activeFeedbackCount(); $('fbBtn').textContent = '시스템 피드백' + (fbn ? ' · ' + fbn : '');
     $('runBtn').innerHTML = state.running ? '<span class="spin"></span><span>확인 중…</span>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span>지금 확인하기' + (f ? ' · ' + esc(label(f)) : '') + '</span>';
-    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v19';
+    $('bandSub').textContent = (c.folders.length ? c.folders.length + '개 과목 감시 중' : '2026 Fall') + ' · v20';
 
     // list
     if (state.view === 'missing') state.view = 'unseen';
@@ -882,7 +884,7 @@
           if (c.exclude.some(function (x) { return x && contains(it.title, x); })) return;
           subs.push(it);
         } else if (it.mimeType === GDOC) {
-          docs.push({ id: it.id, title: it.title, modifiedTime: it.modifiedTime, viewUrl: it.viewUrl, student: it.owner ? String(it.owner).split('@')[0] : '', folderId: folder.id, folderName: folder.name || '', subfolder: '', subfolderId: '', subfolderUrl: '' });
+          docs.push({ id: it.id, title: it.title, kind: 'doc', mimeType: it.mimeType, modifiedTime: it.modifiedTime, viewUrl: it.viewUrl, student: it.owner ? String(it.owner).split('@')[0] : '', folderId: folder.id, folderName: folder.name || '', subfolder: '', subfolderId: '', subfolderUrl: '' });
         }
       });
       var chain = Promise.resolve();
@@ -890,7 +892,7 @@
         var name = studentFromFolder(sub.title, folder.name);
         students.push({ name: name, folderId: sub.id, folderName: sub.title, url: sub.viewUrl || ('https://drive.google.com/drive/folders/' + sub.id) });
         chain = chain.then(function () { return listAll(drive, sub.id); }).then(function (ds) {
-          ds.forEach(function (d) { if (d.mimeType !== GDOC) return; docs.push({ id: d.id, title: d.title, modifiedTime: d.modifiedTime, viewUrl: d.viewUrl, student: name, folderId: folder.id, folderName: folder.name || '', subfolder: sub.title, subfolderId: sub.id, subfolderUrl: sub.viewUrl || '' }); });
+          ds.forEach(function (d) { var kd = submitKind(d.mimeType); if (!kd) return; docs.push({ id: d.id, title: d.title, kind: kd, mimeType: d.mimeType, modifiedTime: d.modifiedTime, viewUrl: d.viewUrl, student: name, folderId: folder.id, folderName: folder.name || '', subfolder: sub.title, subfolderId: sub.id, subfolderUrl: sub.viewUrl || '' }); });
         });
       });
       var assignments = [];
@@ -919,7 +921,8 @@
   }
 
   /* ---------- review run ---------- */
-  function buildPrompt(c, doc, text, assignments, imgInfo, note, keys) {
+  function buildPrompt(c, doc, text, assignments, imgInfo, note, keys, sub) {
+    var subNote = sub && sub.kind && sub.kind !== 'doc' ? '\n\n--- 제출 형태 ---\n이 제출물은 구글 문서가 아니라 ' + (sub.kind === 'pdf' ? 'PDF' : '사진') + ' 파일이다.' + (sub.scan ? ' 손글씨나 스캔본이라 위의 문서 내용(텍스트 추출본)은 비어 있거나 부정확하다. 학생 답은 첨부한 페이지 이미지에서 직접 읽어서 채점하라.' : ' 텍스트 추출본과 첨부 페이지 이미지를 함께 보고 채점하라.') + ' 인쇄된 문제지나 지문 페이지가 섞여 있으면 학생이 쓴 답만 채점하고, 문제지에 적힌 배점([2], [6] 등)을 maxScore 근거로 쓴다. 문제지 여백의 학생 메모는 답의 일부가 아니면 채점하지 않는다. annotations 의 quote 는 이미지에서 읽은 학생 문장을 철자 그대로 옮겨라.' : '';
     var imgCount = imgInfo && imgInfo.imgs ? imgInfo.imgs.length - (imgInfo.keyImgs || 0) : 0;
     var keyNote = imgInfo && imgInfo.keyImgs ? '\n\n--- 첨부 이미지 중 교사 답안지 ---\n' + imgInfo.manifest.slice(imgCount).join('\n') + '\n이 이미지들은 교사 답안지다. 학생 답으로 채점하지 마라.' : '';
     var imgNote = imgCount > 0 ? '\n\n--- 첨부 이미지 ' + imgCount + '장 ---\n' + imgInfo.manifest.slice(0, imgCount).join('\n') + '\n본문 텍스트에는 그림이 빠져 있다. graph 는 반드시 이미지로 판단하라: 어떤 모형인지, 축 label, curve label, 점과 P / Q label, shift 방향과 화살표가 본문 설명과 맞는지 확인한다. 확대 이미지가 있으면 label 은 그것으로 읽는다. 이미지에 graph 가 있으면 텍스트에 설명이 없어도 graph 는 있는 것이다. 문서에 graph 가 아예 없고 문제도 graph 를 요구하지 않으면 graph 얘기를 하지 마라.' + (imgInfo.reason ? '\n(' + imgInfo.reason + ')' : '') : '\n\n--- 주의 ---\n본문 텍스트에는 그림(graph)이 빠져 있고 페이지 이미지도 첨부되지 않았다. graph 가 없다고 단정하지 말고, graph 관련은 텍스트로는 확인 불가라고만 적어라.';
@@ -929,7 +932,7 @@
     var noteText = note ? '\n\n--- 이번 검사에 대한 교사 지시 ---\n' + note : '';
     var keyText = keysPromptText(keys);
     return c.rubric + ctext + fbText + noteText + keyText + '\n\n--- 이 과목의 과제 목록 (교사가 만든 Due 폴더) ---\n' + alist + '\n\n' +
-      '--- 문서 정보 ---\n학생: ' + (doc.student || '(알 수 없음)') + '\n문서 제목: ' + doc.title + '\n과목: ' + (doc.folderName || '') + '\n제출(수정) 시각: ' + fmt(doc.modifiedTime) + ' KST\n\n--- 문서 내용 시작 ---\n' + text + '\n--- 문서 내용 끝 ---' + imgNote + keyNote + '\n\n' +
+      '--- 문서 정보 ---\n학생: ' + (doc.student || '(알 수 없음)') + '\n문서 제목: ' + doc.title + '\n과목: ' + (doc.folderName || '') + '\n제출(수정) 시각: ' + fmt(doc.modifiedTime) + ' KST\n\n--- 문서 내용 시작 ---\n' + text + '\n--- 문서 내용 끝 ---' + subNote + imgNote + keyNote + '\n\n' +
       '먼저 이 문서가 위 과제 목록 중 어느 과제의 답인지 판단하세요 (문서 제목, 내용, 제출 시각과 마감일을 비교. 학생이 결석 등으로 늦게 낼 수 있으니 날짜보다 내용을 우선). 확신이 없으면 null.\n' +
       '반드시 아래 형식의 JSON 객체 하나만 출력하세요. 다른 텍스트나 코드펜스는 넣지 마세요.\n' +
       '{"assignmentId": "위 목록의 id 또는 null", "maxScore": 이 문제의 만점 정수, "scoreBasis": "만점을 어디서 잡았는지 한 구절", "score": 0에서 maxScore 사이 정수, "completeness": "complete" | "partial" | "empty", "summary": "교사가 한눈에 볼 한 문장 (60자 이내)", ' +
@@ -1208,7 +1211,7 @@
         '<div class="pick-tools"><button class="btn tiny" type="button" data-dlg="all">전체 선택</button><button class="btn tiny" type="button" data-dlg="none">전체 해제</button><button class="btn tiny" type="button" data-dlg="new">새 문서·수정된 문서만</button>' + (noGraph ? '<button class="btn tiny" type="button" data-dlg="nograph">graph 못 본 리뷰 ' + noGraph + '건</button>' : '') + '</div>' +
         '<div class="pick-list">' + (d.found.length ? fOrder.map(function (k) { var f = folderById(k); return '<div class="pick-grp">' + esc(f ? label(f) : k) + '</div>' + byF[k].map(function (x) {
           var st = x.state === 'new' ? '<span class="tag new">새 문서</span>' : x.state === 'modified' ? '<span class="tag mod">수정됨</span>' : '<span class="tag dim">리뷰함' + (x.graphSeen ? '' : ' · graph 미확인') + '</span>';
-          return '<label class="pick"><input type="checkbox" data-pick="' + esc(x.id) + '"' + (d.picked[x.id] ? ' checked' : '') + '><span class="who">' + esc(x.student || '(이름 없음)') + '</span><span class="ttl">' + esc(x.title) + (x.skip ? ' <span class="tag dim">제외 제목</span>' : '') + '</span>' + st + '<span class="when">' + esc(fmt(x.modifiedTime, { month: 'numeric', day: 'numeric' })) + '</span></label>';
+          return '<label class="pick"><input type="checkbox" data-pick="' + esc(x.id) + '"' + (d.picked[x.id] ? ' checked' : '') + '><span class="who">' + esc(x.student || '(이름 없음)') + '</span><span class="ttl">' + esc(x.title) + (x.kind && x.kind !== 'doc' ? ' <span class="tag dim">' + (x.kind === 'pdf' ? 'PDF' : '사진') + '</span>' : '') + (x.skip ? ' <span class="tag dim">제외 제목</span>' : '') + '</span>' + st + '<span class="when">' + esc(fmt(x.modifiedTime, { month: 'numeric', day: 'numeric' })) + '</span></label>';
         }).join(''); }).join('') : '<div class="hint" style="padding:12px">조건에 맞는 문서가 없어.</div>') + '</div>' +
         '<div class="dlg-foot"><button class="btn quiet" type="button" data-dlg="back">뒤로</button><span class="grow"></span><button class="btn quiet" type="button" data-dlg="close">취소</button><button class="btn quiet primary" type="button" data-dlg="start"' + (picked ? '' : ' disabled') + '>' + picked + '건 채점 시작</button></div></div>';
     }
@@ -1289,7 +1292,7 @@
     });
   }
   function filterPrompt(d) {
-    var rows = d.found.map(function (x) { var f = folderById(x.folderId); return { id: x.id, subject: f ? label(f) : x.folderName, student: x.student, title: x.title, modified: String(x.modifiedTime).slice(0, 10), state: x.state, excludedTitle: x.skip, graphSeen: x.graphSeen }; });
+    var rows = d.found.map(function (x) { var f = folderById(x.folderId); return { id: x.id, subject: f ? label(f) : x.folderName, student: x.student, title: x.title, fileType: x.kind || 'doc', modified: String(x.modifiedTime).slice(0, 10), state: x.state, excludedTitle: x.skip, graphSeen: x.graphSeen }; });
     return '교사가 숙제 채점 도구에서 이번에 채점할 문서를 고르려 한다. 아래 교사 지시에 맞는 문서의 id 만 골라라.\n\n' +
       '교사 지시: ' + d.note.trim() + '\n\n' +
       '기본 규칙 (지시가 따로 말하지 않으면 따른다):\n' +
@@ -1439,16 +1442,29 @@
     });
   }
   function canvasBlob(cv, type, q) { return new Promise(function (res) { cv.toBlob(function (b) { res(b); }, type, q); }); }
-  function pageImages(doc, reserve) {
+  function pageImages(doc, reserve, scan) {
     var none = function (reason) { return { imgs: [], manifest: [], reason: reason }; };
     var L = pdfLib(); if (!L) return Promise.resolve(none('PDF 라이브러리를 불러오지 못함'));
     if (!state.sample || typeof state.sample.limits !== 'function') return Promise.resolve(none('이미지 전송 기능 없음'));
     return imageCapability().then(function (cap) {
       if (!cap) return none('이 화면에서는 Claude에게 이미지를 보낼 수 없음');
       var max = Math.max(2, Math.min(cap, 10) - (reserve || 0));
+      if (doc.kind === 'image') return fetchRaw(doc.id, doc.modifiedTime, doc.mimeType).then(function (b) { return { imgs: [b], manifest: ['이미지 1: 학생이 올린 사진 (원본)'], reason: '' }; }).catch(function (e) { return none('사진을 받지 못함: ' + ((e && e.message) || e)); });
       return fetchPdf({ fileId: doc.id, modifiedTime: doc.modifiedTime }).then(function (bytes) {
         return L.getDocument({ data: bytes.slice(0), isEvalSupported: false }).promise;
       }).then(function (pdf) {
+        if (scan) {
+          var sn = Math.min(pdf.numPages, max); var sf = []; var sc = Promise.resolve();
+          for (var sp = 1; sp <= sn; sp++) (function (sp) {
+            sc = sc.then(function () { return pdf.getPage(sp); }).then(function (page) {
+              var b0 = page.getViewport({ scale: 1 }); var v = page.getViewport({ scale: Math.min(3, 1500 / b0.width) });
+              var cv = document.createElement('canvas'); cv.width = Math.floor(v.width); cv.height = Math.floor(v.height);
+              var cx = cv.getContext('2d'); cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, cv.width, cv.height);
+              return page.render({ canvasContext: cx, viewport: v }).promise.then(function () { return canvasBlob(cv, 'image/jpeg', 0.88); }).then(function (b) { if (b) sf.push(b); });
+            });
+          })(sp);
+          return sc.then(function () { return { imgs: sf, manifest: sf.map(function (b, i) { return '이미지 ' + (i + 1) + ': ' + (i + 1) + '쪽 전체 (스캔·손글씨)'; }), reason: pdf.numPages > sn ? '앞 ' + sn + '쪽만 보냄 (총 ' + pdf.numPages + '쪽)' : '' }; });
+        }
         var nPages = Math.min(pdf.numPages, 6); var crops = []; var fulls = []; var chain = Promise.resolve();
         for (var p = 1; p <= nPages; p++) (function (p) {
           chain = chain.then(function () { return pdf.getPage(p); }).then(function (page) {
@@ -1505,19 +1521,22 @@
       if (!a) a = guessAssignment(assignments, doc.modifiedTime);
       obj.assignmentId = a ? a.id : ''; obj.assignmentName = a ? a.name : ''; obj.assignmentDue = a ? a.due : ''; return obj;
     };
-    return drive.read_file_content({ fileId: doc.id }).then(function (res) {
+    var kind = doc.kind || 'doc'; base.kind = kind; base.mimeType = doc.mimeType || GDOC;
+    return drive.read_file_content({ fileId: doc.id }).catch(function (e) { if (kind === 'doc') throw e; return { fileContent: '' }; }).then(function (res) {
       var text = (res && typeof res.fileContent === 'string') ? res.fileContent.trim() : '';
       base.wordCount = text ? text.split(/\s+/).length : 0;
-      if (text.length < c.minChars) {
+      var scan = kind === 'image' || (kind === 'pdf' && text.length < 300);
+      if (kind === 'doc' && text.length < c.minChars) {
         return setAssignment(Object.assign(base, { status: 'empty', score: null, completeness: 'empty', summary: '문서에 내용이 거의 없습니다 (' + text.length + '자).', strengths: [], improvements: ['문서를 열어 과제를 작성해야 합니다.'], nextSteps: [], flags: ['미완성'], comment: '' }), null);
       }
       var MAX = 60000; if (text.length > MAX) text = text.slice(0, MAX) + '\n[... 이후 내용은 길이 제한으로 생략됨 ...]';
       var kImgs = keys && keys.images ? keys.images : [];
-      return pageImages(doc, kImgs.length).then(function (info) {
+      return pageImages(doc, kImgs.length, scan).then(function (info) {
+        if (kind !== 'doc' && !info.imgs.length && text.length < c.minChars) { var er = new Error((kind === 'pdf' ? 'PDF' : '사진') + ' 제출물은 페이지 이미지를 보내야 채점할 수 있는데 못 보냄: ' + (info.reason || '이유 모름')); er.code = 'no_images'; throw er; }
         imgInfo = info; var all = { imgs: info.imgs.slice(), manifest: info.manifest.slice(), reason: info.reason, keyImgs: kImgs.length };
         kImgs.forEach(function (im) { all.imgs.push(im.blob); all.manifest.push('이미지 ' + all.imgs.length + ': 교사 답안지 (' + im.label + ') — 학생 답이 아님'); });
         var opts = { modelTier: 'complex', cache: false }; if (all.imgs.length) opts.images = all.imgs;
-        return state.sample(buildPrompt(c, doc, text, assignments, all, note, keys), opts);
+        return state.sample(buildPrompt(c, doc, text, assignments, all, note, keys, { kind: kind, scan: scan }), opts);
       }).then(function (res) {
         var j = parseJsonText(res && res.text) || {}; var tier = (res && res.modelTierApplied) || 'complex'; var mx = parseInt(j.maxScore, 10); if (isNaN(mx) || mx < 1 || mx > 100) mx = 10; var sc = parseInt(j.score, 10);
         return setAssignment(Object.assign(base, {
@@ -1570,6 +1589,17 @@
     html += esc(text.slice(pos));
     return html;
   }
+  function fetchRaw(fileId, modifiedTime, mime) {
+    state.rawCache = state.rawCache || {}; var key = fileId + '@' + (modifiedTime || '');
+    if (state.rawCache[key]) return Promise.resolve(state.rawCache[key]);
+    if (!state.mcp) return Promise.reject(new Error('드라이브 연결 없음'));
+    return state.mcp.server(DRIVE).then(function (d) { return d.download_file_content({ fileId: fileId }); }).then(function (res) {
+      var c = res && res.content; if (!c || typeof c !== 'string') throw new Error('파일 내용이 비어 있음');
+      var blob = new Blob([b64bytes(c)], { type: mime || (res && res.mimeType) || 'image/jpeg' });
+      var keys = Object.keys(state.rawCache); if (keys.length > 6) delete state.rawCache[keys[0]];
+      state.rawCache[key] = blob; return blob;
+    });
+  }
   function fetchPdf(r) {
     state.pdfCache = state.pdfCache || {};
     var key = r.fileId + '@' + (r.modifiedTime || '');
@@ -1609,7 +1639,7 @@
     var cards = anns.map(function (a, i) {
       var editing = state.editAnn === i; var lost = state.cmpMode !== 'loading' && !state.cmpAnchors[i];
       return '<div class="ann-card' + (state.activeAnn === i ? ' on' : '') + (lost ? ' lost' : '') + '" data-card="' + i + '">' +
-        '<div class="q" data-focus="' + i + '"><b>' + (i + 1) + '</b>' + esc(a.quote.length > 90 ? a.quote.slice(0, 90) + '…' : a.quote) + (lost ? ' <span style="color:var(--crit)">(본문에서 위치 못 찾음)</span>' : '') + '</div>' +
+        '<div class="q" data-focus="' + i + '"><b>' + (i + 1) + '</b>' + esc(a.quote.length > 90 ? a.quote.slice(0, 90) + '…' : a.quote) + (lost && state.cmpMode !== 'image' ? ' <span style="color:var(--crit)">(본문에서 위치 못 찾음)</span>' : '') + '</div>' +
         (editing ? '<textarea id="annEdit" data-i="' + i + '">' + esc(a.note) + '</textarea>' : '<div class="n">' + esc(a.note) + '</div>') +
         '<div class="btns">' + (editing
           ? '<button class="btn tiny primary" type="button" data-ann-save="' + i + '" style="height:26px">저장</button><button class="btn tiny" type="button" data-ann-cancel="' + i + '">취소</button>'
@@ -1625,6 +1655,14 @@
     var token = state.cmpToken = (state.cmpToken || 0) + 1;
     var L = pdfLib();
     var fail = function (why) { if (state.cmpToken !== token) return; state.cmpMode = 'text'; renderTextPages(r, why); };
+    if (r.kind === 'image') {
+      fetchRaw(r.fileId, r.modifiedTime, r.mimeType).then(function (b) {
+        if (state.cmpToken !== token) return; var pages = $('cmpPages'); if (!pages) return;
+        var url = URL.createObjectURL(b); pages.innerHTML = '<div class="cmp-page" style="width:' + Math.min(816, pageWidth()) + 'px"><img src="' + url + '" alt="학생이 올린 사진" style="display:block;width:100%;height:auto"></div>';
+        state.cmpMode = 'image'; applyHighlights(); renderCompare();
+      }).catch(function (e) { fail((e && e.message) || String(e)); });
+      return;
+    }
     if (!L) { fail('PDF 라이브러리를 불러오지 못함'); return; }
     fetchPdf(r).then(function (bytes) {
       if (state.cmpToken !== token) return;
@@ -1754,7 +1792,7 @@
     var bottom = 0; anchored.forEach(function (x, j) { x.el.style.top = tops[j] + 'px'; bottom = Math.max(bottom, tops[j] + x.h); });
     var pagesEl = $('cmpPages'); var pagesH = pagesEl ? pagesEl.offsetHeight : 0;
     var y = Math.max(bottom + 28, lost.length ? Math.min(pagesH, bottom + 28) : 0);
-    if (lost.length) { var lab = document.createElement('div'); lab.className = 'cmp-lost'; lab.textContent = '본문에서 위치 못 찾음'; margin.appendChild(lab); lab.style.top = y + 'px'; y += lab.offsetHeight + 6; lost.forEach(function (x) { x.el.style.top = y + 'px'; y += x.h + gap; }); bottom = y; }
+    if (lost.length) { var lab = document.createElement('div'); lab.className = 'cmp-lost'; lab.textContent = state.cmpMode === 'image' ? '문장별 코멘트 (사진이라 위치 표시 없음)' : '본문에서 위치 못 찾음'; margin.appendChild(lab); lab.style.top = y + 'px'; y += lab.offsetHeight + 6; lost.forEach(function (x) { x.el.style.top = y + 'px'; y += x.h + gap; }); bottom = y; }
     var hy = Math.max(bottom + 16, 0); hints.forEach(function (h) { h.style.top = hy + 'px'; hy += h.offsetHeight + 8; });
     margin.style.height = Math.max(hy, pagesH) + 'px';
   }
